@@ -82,10 +82,10 @@ RUN \
     cd /opt/control-plane && \
     npm install --no-audit --no-fund --omit=dev \
         @vectorize-io/hindsight-control-plane@1.2.2 && \
-    # The package ships a self-contained standalone/ directory; move it to the
-    # root so the service runs it without the surrounding node_modules tree.
+    # The package ships a standalone/ directory; copy it to the root so
+    # server.js is found. Keep node_modules: server.js still requires `next`.
     cp -a node_modules/@vectorize-io/hindsight-control-plane/standalone/. /opt/control-plane/ && \
-    rm -rf /opt/control-plane/node_modules && \
+    test -f /opt/control-plane/server.js && \
     echo "Control plane installed"
 
 # Uses /bin for compatibility purposes
@@ -157,6 +157,6 @@ ENV HEALTH_PORT="8888" \
 HEALTHCHECK \
     --interval=10s \
     --retries=6 \
-    --start-period=180s \
+    --start-period=600s \
     --timeout=25s \
     CMD curl -A "HealthCheck: Docker/1.0" -s -f "http://127.0.0.1:${HEALTH_PORT}${HEALTH_URL}" >/dev/null 2>&1 || exit 1

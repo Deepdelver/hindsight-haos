@@ -19,6 +19,12 @@ mkdir -p "$HOME"
 [ -f /data/hindsight/env ] && . /data/hindsight/env
 
 # --- start PostgreSQL -------------------------------------------------------
+# A container restart can leave postmaster.pid behind; pg_ctl then refuses to start.
+if [ -f "${PGDATA}/postmaster.pid" ] && ! runuser -u postgres -- "${PG_BIN}/pg_isready" -h 127.0.0.1 -q; then
+    bashio::log.warning "Removing stale PostgreSQL PID file"
+    rm -f "${PGDATA}/postmaster.pid"
+fi
+
 bashio::log.info "Starting PostgreSQL ${PG_MAJOR}..."
 runuser -u postgres -- "${PG_BIN}/pg_ctl" -D "${PGDATA}" -l /data/pg/server.log start -w -t 60 \
     || bashio::log.fatal "PostgreSQL failed to start"

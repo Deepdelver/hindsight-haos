@@ -64,5 +64,5 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.0"
+version: "1.2.1"
 webui: "http://[HOST]:[PORT:9999]"
