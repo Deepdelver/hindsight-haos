@@ -4,14 +4,15 @@ set -euo pipefail
 
 # =============================================================================
 # S6 long-running service: PostgreSQL + Hindsight API
-#
-# The control plane is a separate service (services.d/control-plane) so it can
-# be switched off from the addon options without taking the API down.
 # =============================================================================
 
 PG_MAJOR="15"
 PG_BIN="/usr/lib/postgresql/${PG_MAJOR}/bin"
 PGDATA="${PGDATA:-/data/pg}"
+
+# Local model downloads (GGUF + ONNX caches) must survive addon updates.
+export HOME="/data/hindsight-home"
+mkdir -p "$HOME"
 
 # Load the env written by 30-config.sh
 # shellcheck source=/dev/null
@@ -19,16 +20,16 @@ PGDATA="${PGDATA:-/data/pg}"
 
 # --- start PostgreSQL -------------------------------------------------------
 bashio::log.info "Starting PostgreSQL ${PG_MAJOR}..."
-su - postgres -c "${PG_BIN}/pg_ctl -D ${PGDATA} -l /data/pg/server.log start -w -t 60" \
+runuser -u postgres -- "${PG_BIN}/pg_ctl" -D "${PGDATA}" -l /data/pg/server.log start -w -t 60 \
     || bashio::log.fatal "PostgreSQL failed to start"
 
 for _ in $(seq 1 30); do
-    if su - postgres -c "${PG_BIN}/pg_isready -h 127.0.0.1 -q"; then break; fi
+    if runuser -u postgres -- "${PG_BIN}/pg_isready" -h 127.0.0.1 -q; then break; fi
     sleep 1
 done
 
-su - postgres -c "${PG_BIN}/psql -h 127.0.0.1 -lqt" 2>/dev/null | grep -q hindsight \
-    || su - postgres -c "${PG_BIN}/createdb -h 127.0.0.1 hindsight"
+runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -lqt 2>/dev/null | grep -q hindsight \
+    || runuser -u postgres -- "${PG_BIN}/createdb" -h 127.0.0.1 hindsight
 
 # --- start Hindsight --------------------------------------------------------
 bashio::log.info "Starting Hindsight API..."

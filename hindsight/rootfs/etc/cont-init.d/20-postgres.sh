@@ -4,7 +4,6 @@ set -euo pipefail
 
 # =============================================================================
 # cont-init: prepare PostgreSQL cluster and Hindsight database
-# Runs once at container start, before the supervised service
 # =============================================================================
 
 PGDATA="${PGDATA:-/data/pg}"
@@ -13,13 +12,12 @@ PG_BIN="/usr/lib/postgresql/${PG_MAJOR}/bin"
 
 bashio::log.info "Preparing PostgreSQL ${PG_MAJOR}..."
 
-# The Debian postgres image ships a cluster under /var/lib/postgresql; we move
-# it to /data so it survives addon updates and is included in HA backups.
+# runuser switches user without PAM (plain `su` fails in HAOS addon containers).
 if [ ! -f "${PGDATA}/PG_VERSION" ]; then
     bashio::log.info "Initializing a fresh cluster at ${PGDATA}"
     mkdir -p "${PGDATA}"
     chown -R postgres:postgres "${PGDATA}"
-    su - postgres -c "${PG_BIN}/initdb -D ${PGDATA} --auth=trust --encoding=UTF8 --locale=C"
+    runuser -u postgres -- "${PG_BIN}/initdb" -D "${PGDATA}" --auth=trust --encoding=UTF8 --locale=C
 
     cat >> "${PGDATA}/postgresql.conf" <<EOF
 listen_addresses = '127.0.0.1'
@@ -39,15 +37,15 @@ else
 fi
 
 # Hindsight database
-if ! su - postgres -c "${PG_BIN}/psql -h 127.0.0.1 -lqt" 2>/dev/null | grep -q hindsight; then
+if ! runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -lqt 2>/dev/null | grep -q hindsight; then
     bashio::log.info "Creating hindsight database"
-    su - postgres -c "${PG_BIN}/createdb -h 127.0.0.1 hindsight"
+    runuser -u postgres -- "${PG_BIN}/createdb" -h 127.0.0.1 hindsight
 fi
 
 # pgvector — Hindsight needs a vector extension for semantic search
-if ! su - postgres -c "${PG_BIN}/psql -h 127.0.0.1 -d hindsight -tAc \"SELECT 1 FROM pg_extension WHERE extname='vector'\"" 2>/dev/null | grep -q 1; then
+if ! runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -d hindsight -tAc "SELECT 1 FROM pg_extension WHERE extname='vector'" 2>/dev/null | grep -q 1; then
     bashio::log.info "Enabling pgvector extension"
-    su - postgres -c "${PG_BIN}/psql -h 127.0.0.1 -d hindsight -c 'CREATE EXTENSION IF NOT EXISTS vector;'" \
+    runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -d hindsight -c 'CREATE EXTENSION IF NOT EXISTS vector;' \
         || bashio::log.warning "pgvector unavailable; Hindsight may fall back to built-in search"
 fi
 

@@ -17,12 +17,12 @@ map:
 name: Hindsight
 options:
   env_vars: []
-  llm_provider: openai
+  llm_provider: llamacpp
   llm_api_key: ""
-  llm_model: gpt-4o-mini
-  embeddings_provider: openai
-  embeddings_model: text-embedding-3-small
-  reranker_provider: rrf
+  llm_model: gemma-4-e2b-it
+  embeddings_provider: onnx
+  embeddings_model: intfloat/multilingual-e5-small
+  reranker_provider: onnx
   mcp_enabled: true
   worker_id: hindsight-haos
   log_level: info
@@ -41,14 +41,18 @@ schema:
   env_vars:
     - name: match(^[A-Za-z0-9_]+$)
       value: str?
-  llm_provider: list(openai|anthropic|gemini|groq|deepseek|ollama|fireworks|openrouter|nous|custom)
+  llm_provider: list(llamacpp|openai|ollama|anthropic|gemini|groq|deepseek|openrouter|fireworks|nous|lmstudio|custom)
   llm_api_key: password
   llm_model: str
   llm_base_url: str?
-  embeddings_provider: list(openai|ollama|cohere)
-  embeddings_api_key: password?
+  embeddings_provider: list(onnx|local|openai|cohere|tei|hindsight|litellm|litellm-sdk|openrouter|requesty|google)
   embeddings_model: str
-  reranker_provider: list(rrf|cohere|flashrank)
+  embeddings_api_key: password?
+  reranker_provider: list(onnx|flashrank|local|hindsight|rrf|cohere|tei|openrouter|nvidia|google)
+  reranker_model: str?
+  llamacpp_model_path: str?
+  llamacpp_context_size: int?
+  llamacpp_gpu_layers: int?
   mcp_enabled: bool
   mcp_auth_token: password?
   worker_id: str
@@ -60,5 +64,5 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.1.1"
+version: "1.2.0"
 webui: "http://[HOST]:[PORT:9999]"

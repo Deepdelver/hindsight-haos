@@ -8,4 +8,4 @@ PG_BIN="/usr/lib/postgresql/${PG_MAJOR}/bin"
 PGDATA="${PGDATA:-/data/pg}"
 
 bashio::log.info "Stopping PostgreSQL..."
-su - postgres -c "${PG_BIN}/pg_ctl -D ${PGDATA} stop -m fast" 2>/dev/null || true
+runuser -u postgres -- "${PG_BIN}/pg_ctl" -D "${PGDATA}" stop -m fast 2>/dev/null || true

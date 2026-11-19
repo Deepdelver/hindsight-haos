@@ -47,17 +47,23 @@ RUN \
         python3 \
         python3-pip \
         python3-venv \
+        build-essential \
+        cmake \
         jq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Hindsight slim API (no local ML models; embeddings/reranker are external).
+# Hindsight API: slim core plus the local model extras.
+# - local-llm: built-in llama.cpp LLM (no API key, GGUF auto-downloaded on first run)
+# - local-onnx: in-process ONNX embeddings and reranker (no API key)
+# - embedded-db: pg0 fallback (we use PostgreSQL 15 separately, but keep it available)
 # Installed into a dedicated venv so it never conflicts with system python.
 RUN \
-    echo "Installing hindsight-api-slim" && \
+    echo "Installing hindsight-api-slim with local model support" && \
     python3 -m venv /opt/hindsight-venv && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir --upgrade pip && \
-    /opt/hindsight-venv/bin/pip install --no-cache-dir "hindsight-api-slim[embedded-db]"
+    /opt/hindsight-venv/bin/pip install --no-cache-dir \
+        "hindsight-api-slim[embedded-db,local-llm,local-onnx]"
 
 # Control Plane: Next.js standalone bundle, shipped as an npm package.
 # Node 22 matches the major the upstream image builds with.
