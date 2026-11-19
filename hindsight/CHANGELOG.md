@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.4
+
+- Add the official Hindsight icon as the addon icon (`icon.png`)
+- Enable ingress so the Control Plane dashboard opens from the Home Assistant sidebar
+  (`ingress_port: 9999`, `panel_title: Hindsight`)
+- Add a watchdog health check on the API `/health` endpoint
+- Link the official Hindsight project and credit Deepdelver in the description, README
+  and addon docs
+
+## 1.2.3
+
+- Source the generated env with `set -a` so `hindsight-api` actually receives the
+  LLM, embeddings and reranker settings instead of falling back to provider defaults
+- Create the database and enable pgvector after PostgreSQL is accepting connections
+
 ## 1.2.2
 
 - Make embeddings and reranker model selection automatic by default. `embeddings_model`

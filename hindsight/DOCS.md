@@ -2,6 +2,8 @@
 
 Hindsight is a persistent AI memory engine that gives your AI agents long-term memory with **retain**, **recall**, and **reflect** APIs. It runs as a standalone service on your Home Assistant, accessible to all your AI agents via MCP (Model Context Protocol).
 
+Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hindsight itself is an independent open-source project: [documentation](https://hindsight.vectorize.io/developer/) · [source](https://github.com/vectorize-io/hindsight) · [this addon](https://github.com/Deepdelver/hindsight-haos).
+
 ## What it does
 
 - **Retain** — Store facts, preferences, and context from conversations
@@ -131,6 +133,12 @@ http://<your-home-assistant-ip>:9999
 ```
 
 Use it to browse memories, manage banks, and monitor the system.
+
+It also appears as a **Hindsight** item in the Home Assistant sidebar (ingress is
+enabled in `config.yaml`, with `ingress_port: 9999`). Home Assistant proxies the UI, so
+you can open it from the sidebar on any device without exposing port 9999. The addon
+page has **Auto update** and **Watchdog** toggles; the watchdog checks
+`http://[HOST]:[PORT:8888]/health` and restarts the addon if it stops responding.
 
 ## Ports
 

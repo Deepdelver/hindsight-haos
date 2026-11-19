@@ -2,6 +2,14 @@
 
 Home Assistant OS addon for [Hindsight](https://hindsight.vectorize.io/) — persistent AI agent memory with retain, recall, and reflect APIs.
 
+Created and maintained by [Deepdelver](https://github.com/Deepdelver). This is an unofficial addon; the Hindsight project itself lives at [hindsight.vectorize.io](https://hindsight.vectorize.io/) and [github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight).
+
+Official project links:
+
+- Documentation: https://hindsight.vectorize.io/developer/
+- Source: https://github.com/vectorize-io/hindsight
+- This addon: https://github.com/Deepdelver/hindsight-haos
+
 ## Installation
 
 1. In Home Assistant, go to **Settings** > **Apps** > **⋮** (top right) > **Repositories**
@@ -19,6 +27,15 @@ Hindsight gives your AI agents persistent memory that works across all your tool
 - **API Server**: Port 8888 (REST + MCP)
 - **Control Plane**: Port 9999 (Web UI)
 - **MCP endpoint**: `http://<your-ha-ip>:8888/mcp/<bank_id>/`
+
+### Dashboard in the sidebar
+
+The Control Plane web UI is available as a panel in the Home Assistant sidebar
+(**Hindsight**). Ingress is enabled in `config.yaml`, so Home Assistant proxies it at
+`https://<your-ha-host>/api/hassio_ingress/.../` — no port forwarding needed. The
+**Watchdog** toggle restarts the addon if the API health check on port 8888 stops
+answering, and **Auto update** keeps it current with this repository. Both toggles are
+on the addon's page in Home Assistant; the watchdog URL is defined in `config.yaml`.
 
 ## Configuration
 
