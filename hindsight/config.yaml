@@ -1,5 +1,5 @@
 name: "Hindsight"
-version: "1.0.2"
+version: "1.0.3"
 slug: "hindsight"
 description: "Hindsight AI Memory — persistent agent memory with retain, recall, and reflect APIs. Shared across all your AI agents via MCP."
 url: "https://github.com/Deepdelver/hindsight-haos"
@@ -32,8 +32,9 @@ options:
   llm_provider: "openai"
   llm_api_key: ""
   llm_model: "gpt-4o-mini"
-  embeddings_provider: "local"
-  reranker_provider: "local"
+  embeddings_provider: "openai"
+  embeddings_model: "text-embedding-3-small"
+  reranker_provider: "rrf"
   mcp_enabled: true
   mcp_local_bank_id: "default"
   worker_id: "hindsight-haos"
@@ -44,10 +45,10 @@ schema:
   llm_api_key: str
   llm_model: str
   llm_base_url: "str?"
-  embeddings_provider: "list(local|openai|ollama|cohere)"
-  embeddings_openai_api_key: "str?"
-  embeddings_openai_model: "str?"
-  reranker_provider: "list(local|cohere|flashrank|rrf)"
+  embeddings_provider: "list(openai|ollama|cohere)"
+  embeddings_api_key: "str?"
+  embeddings_model: str
+  reranker_provider: "list(rrf|cohere|flashrank)"
   mcp_enabled: bool
   mcp_local_bank_id: str
   mcp_auth_token: "str?"

@@ -32,9 +32,10 @@ RUN cd /tmp && \
 # Create hindsight user (UID 1000, matching upstream image)
 RUN adduser -D -u 1000 -h /home/hindsight hindsight
 
-# Install hindsight-api-slim (no local ML models — uses external/OpenAI embeddings by default)
-# Use slim to keep image size manageable on HA hardware
-RUN pip3 install --no-cache-dir --break-system-packages "hindsight-api[embedded-db]"
+# Install hindsight-api-slim (no local ML models - uses external providers)
+# Slim keeps the image small and avoids PyTorch/ONNX Alpine incompatibilities
+# embedded-db extra provides pg0 fallback if needed
+RUN pip3 install --no-cache-dir --break-system-packages "hindsight-api-slim[embedded-db]"
 
 # Clean up build deps to reduce image size
 RUN apk del gcc g++ python3-dev musl-dev libffi-dev openssl-dev cargo make cmake git postgresql16-dev 2>/dev/null || true && \
