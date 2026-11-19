@@ -4,6 +4,9 @@ set -euo pipefail
 
 # =============================================================================
 # S6 long-running service: PostgreSQL + Hindsight API
+#
+# The control plane is a separate service (services.d/control-plane) so it can
+# be switched off from the addon options without taking the API down.
 # =============================================================================
 
 PG_MAJOR="15"
@@ -19,8 +22,6 @@ bashio::log.info "Starting PostgreSQL ${PG_MAJOR}..."
 su - postgres -c "${PG_BIN}/pg_ctl -D ${PGDATA} -l /data/pg/server.log start -w -t 60" \
     || bashio::log.fatal "PostgreSQL failed to start"
 
-# Wait for the socket, then make sure the database exists (cont-init may have
-# been skipped on a restart where the cluster already existed).
 for _ in $(seq 1 30); do
     if su - postgres -c "${PG_BIN}/pg_isready -h 127.0.0.1 -q"; then break; fi
     sleep 1
@@ -33,5 +34,4 @@ su - postgres -c "${PG_BIN}/psql -h 127.0.0.1 -lqt" 2>/dev/null | grep -q hindsi
 bashio::log.info "Starting Hindsight API..."
 cd /data
 
-# Run as an unprivileged user when possible; the venv is world-readable.
 exec /opt/hindsight-venv/bin/hindsight-api

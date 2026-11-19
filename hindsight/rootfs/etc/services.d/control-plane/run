@@ -1,0 +1,46 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+set -euo pipefail
+
+# =============================================================================
+# S6 long-running service: Hindsight Control Plane (Next.js standalone)
+#
+# Started only when the `control_plane` option is true. The addon's main
+# service (services.d/hindsight) runs the API; this one runs the web UI and
+# proxies to the API over the local network.
+#
+# The upstream start-all.sh documents a Next.js loopback defect (#1926): when
+# HOSTNAME is a literal loopback address, every locale rewrite 307s to itself.
+# Binding as `localhost` with an explicit DNS result order keeps the requested
+# address family and avoids the loop.
+# =============================================================================
+
+ENABLE_CP="${control_plane:-true}"
+CP_PORT="${control_plane_port:-9999}"
+
+if [ "${ENABLE_CP}" != "true" ]; then
+    bashio::log.info "Control plane disabled (control_plane=false), exiting"
+    exit 0
+fi
+
+# Wait for the API to answer before serving, so the UI does not open on a
+# connection-refused dataplane.
+bashio::log.info "Waiting for the Hindsight API on 127.0.0.1:8888..."
+for _ in $(seq 1 60); do
+    if curl -sf -o /dev/null --max-time 3 http://127.0.0.1:8888/health; then
+        bashio::log.info "API is up"
+        break
+    fi
+    sleep 2
+done
+
+export PORT="${CP_PORT}"
+export HOSTNAME="localhost"
+export NODE_OPTIONS="--dns-result-order=ipv4first"
+export NODE_ENV=production
+export HINDSIGHT_CP_DATAPLANE_API_URL="http://127.0.0.1:8888"
+export HINDSIGHT_CP_PORT="${CP_PORT}"
+
+bashio::log.info "Starting Hindsight Control Plane on port ${CP_PORT}"
+cd /opt/control-plane
+exec node server.js

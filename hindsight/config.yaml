@@ -6,8 +6,6 @@ description: Hindsight AI Memory — persistent agent memory with retain, recall
 environment:
   HINDSIGHT_API_HOST: 0.0.0.0
   HINDSIGHT_API_PORT: "8888"
-  HINDSIGHT_API_CONTROL_PLANE_PORT: "9999"
-  HINDSIGHT_API_DATA_DIR: /data/hindsight
   HINDSIGHT_API_LOG_LEVEL: info
 image: ghcr.io/deepdelver/hindsight-{arch}
 init: false
@@ -27,9 +25,11 @@ options:
   embeddings_model: text-embedding-3-small
   reranker_provider: rrf
   mcp_enabled: true
-  mcp_local_bank_id: default
   worker_id: hindsight-haos
   log_level: info
+  control_plane: true
+  control_plane_port: 9999
+  ingress: false
 panel_admin: false
 panel_icon: mdi:brain
 ports:
@@ -51,13 +51,15 @@ schema:
   embeddings_model: str
   reranker_provider: list(rrf|cohere|flashrank)
   mcp_enabled: bool
-  mcp_local_bank_id: str
   mcp_auth_token: password?
   worker_id: str
   log_level: list(debug|info|warning|error)
+  control_plane: bool
+  control_plane_port: port
+  ingress: bool
 slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.0.5"
+version: "1.1.0"
 webui: "http://[HOST]:[PORT:9999]"

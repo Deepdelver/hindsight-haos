@@ -59,6 +59,29 @@ RUN \
     /opt/hindsight-venv/bin/pip install --no-cache-dir --upgrade pip && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir "hindsight-api-slim[embedded-db]"
 
+# Control Plane: Next.js standalone bundle, shipped as an npm package.
+# Node 22 matches the major the upstream image builds with.
+RUN \
+    echo "Installing Node.js and the Hindsight control plane" && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+        | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
+        > /etc/apt/sources.list.d/nodesource.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    \
+    mkdir -p /opt/control-plane && \
+    cd /opt/control-plane && \
+    npm install --no-audit --no-fund --omit=dev \
+        @vectorize-io/hindsight-control-plane@1.2.2 && \
+    # The package ships a self-contained standalone/ directory; move it to the
+    # root so the service runs it without the surrounding node_modules tree.
+    cp -a node_modules/@vectorize-io/hindsight-control-plane/standalone/. /opt/control-plane/ && \
+    rm -rf /opt/control-plane/node_modules && \
+    echo "Control plane installed"
+
 # Uses /bin for compatibility purposes
 RUN if [ ! -f /bin/sh ] && [ -f /usr/bin/sh ]; then ln -s /usr/bin/sh /bin/sh; fi && \
     if [ ! -f /bin/bash ] && [ -f /usr/bin/bash ]; then ln -s /usr/bin/bash /bin/bash; fi
@@ -124,10 +147,10 @@ LABEL \
 #################
 
 ENV HEALTH_PORT="8888" \
-    HEALTH_URL=""
+    HEALTH_URL="/health"
 HEALTHCHECK \
     --interval=10s \
     --retries=6 \
-    --start-period=120s \
+    --start-period=180s \
     --timeout=25s \
     CMD curl -A "HealthCheck: Docker/1.0" -s -f "http://127.0.0.1:${HEALTH_PORT}${HEALTH_URL}" >/dev/null 2>&1 || exit 1

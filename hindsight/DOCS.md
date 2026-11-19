@@ -20,8 +20,9 @@ Hindsight is a persistent AI memory engine that gives your AI agents long-term m
    - **embeddings_model** — Embedding model (default `text-embedding-3-small`)
    - **embeddings_api_key** — Separate key for embeddings (falls back to `llm_api_key`)
    - **reranker_provider** — `rrf` (no model needed), `cohere`, `flashrank`
-   - **mcp_local_bank_id** — Memory namespace shared by your agents (default `default`)
-   - **mcp_auth_token** — Optional bearer token protecting the MCP endpoint
+   - **mcp_enabled** — `true`/`false`, expose the MCP server
+   - **control_plane** — `true`/`false`, run the web UI on port 9999
+   - **control_plane_port** — port for the web UI (default `9999`)
    - **worker_id** — Stable identity across restarts (default `hindsight-haos`)
    - **log_level** — `debug`, `info`, `warning`, `error`
 3. Start the addon
@@ -41,8 +42,8 @@ lets you set any additional variable directly:
 | `embeddings_model` | `HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL` |
 | `reranker_provider` | `HINDSIGHT_API_RERANKER_PROVIDER` |
 | `mcp_enabled` | `HINDSIGHT_API_MCP_ENABLED` |
-| `mcp_local_bank_id` | `HINDSIGHT_API_MCP_LOCAL_BANK_ID` |
-| `mcp_auth_token` | `HINDSIGHT_API_MCP_AUTH_TOKEN` |
+| `control_plane` | (addon service toggle, not a Hindsight variable) |
+| `control_plane_port` | `PORT` / `HINDSIGHT_CP_PORT` for the UI service |
 | `worker_id` | `HINDSIGHT_API_WORKER_ID` |
 | `log_level` | `HINDSIGHT_API_LOG_LEVEL` |
 

@@ -32,8 +32,8 @@ Hindsight gives your AI agents persistent memory that works across all your tool
 | `embeddings_model` | `text-embedding-3-small` | Embedding model |
 | `reranker_provider` | `rrf` | Reranker (`rrf` needs no model) |
 | `mcp_enabled` | `true` | Expose the MCP server |
-| `mcp_local_bank_id` | `default` | Shared memory namespace |
-| `mcp_auth_token` | — | Bearer token for MCP |
+| `control_plane` | `true` | Run the web UI (port 9999) |
+| `control_plane_port` | `9999` | Port for the web UI |
 | `worker_id` | `hindsight-haos` | Stable worker identity |
 | `log_level` | `info` | Log verbosity |
 
@@ -45,16 +45,19 @@ An **env_vars** list is available for any additional `HINDSIGHT_API_*` variable.
 hindsight/
 ├── config.yaml          # addon metadata, options schema, ports
 ├── build.json           # base image per architecture
-├── Dockerfile           # Debian base + PostgreSQL 15 + pgvector + hindsight-api-slim
+├── Dockerfile           # Debian base + PostgreSQL 15 + pgvector + hindsight-api-slim + Node/control plane
 ├── apparmor.txt         # AppArmor profile
 └── rootfs/
     └── etc/
         ├── cont-init.d/
         │   ├── 20-postgres.sh   # cluster init, database, pgvector
         │   └── 30-config.sh     # options -> HINDSIGHT_API_* env
-        └── services.d/hindsight/
-            ├── run              # PostgreSQL + hindsight-api
-            └── finish           # clean PostgreSQL shutdown
+        └── services.d/
+            ├── hindsight/
+            │   ├── run          # PostgreSQL + hindsight-api
+            │   └── finish       # clean PostgreSQL shutdown
+            └── control-plane/
+                └── run          # Next.js web UI (optional, menu-selectable)
 ```
 
 ## License
