@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.7
+
+- Set `ingress_entry: /dashboard` so the sidebar panel opens the Control Plane directly
+  instead of following the root 307 redirect into Home Assistant's main panel
+
 ## 1.2.6
 
 - Add a `mode` switch. `simple` (default) ignores all provider/model options and uses
