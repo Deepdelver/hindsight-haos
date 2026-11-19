@@ -1,5 +1,5 @@
 name: "Hindsight"
-version: "1.0.3"
+version: "1.0.4"
 slug: "hindsight"
 description: "Hindsight AI Memory — persistent agent memory with retain, recall, and reflect APIs. Shared across all your AI agents via MCP."
 url: "https://github.com/Deepdelver/hindsight-haos"
@@ -19,7 +19,7 @@ ports_description:
   9999/tcp: "Hindsight Control Plane Web UI"
 
 ingress: false
-webui: "http://[HOST]:[PORT:9999/tcp]"
+webui: "http://[HOST]:[PORT:9999]"
 
 tmpfs: true
 backup: cold
