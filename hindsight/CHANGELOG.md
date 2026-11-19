@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.2.2
+
+- Make embeddings and reranker model selection automatic by default. `embeddings_model`
+  and `reranker_model` now default to `auto`, which leaves the model id unset so
+  Hindsight uses (and downloads) its own provider default. An explicit model id in the
+  Configuration tab still overrides it
+- Document how to opt into `hindsight-ai/hs-embed-1` and the re-embed requirement
+  when switching models on an install that already holds memories
+
+## 1.2.1
+
+- Keep `next` in the control plane bundle and clean up stale PostgreSQL PID files on
+  restart
+
+## 1.2.0
+
+- Zero-config local models: built-in llama.cpp LLM plus local ONNX embeddings and
+  reranker, so no API key or external model server is needed with the defaults
+- Fix the PostgreSQL user switch during cluster init
+
 ## 1.1.1
 
 - Remove the `image:` key so the Supervisor builds locally from the Dockerfile;

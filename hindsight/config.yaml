@@ -21,8 +21,9 @@ options:
   llm_api_key: ""
   llm_model: gemma-4-e2b-it
   embeddings_provider: onnx
-  embeddings_model: intfloat/multilingual-e5-small
+  embeddings_model: auto
   reranker_provider: onnx
+  reranker_model: auto
   mcp_enabled: true
   worker_id: hindsight-haos
   log_level: info
@@ -64,5 +65,5 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.1"
+version: "1.2.2"
 webui: "http://[HOST]:[PORT:9999]"

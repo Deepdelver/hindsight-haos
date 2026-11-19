@@ -16,9 +16,11 @@ LLM_MODEL="${llm_model:-gemma-4-e2b-it}"
 LLM_BASE_URL="${llm_base_url:-}"
 EMBEDDINGS_PROVIDER="${embeddings_provider:-onnx}"
 EMBEDDINGS_API_KEY="${embeddings_api_key:-}"
-EMBEDDINGS_MODEL="${embeddings_model:-intfloat/multilingual-e5-small}"
+# "auto" (the default) means: do not pin a model id, let Hindsight use its own
+# provider default and download it on first start. Works for every provider.
+EMBEDDINGS_MODEL="${embeddings_model:-auto}"
 RERANKER_PROVIDER="${reranker_provider:-onnx}"
-RERANKER_MODEL="${reranker_model:-hindsight-ai/hs-rerank-1}"
+RERANKER_MODEL="${reranker_model:-auto}"
 MCP_ENABLED="${mcp_enabled:-true}"
 MCP_AUTH_TOKEN="${mcp_auth_token:-}"
 WORKER_ID="${worker_id:-hindsight-haos}"
@@ -26,6 +28,14 @@ LOG_LEVEL="${log_level:-info}"
 LLAMACPP_MODEL_PATH="${llamacpp_model_path:-}"
 LLAMACPP_CONTEXT_SIZE="${llamacpp_context_size:-16384}"
 LLAMACPP_GPU_LAYERS="${llamacpp_gpu_layers:-0}"
+
+# True when the user has explicitly chosen a model instead of "auto".
+embeddings_model_set() {
+    [[ -n "$EMBEDDINGS_MODEL" && "$EMBEDDINGS_MODEL" != "auto" ]]
+}
+reranker_model_set() {
+    [[ -n "$RERANKER_MODEL" && "$RERANKER_MODEL" != "auto" ]]
+}
 
 # Local providers need no API key. Everything else does.
 NO_KEY_PROVIDERS=" llamacpp ollama lmstudio custom "
@@ -59,25 +69,38 @@ ENV_FILE=/data/hindsight/env
         printf 'HINDSIGHT_API_MCP_AUTH_TOKEN=%s\n' "$MCP_AUTH_TOKEN"
     fi
 
+    # Only emit a model id when one was explicitly configured. With "auto" the
+    # provider's own default is used, so upstream model changes flow through
+    # without an addon update.
     case "$EMBEDDINGS_PROVIDER" in
         onnx)
-            printf 'HINDSIGHT_API_EMBEDDINGS_ONNX_MODEL_ID=%s\n' "$EMBEDDINGS_MODEL"
+            if embeddings_model_set; then
+                printf 'HINDSIGHT_API_EMBEDDINGS_ONNX_MODEL_ID=%s\n' "$EMBEDDINGS_MODEL"
+            fi
             ;;
         local)
-            printf 'HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=%s\n' "$EMBEDDINGS_MODEL"
+            if embeddings_model_set; then
+                printf 'HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=%s\n' "$EMBEDDINGS_MODEL"
+            fi
             ;;
         openai)
-            printf 'HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL=%s\n' "$EMBEDDINGS_MODEL"
+            if embeddings_model_set; then
+                printf 'HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL=%s\n' "$EMBEDDINGS_MODEL"
+            fi
             printf 'HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY=%s\n' "${EMBEDDINGS_API_KEY:-$LLM_API_KEY}"
             ;;
     esac
 
     case "$RERANKER_PROVIDER" in
         onnx)
-            printf 'HINDSIGHT_API_RERANKER_ONNX_MODEL_ID=%s\n' "$RERANKER_MODEL"
+            if reranker_model_set; then
+                printf 'HINDSIGHT_API_RERANKER_ONNX_MODEL_ID=%s\n' "$RERANKER_MODEL"
+            fi
             ;;
         flashrank)
-            printf 'HINDSIGHT_API_RERANKER_FLASHRANK_MODEL=%s\n' "$RERANKER_MODEL"
+            if reranker_model_set; then
+                printf 'HINDSIGHT_API_RERANKER_FLASHRANK_MODEL=%s\n' "$RERANKER_MODEL"
+            fi
             ;;
     esac
 
@@ -109,8 +132,19 @@ ENV_FILE=/data/hindsight/env
 
 chmod 600 "$ENV_FILE"
 
+if embeddings_model_set; then
+    EMBEDDINGS_DISPLAY="$EMBEDDINGS_MODEL"
+else
+    EMBEDDINGS_DISPLAY="Hindsight default"
+fi
+if reranker_model_set; then
+    RERANKER_DISPLAY="$RERANKER_MODEL"
+else
+    RERANKER_DISPLAY="Hindsight default"
+fi
+
 bashio::log.info "Hindsight configuration written"
 bashio::log.info "  LLM:        ${LLM_PROVIDER} / ${LLM_MODEL}"
-bashio::log.info "  Embeddings: ${EMBEDDINGS_PROVIDER} / ${EMBEDDINGS_MODEL}"
-bashio::log.info "  Reranker:   ${RERANKER_PROVIDER} / ${RERANKER_MODEL}"
+bashio::log.info "  Embeddings: ${EMBEDDINGS_PROVIDER} / ${EMBEDDINGS_DISPLAY}"
+bashio::log.info "  Reranker:   ${RERANKER_PROVIDER} / ${RERANKER_DISPLAY}"
 bashio::log.info "  MCP:        ${MCP_ENABLED} at /mcp/<bank_id>/"

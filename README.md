@@ -29,9 +29,9 @@ Hindsight gives your AI agents persistent memory that works across all your tool
 | `llm_model` | `gemma-4-e2b-it` | Model name (default model for the chosen provider) |
 | `llm_base_url` | — | Custom endpoint (Ollama, OpenAI-compatible proxies) |
 | `embeddings_provider` | `onnx` | Local ONNX embeddings, no key. Hosted: `openai`, `cohere`, `tei`, ... |
-| `embeddings_model` | `intfloat/multilingual-e5-small` | Embedding model |
+| `embeddings_model` | `auto` | `auto` lets Hindsight pick and download its default model. Set a model id to override |
 | `reranker_provider` | `onnx` | Local ONNX reranker, no key. `rrf` needs no model at all |
-| `reranker_model` | `hindsight-ai/hs-rerank-1` | Reranker model (optional) |
+| `reranker_model` | `auto` | `auto` lets Hindsight pick its default model; set a model id to override |
 | `llamacpp_model_path` | — | Optional GGUF path; otherwise auto-downloaded to `/data/hindsight-home/.hindsight/models` |
 | `llamacpp_context_size` | `16384` | Local LLM context window |
 | `llamacpp_gpu_layers` | `0` | GPU layers (`0` = CPU, `-1` = all) |
@@ -42,6 +42,31 @@ Hindsight gives your AI agents persistent memory that works across all your tool
 | `log_level` | `info` | Log verbosity |
 
 An **env_vars** list is available for any additional `HINDSIGHT_API_*` variable.
+
+### Automatic embeddings models
+
+`embeddings_model` and `reranker_model` default to `auto`. In that mode the addon sets
+only the provider and lets Hindsight choose its own model — it downloads the weights on
+first start and picks up upstream default changes on update. Set an explicit model id
+when you want to pin one; it is then passed to the selected provider (ONNX, local,
+OpenAI, FlashRank — see the table below).
+
+For the `onnx` provider an explicit model must be a Hugging Face repo containing
+`onnx/model.onnx`. Hindsight currently recommends `hindsight-ai/hs-embed-1` for agent
+memory. It needs no E5 query/passage prefix, so clear both when selecting it:
+
+```
+embeddings_model: hindsight-ai/hs-embed-1
+env_vars:
+  - name: HINDSIGHT_API_EMBEDDINGS_ONNX_QUERY_PREFIX
+    value: ""
+  - name: HINDSIGHT_API_EMBEDDINGS_ONNX_PASSAGE_PREFIX
+    value: ""
+```
+
+Both models yield 384-dimensional vectors, but vectors from different models do not
+mix. On an install that already has memories, run `hindsight-admin reembed` after
+changing the model; a fresh install needs nothing.
 
 Hindsight always uses an LLM for fact extraction, consolidation and reflect. The defaults keep that local and free: built-in llama.cpp plus local ONNX embeddings/reranking. Switching `llm_provider` to a hosted provider needs the matching `llm_api_key`; switching `embeddings_provider`/`reranker_provider` to a hosted one needs its key (an `env_vars` entry such as `HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY=...`). Local models are slower and lower quality than a hosted model — pick what fits your hardware.
 
