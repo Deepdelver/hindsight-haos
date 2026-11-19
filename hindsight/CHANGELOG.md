@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.6
+
+- Add a `mode` switch. `simple` (default) ignores all provider/model options and uses
+  the free local stack with automatic models; `expert` passes all options through for
+  subscriptions, Ollama, or self-hosted models
+- Document both modes in the README and addon docs
+
+## 1.2.5
+
+- Bind the Control Plane to `0.0.0.0` so Supervisor's port mapping and ingress can
+  reach port 9999
+
 ## 1.2.4
 
 - Add the official Hindsight icon as the addon icon (`icon.png`)

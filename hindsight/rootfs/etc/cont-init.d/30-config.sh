@@ -28,6 +28,24 @@ LOG_LEVEL="${log_level:-info}"
 LLAMACPP_MODEL_PATH="${llamacpp_model_path:-}"
 LLAMACPP_CONTEXT_SIZE="${llamacpp_context_size:-16384}"
 LLAMACPP_GPU_LAYERS="${llamacpp_gpu_layers:-0}"
+MODE="${mode:-simple}"
+
+# Simple mode: ignore every provider/model option below and use the free local
+# stack that works out of the box. Expert mode passes all options through, for
+# people using subscriptions, Ollama, or their own models.
+if [[ "$MODE" != "expert" ]]; then
+    LLM_PROVIDER="llamacpp"
+    LLM_API_KEY=""
+    LLM_BASE_URL=""
+    LLM_MODEL="gemma-4-e2b-it"
+    EMBEDDINGS_PROVIDER="onnx"
+    EMBEDDINGS_MODEL="auto"
+    RERANKER_PROVIDER="onnx"
+    RERANKER_MODEL="auto"
+    LLAMACPP_MODEL_PATH=""
+    LLAMACPP_CONTEXT_SIZE="16384"
+    LLAMACPP_GPU_LAYERS="0"
+fi
 
 # True when the user has explicitly chosen a model instead of "auto".
 embeddings_model_set() {
@@ -144,6 +162,7 @@ else
 fi
 
 bashio::log.info "Hindsight configuration written"
+bashio::log.info "  Mode:       ${MODE}"
 bashio::log.info "  LLM:        ${LLM_PROVIDER} / ${LLM_MODEL}"
 bashio::log.info "  Embeddings: ${EMBEDDINGS_PROVIDER} / ${EMBEDDINGS_DISPLAY}"
 bashio::log.info "  Reranker:   ${RERANKER_PROVIDER} / ${RERANKER_DISPLAY}"

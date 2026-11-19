@@ -41,6 +41,7 @@ on the addon's page in Home Assistant; the watchdog URL is defined in `config.ya
 
 | Option | Default | Purpose |
 | --- | --- | --- |
+| `mode` | `simple` | `simple` = free local models, nothing to configure. `expert` = set every provider/model yourself |
 | `llm_provider` | `llamacpp` | LLM provider. `llamacpp` runs a small local model inside the addon — no key. Change to `openai`, `ollama`, `groq`, `anthropic`, ... for a different one |
 | `llm_api_key` | — | Only needed for hosted providers |
 | `llm_model` | `gemma-4-e2b-it` | Model name (default model for the chosen provider) |
@@ -59,6 +60,19 @@ on the addon's page in Home Assistant; the watchdog URL is defined in `config.ya
 | `log_level` | `info` | Log verbosity |
 
 An **env_vars** list is available for any additional `HINDSIGHT_API_*` variable.
+
+## Simple and expert mode
+
+`mode: simple` (the default) is the out-of-the-box setup: a local llama.cpp LLM with
+local ONNX embeddings and reranker. No API keys, no external model server, and every
+model is chosen automatically by Hindsight. Provider and model options are ignored in
+this mode — leave them as they are.
+
+Switch `mode` to `expert` to choose everything yourself: LLM provider/model/key/base
+URL, embeddings provider/model/key, reranker provider/model, llama.cpp model path,
+context size and GPU layers. This is the mode for paid subscriptions, Ollama on your
+network, or your own hosted models. The `env_vars` list is available in both modes for
+any other `HINDSIGHT_API_*` setting.
 
 ### Automatic embeddings models
 

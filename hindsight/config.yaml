@@ -18,6 +18,7 @@ map:
 name: Hindsight
 options:
   env_vars: []
+  mode: simple
   llm_provider: llamacpp
   llm_api_key: ""
   llm_model: gemma-4-e2b-it
@@ -44,6 +45,7 @@ schema:
   env_vars:
     - name: match(^[A-Za-z0-9_]+$)
       value: str?
+  mode: list(simple|expert)
   llm_provider: list(llamacpp|openai|ollama|anthropic|gemini|groq|deepseek|openrouter|fireworks|nous|lmstudio|custom)
   llm_api_key: password
   llm_model: str
@@ -67,6 +69,6 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.5"
+version: "1.2.6"
 watchdog: "http://[HOST]:[PORT:8888]/health"
 webui: "http://[HOST]:[PORT:9999]"

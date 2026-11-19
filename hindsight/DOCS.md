@@ -13,7 +13,10 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
 ## Setup
 
 1. Install this addon
-2. Go to **Configuration** and set:
+2. Go to **Configuration** and pick a mode:
+   - **simple** (default) — local LLM + local ONNX embeddings/reranker, no keys, nothing else to set
+   - **expert** — configure the providers and models yourself (see below)
+3. In expert mode, set:
    - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`, `custom`
    - **llm_api_key** — API key for the chosen provider (not needed for `ollama`)
    - **llm_model** — Model name (default `gpt-4o-mini`)
@@ -28,7 +31,7 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
    - **control_plane_port** — port for the web UI (default `9999`)
    - **worker_id** — Stable identity across restarts (default `hindsight-haos`)
    - **log_level** — `debug`, `info`, `warning`, `error`
-3. Start the addon
+4. Start the addon
 
 ## Configuration options
 
@@ -37,6 +40,7 @@ lets you set any additional variable directly:
 
 | Option | Environment variable |
 | --- | --- |
+| `mode` | (addon option: `simple` or `expert`) |
 | `llm_provider` | `HINDSIGHT_API_LLM_PROVIDER` |
 | `llm_api_key` | `HINDSIGHT_API_LLM_API_KEY` |
 | `llm_model` | `HINDSIGHT_API_LLM_MODEL` |
@@ -58,6 +62,17 @@ Add a custom variable in the UI under **env_vars**, for example:
 name:  HINDSIGHT_API_VECTOR_EXTENSION
 value: pgvector
 ```
+
+### Simple and expert mode
+
+`mode: simple` forces the local stack regardless of the other fields: llama.cpp LLM
+(`gemma-4-e2b-it`), ONNX embeddings and ONNX reranker, all models `auto`. No key is
+needed. It is the recommended setting for a fresh install.
+
+`mode: expert` passes every option through: LLM provider/model/key/base URL,
+embeddings provider/model/key, reranker provider/model, and the llama.cpp path,
+context size and GPU layers. Use it for subscriptions (OpenAI, Anthropic, OpenRouter,
+...), Ollama on your LAN, or self-hosted models. `env_vars` still works in both modes.
 
 ### Automatic model selection
 
