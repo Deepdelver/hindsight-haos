@@ -36,17 +36,7 @@ else
     chown -R postgres:postgres "${PGDATA}"
 fi
 
-# Hindsight database
-if ! runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -lqt 2>/dev/null | grep -q hindsight; then
-    bashio::log.info "Creating hindsight database"
-    runuser -u postgres -- "${PG_BIN}/createdb" -h 127.0.0.1 hindsight
-fi
-
-# pgvector — Hindsight needs a vector extension for semantic search
-if ! runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -d hindsight -tAc "SELECT 1 FROM pg_extension WHERE extname='vector'" 2>/dev/null | grep -q 1; then
-    bashio::log.info "Enabling pgvector extension"
-    runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -d hindsight -c 'CREATE EXTENSION IF NOT EXISTS vector;' \
-        || bashio::log.warning "pgvector unavailable; Hindsight may fall back to built-in search"
-fi
+# The database and pgvector extension are created in the service run script,
+# after PostgreSQL is started there.
 
 bashio::log.info "PostgreSQL preparation complete"

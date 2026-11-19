@@ -14,9 +14,11 @@ PGDATA="${PGDATA:-/data/pg}"
 export HOME="/data/hindsight-home"
 mkdir -p "$HOME"
 
-# Load the env written by 30-config.sh
+# Load the env written by 30-config.sh and export it to hindsight-api.
 # shellcheck source=/dev/null
+set -a
 [ -f /data/hindsight/env ] && . /data/hindsight/env
+set +a
 
 # --- start PostgreSQL -------------------------------------------------------
 # A container restart can leave postmaster.pid behind; pg_ctl then refuses to start.
@@ -36,6 +38,13 @@ done
 
 runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -lqt 2>/dev/null | grep -q hindsight \
     || runuser -u postgres -- "${PG_BIN}/createdb" -h 127.0.0.1 hindsight
+
+# pgvector — create it now that PostgreSQL is actually accepting connections.
+if ! runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -d hindsight -tAc "SELECT 1 FROM pg_extension WHERE extname='vector'" 2>/dev/null | grep -q 1; then
+    bashio::log.info "Enabling pgvector extension"
+    runuser -u postgres -- "${PG_BIN}/psql" -h 127.0.0.1 -d hindsight -c 'CREATE EXTENSION IF NOT EXISTS vector;' \
+        || bashio::log.warning "pgvector unavailable; Hindsight may fall back to built-in search"
+fi
 
 # --- start Hindsight --------------------------------------------------------
 bashio::log.info "Starting Hindsight API..."
