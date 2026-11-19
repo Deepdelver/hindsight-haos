@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+- Remove the `image:` key so the Supervisor builds locally from the Dockerfile;
+  the referenced GHCR images do not exist and would make install fail.
+
 ## 1.1.0
 
 - Add the Hindsight Control Plane as a separate, menu-selectable service
