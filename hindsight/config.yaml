@@ -1,5 +1,5 @@
 name: "Hindsight"
-version: "1.0.1"
+version: "1.0.2"
 slug: "hindsight"
 description: "Hindsight AI Memory — persistent agent memory with retain, recall, and reflect APIs. Shared across all your AI agents via MCP."
 url: "https://github.com/Deepdelver/hindsight-haos"
@@ -15,12 +15,11 @@ ports:
   8888/tcp: 8888
   9999/tcp: 9999
 ports_description:
-  8888/tcp: "Hindsight API & MCP Server"
-  9999/tcp: "Hindsight Control Plane (Web UI)"
+  8888/tcp: "Hindsight API and MCP Server"
+  9999/tcp: "Hindsight Control Plane Web UI"
 
 ingress: false
 webui: "http://[HOST]:[PORT:9999/tcp]"
-watchdog: "http://[HOST]:[PORT:8888/tcp]/health"
 
 tmpfs: true
 backup: cold
@@ -30,44 +29,29 @@ map:
     read_only: false
 
 options:
-  # LLM Provider (required)
   llm_provider: "openai"
   llm_api_key: ""
   llm_model: "gpt-4o-mini"
-  llm_base_url: ""
-
-  # Embeddings
   embeddings_provider: "local"
-  embeddings_openai_api_key: ""
-  embeddings_openai_model: "text-embedding-3-small"
-
-  # Reranker
   reranker_provider: "local"
-
-  # MCP Server
   mcp_enabled: true
   mcp_local_bank_id: "default"
-  mcp_auth_token: ""
-
-  # Worker
   worker_id: "hindsight-haos"
-
-  # Logging
   log_level: "info"
 
 schema:
-  llm_provider: "list(openai|openai-responses|anthropic|gemini|groq|deepseek|ollama|ollama-cloud|minimax|fireworks|openrouter|nous|lmstudio|llamacpp|custom)"
-  llm_api_key: "str"
-  llm_model: "str"
+  llm_provider: "list(openai|anthropic|gemini|groq|deepseek|ollama|fireworks|openrouter|nous|custom)"
+  llm_api_key: str
+  llm_model: str
   llm_base_url: "str?"
-  embeddings_provider: "list(local|openai|ollama|tei|onnx|cohere)"
+  embeddings_provider: "list(local|openai|ollama|cohere)"
   embeddings_openai_api_key: "str?"
   embeddings_openai_model: "str?"
-  reranker_provider: "list(local|cohere|tei|openrouter|flashrank|rrf)"
-  mcp_enabled: "bool"
-  mcp_local_bank_id: "str"
+  reranker_provider: "list(local|cohere|flashrank|rrf)"
+  mcp_enabled: bool
+  mcp_local_bank_id: str
   mcp_auth_token: "str?"
-  worker_id: "str"
+  worker_id: str
   log_level: "list(debug|info|warning|error)"
 
 environment:
