@@ -1,0 +1,37 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+set -euo pipefail
+
+# =============================================================================
+# S6 long-running service: PostgreSQL + Hindsight API
+# =============================================================================
+
+PG_MAJOR="15"
+PG_BIN="/usr/lib/postgresql/${PG_MAJOR}/bin"
+PGDATA="${PGDATA:-/data/pg}"
+
+# Load the env written by 30-config.sh
+# shellcheck source=/dev/null
+[ -f /data/hindsight/env ] && . /data/hindsight/env
+
+# --- start PostgreSQL -------------------------------------------------------
+bashio::log.info "Starting PostgreSQL ${PG_MAJOR}..."
+su - postgres -c "${PG_BIN}/pg_ctl -D ${PGDATA} -l /data/pg/server.log start -w -t 60" \
+    || bashio::log.fatal "PostgreSQL failed to start"
+
+# Wait for the socket, then make sure the database exists (cont-init may have
+# been skipped on a restart where the cluster already existed).
+for _ in $(seq 1 30); do
+    if su - postgres -c "${PG_BIN}/pg_isready -h 127.0.0.1 -q"; then break; fi
+    sleep 1
+done
+
+su - postgres -c "${PG_BIN}/psql -h 127.0.0.1 -lqt" 2>/dev/null | grep -q hindsight \
+    || su - postgres -c "${PG_BIN}/createdb -h 127.0.0.1 hindsight"
+
+# --- start Hindsight --------------------------------------------------------
+bashio::log.info "Starting Hindsight API..."
+cd /data
+
+# Run as an unprivileged user when possible; the venv is world-readable.
+exec /opt/hindsight-venv/bin/hindsight-api

@@ -1,0 +1,51 @@
+#include <tunables/global>
+
+profile hindsight_addon flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  capability chown,
+  capability dac_override,
+  capability fowner,
+  capability kill,
+  capability setgid,
+  capability setuid,
+  capability sys_chroot,
+  file,
+  signal,
+  network udp,
+  network tcp,
+  network dgram,
+  network stream,
+  network inet,
+  network inet6,
+  network netlink raw,
+  network unix dgram,
+
+  # S6-Overlay
+  /init ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/s6-overlay/** ix,
+  /etc/cont-init.d/** ix,
+  /etc/services.d/** ix,
+  /etc/fix-attrs.d/** ix,
+
+  # Supervisor
+  /run/supervisor.sock rw,
+  /data/** rwk,
+  /share/** rw,
+  /config/** rw,
+
+  # PostgreSQL binaries and cluster
+  /usr/lib/postgresql/** ix,
+  /usr/share/postgresql/** r,
+  /etc/postgresql/** rw,
+
+  # Hindsight venv
+  /opt/hindsight-venv/** ix,
+
+  # Deny writes outside the addon's own data
+  deny /etc/shadow rw,
+  deny /root/** rw,
+}

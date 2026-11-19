@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+set -euo pipefail
+
+# S6 finish script: stop PostgreSQL cleanly when the service stops.
+PG_MAJOR="15"
+PG_BIN="/usr/lib/postgresql/${PG_MAJOR}/bin"
+PGDATA="${PGDATA:-/data/pg}"
+
+bashio::log.info "Stopping PostgreSQL..."
+su - postgres -c "${PG_BIN}/pg_ctl -D ${PGDATA} stop -m fast" 2>/dev/null || true

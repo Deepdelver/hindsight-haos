@@ -12,40 +12,74 @@ Hindsight is a persistent AI memory engine that gives your AI agents long-term m
 
 1. Install this addon
 2. Go to **Configuration** and set:
-   - **LLM Provider**: Your LLM provider (openai, groq, anthropic, ollama, custom)
-   - **LLM API Key**: Your API key for the chosen provider
-   - **LLM Model**: The model to use (default: gpt-4o-mini)
-   - **Worker ID**: A stable identifier for this instance (default: hindsight-haos)
+   - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`, `custom`
+   - **llm_api_key** — API key for the chosen provider (not needed for `ollama`)
+   - **llm_model** — Model name (default `gpt-4o-mini`)
+   - **llm_base_url** — Custom endpoint (optional; used for Ollama or a proxy)
+   - **embeddings_provider** — `openai`, `ollama`, `cohere`
+   - **embeddings_model** — Embedding model (default `text-embedding-3-small`)
+   - **embeddings_api_key** — Separate key for embeddings (falls back to `llm_api_key`)
+   - **reranker_provider** — `rrf` (no model needed), `cohere`, `flashrank`
+   - **mcp_local_bank_id** — Memory namespace shared by your agents (default `default`)
+   - **mcp_auth_token** — Optional bearer token protecting the MCP endpoint
+   - **worker_id** — Stable identity across restarts (default `hindsight-haos`)
+   - **log_level** — `debug`, `info`, `warning`, `error`
 3. Start the addon
+
+## Configuration options
+
+Every option is also exported as an environment variable, and the **env_vars** list
+lets you set any additional variable directly:
+
+| Option | Environment variable |
+| --- | --- |
+| `llm_provider` | `HINDSIGHT_API_LLM_PROVIDER` |
+| `llm_api_key` | `HINDSIGHT_API_LLM_API_KEY` |
+| `llm_model` | `HINDSIGHT_API_LLM_MODEL` |
+| `llm_base_url` | `HINDSIGHT_API_LLM_BASE_URL` |
+| `embeddings_provider` | `HINDSIGHT_API_EMBEDDINGS_PROVIDER` |
+| `embeddings_model` | `HINDSIGHT_API_EMBEDDINGS_OPENAI_MODEL` |
+| `reranker_provider` | `HINDSIGHT_API_RERANKER_PROVIDER` |
+| `mcp_enabled` | `HINDSIGHT_API_MCP_ENABLED` |
+| `mcp_local_bank_id` | `HINDSIGHT_API_MCP_LOCAL_BANK_ID` |
+| `mcp_auth_token` | `HINDSIGHT_API_MCP_AUTH_TOKEN` |
+| `worker_id` | `HINDSIGHT_API_WORKER_ID` |
+| `log_level` | `HINDSIGHT_API_LOG_LEVEL` |
+
+Add a custom variable in the UI under **env_vars**, for example:
+
+```
+name:  HINDSIGHT_API_VECTOR_EXTENSION
+value: pgvector
+```
 
 ## Connecting your AI agents
 
 Once running, Hindsight exposes an MCP server at:
 
 ```
-http://<your-home-assistant-ip>:8888/mcp
+http://<your-home-assistant-ip>:8888/mcp/<bank_id>/
 ```
 
 ### Hermes Agent
 
 ```bash
-hermes config set mcp_servers.hindsight.url "http://<ha-ip>:8888/mcp"
+hermes config set mcp_servers.hindsight.url "http://<ha-ip>:8888/mcp/default/"
 ```
 
 ### OpenClaw / Claude Code
 
 ```bash
-claude mcp add --transport http hindsight http://<ha-ip>:8888/mcp
+claude mcp add --transport http hindsight http://<ha-ip>:8888/mcp/default/
 ```
 
-### OpenCode / Cursor / Any MCP client
+### OpenCode / Cursor / any MCP client
 
-Add to your MCP config:
 ```json
 {
   "mcpServers": {
     "hindsight": {
-      "url": "http://<ha-ip>:8888/mcp"
+      "url": "http://<ha-ip>:8888/mcp/default/"
     }
   }
 }
@@ -63,18 +97,31 @@ Use it to browse memories, manage banks, and monitor the system.
 
 ## Ports
 
-- **8888**: Hindsight API & MCP Server
-- **9999**: Control Plane Web UI
+- **8888** — Hindsight API and MCP server
+- **9999** — Control Plane web UI
 
 ## Data
 
-All data is stored in `/data` inside the addon container and is included in Home Assistant backups. The addon uses PostgreSQL for storage.
+PostgreSQL data lives in `/data` inside the addon container and is included in
+Home Assistant backups. The addon uses a cold backup, so Home Assistant stops it
+while the backup runs.
 
 ## Using with Ollama
 
-If you have the Ollama addon running on Home Assistant, set:
-- **LLM Provider**: `ollama`
-- **LLM API Key**: (leave empty or set any value)
-- **LLM Model**: `qwen3.5:latest` (or your preferred model)
+If you run the Ollama addon on the same Home Assistant:
 
-Then set the Ollama base URL via the addon's environment. The Ollama addon is typically reachable at `http://homeassistant.local:11434`.
+- **llm_provider**: `ollama`
+- **llm_api_key**: leave empty
+- **llm_model**: your model, e.g. `qwen3.5:latest`
+- **llm_base_url**: `http://homeassistant.local:11434`
+- **embeddings_provider**: `ollama`
+
+## Troubleshooting
+
+- **Addon does not appear in the store** — the Supervisor silently drops apps whose
+  `config.yaml` fails validation. Check **Settings > System > Logs > Supervisor**
+  for a line starting `Can't read .../config.yaml`.
+- **Container exits at start** — check the addon log. The most common cause is an
+  empty `llm_api_key` with a provider that requires one.
+- **MCP endpoint refuses connections** — confirm port 8888 is published and that
+  `mcp_enabled` is `true`.
