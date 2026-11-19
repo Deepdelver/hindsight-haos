@@ -9,10 +9,9 @@ set -euo pipefail
 # service (services.d/hindsight) runs the API; this one runs the web UI and
 # proxies to the API over the local network.
 #
-# The upstream start-all.sh documents a Next.js loopback defect (#1926): when
-# HOSTNAME is a literal loopback address, every locale rewrite 307s to itself.
-# Binding as `localhost` with an explicit DNS result order keeps the requested
-# address family and avoids the loop.
+# Next.js standalone has a locale-rewrite loop (#1926) only when HOSTNAME is a
+# literal loopback address (127.0.0.1/::1). The upstream default 0.0.0.0 is
+# unaffected and is required here so Supervisor's port mapping can reach the UI.
 # =============================================================================
 
 ENABLE_CP="${control_plane:-true}"
@@ -35,8 +34,8 @@ for _ in $(seq 1 60); do
 done
 
 export PORT="${CP_PORT}"
-export HOSTNAME="localhost"
-export NODE_OPTIONS="--dns-result-order=ipv4first"
+export HOSTNAME="0.0.0.0"
+export NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--dns-result-order=ipv4first"
 export NODE_ENV=production
 export HINDSIGHT_CP_DATAPLANE_API_URL="http://127.0.0.1:8888"
 export HINDSIGHT_CP_PORT="${CP_PORT}"
