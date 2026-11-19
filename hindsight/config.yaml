@@ -50,7 +50,7 @@ schema:
   embeddings_model: str
   embeddings_api_key: password?
   reranker_provider: list(onnx|flashrank|local|hindsight|rrf|cohere|tei|openrouter|nvidia|google)
-  reranker_model: str?
+  reranker_model: str
   llamacpp_model_path: str?
   llamacpp_context_size: int?
   llamacpp_gpu_layers: int?
