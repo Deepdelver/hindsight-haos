@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.13
+
+- Force full page loads for internal links so Next.js client routing does not break under ingress
+
 ## 1.2.12
 
 - Rewrite the bank-selector path regex so a bank opens after clicking it in the sidebar

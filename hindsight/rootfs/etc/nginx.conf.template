@@ -77,6 +77,10 @@ server {
         # ingress prefix in front of it.
         sub_filter '^\\/banks\\/' '^.*\\/banks\\/';
 
+        # Next.js client-side navigation cannot handle HA's ingress prefix.
+        # Force internal links to do a full page load, which works correctly.
+        sub_filter '<head>' '<head><script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href*=hassio_ingress]");if(a&&!a.target){e.preventDefault();e.stopPropagation();window.location.href=a.href}},true);</script>';
+
         proxy_hide_header Content-Security-Policy;
     }
 }
