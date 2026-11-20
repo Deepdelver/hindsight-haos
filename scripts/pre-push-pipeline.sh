@@ -65,7 +65,9 @@ Assess the changes in this repository ($REPO) and finish these items before any 
    python3 hindsight/tests/test_ingress_rewrite.py
 4. Report: list files changed, the exact test command and its result, and any residual risk.
 
-Do NOT push to GitHub; the parent session pushes after this task is done.
+Do NOT commit and do NOT push. Leave any README/DOCS/test edits uncommitted in
+the working tree so the pre-push key for this commit stays valid. The parent
+session commits and pushes after this task is done.
 EOF
     echo "Pipeline triggered. Re-run the push after the task is completed."
     exit 1

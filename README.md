@@ -133,11 +133,15 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
 
 Before **any push to GitHub**, the agent assessment pipeline on the project's
 Kanban board must run for the commit being pushed. This is enforced by a local
-pre-push hook (`git config core.hooksPath .githooks`).
+pre-push hook. The hook file is committed (`.githooks/pre-push`), but the
+`core.hooksPath` setting is per-clone: run
+`git config core.hooksPath .githooks` once in each fresh clone. Pushes from a
+clone without that setting are not gated.
 
 ```bash
 cd hindsight-haos
 python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression tests
+python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tests
 ```
 
 The flow is:
@@ -157,7 +161,16 @@ checklist; the script is `scripts/pre-push-pipeline.sh`. The test reads the real
 them to representative HTML/JS. It fails if an API suffix gets the ingress base
 injected, if a navigation builder loses it, or if the bank-selector regex is no
 longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template
-revision.
+revision. `test_prepush_pipeline.py` checks the hook/script wiring and exercises
+the gate's decision logic (done / none / running, test failure) with fake
+`git` and `hermes` binaries; it does not touch the real board.
+
+If a push is blocked, check the assessment task for the current commit
+(`git rev-parse HEAD`): its status must be `done`, and the regression test must
+pass. The gate is fail-closed — when `hermes` is missing or the `hindsight-haos`
+board is not the active board in the push shell, the push is aborted rather than
+allowed. On this host the board is pinned by `HERMES_KANBAN_DB`; the `BOARD`
+variable inside the script is only informational.
 
 ## Troubleshooting
 

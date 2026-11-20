@@ -185,7 +185,8 @@ page has **Auto update** and **Watchdog** toggles; the watchdog checks
 ## Ports
 
 - **8888** — Hindsight API and MCP server
-- **9999** — Control Plane web UI
+- **9999** — Control Plane web UI (direct/LAN access)
+- **9997** — internal ingress port used by the Home Assistant sidebar; no port forwarding is needed for the UI
 
 ## Data
 
@@ -220,3 +221,7 @@ If you run the Ollama addon on the same Home Assistant:
 - **Retains retry with `429 Too Many Requests`** — the configured LLM provider is
   rate-limiting fact extraction (common with free hosted models). Use `mode: simple`
   for local models or a provider key with a higher quota; the worker retries safely.
+- **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
+  current commit must be `done` and `python3 hindsight/tests/test_ingress_rewrite.py`
+  must pass. The hook is local (`git config core.hooksPath .githooks`); see
+  README → Development and testing for the full flow.
