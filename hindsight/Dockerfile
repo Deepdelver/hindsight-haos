@@ -82,7 +82,7 @@ RUN \
     mkdir -p /opt/control-plane && \
     cd /opt/control-plane && \
     npm install --no-audit --no-fund --omit=dev \
-        @vectorize-io/hindsight-control-plane@1.2.2 && \
+        @vectorize-io/hindsight-control-plane@1.2.3 && \
     # The package ships a standalone/ directory; copy it to the root so
     # server.js is found. Keep node_modules: server.js still requires `next`.
     cp -a node_modules/@vectorize-io/hindsight-control-plane/standalone/. /opt/control-plane/ && \

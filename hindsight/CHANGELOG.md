@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.18
+
+- Pin the Control Plane to `@vectorize-io/hindsight-control-plane` 1.2.3 to match hindsight-api 1.2.3, fixing UI/API version-mismatch 404s and empty Memories/Experience/Observations tabs
+
 ## 1.2.17
 
 - Send no-store cache headers for the Control Plane so stale UI assets cannot survive an update
