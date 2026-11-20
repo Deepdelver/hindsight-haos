@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.14
+
+- Stop rewriting double-quoted route fragments that corrupted API URLs with duplicate ingress prefixes, fixing bank creation and bank pages
+
 ## 1.2.13
 
 - Force full page loads for internal links so Next.js client routing does not break under ingress
