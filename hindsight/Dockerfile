@@ -49,7 +49,8 @@ RUN \
         python3-venv \
         build-essential \
         cmake \
-        jq && \
+        jq \
+        nginx && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

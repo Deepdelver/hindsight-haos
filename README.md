@@ -37,6 +37,39 @@ The Control Plane web UI is available as a panel in the Home Assistant sidebar
 answering, and **Auto update** keeps it current with this repository. Both toggles are
 on the addon's page in Home Assistant; the watchdog URL is defined in `config.yaml`.
 
+## Hermes Agent (local external)
+
+Hindsight ships as a Hermes memory provider in the official plugin catalog. To point it
+at this addon — no Hindsight API key needed:
+
+```bash
+hermes plugins install hindsight --enable --yes-deps
+hermes config get memory.provider     # hindsight
+hermes memory status                  # Provider: hindsight, Status: available
+```
+
+`hermes memory setup` is the interactive alternative. Then create
+`$HERMES_HOME/hindsight/config.json` (`~/.hermes/hindsight/config.json` for the default
+profile):
+
+```json
+{
+  "mode": "local_external",
+  "api_url": "http://9b734b76-hindsight:8888",
+  "bank_id": "hermes",
+  "recall_min_scores": { "reranker": 0.25 }
+}
+```
+
+`api_url` must be the addon's own hostname on the HAOS internal network — get it from
+**Settings → Apps → Hindsight → Hostname** (the prefix is unique per installation). From
+another machine on the LAN use `http://<ha-ip>:8888` instead. Restart the gateway with
+`hermes gateway restart` after changing the config so a running process picks it up.
+
+The `hermes` bank appears in the Control Plane after the first retain.
+`recall_min_scores.reranker` suppresses off-topic results on a small bank; remove it if
+you want every ranked hit. See the [official integration guide](https://hindsight.vectorize.io/sdks/integrations/hermes) for all options.
+
 ## Configuration
 
 | Option | Default | Purpose |
@@ -109,9 +142,10 @@ hindsight/
 ├── build.json           # base image per architecture
 ├── Dockerfile           # Debian base + PostgreSQL 15 + pgvector + hindsight-api-slim + Node/control plane
 ├── apparmor.txt         # AppArmor profile
-└── rootfs/
-    └── etc/
-        ├── cont-init.d/
+├── rootfs/
+│   └── etc/
+│       ├── nginx.conf.template  # ingress-aware reverse proxy for the web UI
+│       ├── cont-init.d/
         │   ├── 20-postgres.sh   # cluster init, database, pgvector
         │   └── 30-config.sh     # options -> HINDSIGHT_API_* env
         └── services.d/

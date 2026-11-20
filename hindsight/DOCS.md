@@ -117,8 +117,37 @@ http://<your-home-assistant-ip>:8888/mcp/<bank_id>/
 
 ### Hermes Agent
 
+The recommended integration is the official Hindsight **memory provider** plugin in
+`local_external` mode:
+
 ```bash
-hermes config set mcp_servers.hindsight.url "http://<ha-ip>:8888/mcp/default/"
+hermes plugins install hindsight --enable --yes-deps
+hermes config get memory.provider          # hindsight
+hermes memory status                       # Provider: hindsight, Status: available
+```
+
+Create `$HERMES_HOME/hindsight/config.json` (`~/.hermes/hindsight/config.json` for the
+default profile):
+
+```json
+{
+  "mode": "local_external",
+  "api_url": "http://9b734b76-hindsight:8888",
+  "bank_id": "hermes",
+  "recall_min_scores": { "reranker": 0.25 }
+}
+```
+
+Use the addon hostname from **Settings → Apps → Hindsight → Hostname** (unique per
+installation), or `http://<ha-ip>:8888` from another machine. No API key is needed.
+Restart a running gateway with `hermes gateway restart`. The `hermes` bank is created on
+the first retain; `recall_min_scores.reranker` filters off-topic recalls on small banks.
+Full reference: https://hindsight.vectorize.io/sdks/integrations/hermes
+
+The MCP endpoint is an alternative for clients that don't use the memory plugin:
+
+```bash
+hermes config set mcp_servers.hindsight.url "http://<ha-ip>:8888/mcp/hermes/"
 ```
 
 ### OpenClaw / Claude Code

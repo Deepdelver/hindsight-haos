@@ -5,17 +5,15 @@ set -euo pipefail
 # =============================================================================
 # S6 long-running service: Hindsight Control Plane (Next.js standalone)
 #
-# Started only when the `control_plane` option is true. The addon's main
-# service (services.d/hindsight) runs the API; this one runs the web UI and
-# proxies to the API over the local network.
-#
-# Next.js standalone has a locale-rewrite loop (#1926) only when HOSTNAME is a
-# literal loopback address (127.0.0.1/::1). The upstream default 0.0.0.0 is
-# unaffected and is required here so Supervisor's port mapping can reach the UI.
+# Next.js emits root-absolute asset and API paths (/_next/..., /api/...).
+# Home Assistant ingress serves the app under /api/hassio_ingress/<token>/, so
+# nginx in front rewrites those paths using the base path discovered from the
+# Supervisor at startup. The UI itself listens on a loopback backend port.
 # =============================================================================
 
 ENABLE_CP="${control_plane:-true}"
 CP_PORT="${control_plane_port:-9999}"
+BACKEND_PORT=9998
 
 if [ "${ENABLE_CP}" != "true" ]; then
     bashio::log.info "Control plane disabled (control_plane=false), exiting"
@@ -33,13 +31,42 @@ for _ in $(seq 1 60); do
     sleep 2
 done
 
-export PORT="${CP_PORT}"
+# The ingress path is unique per installation. Read it from the Supervisor (its
+# token is available to every addon) and strip the entry path to get the base.
+BASE_PATH=""
+if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
+    INGRESS_URL="$(curl -sf -m 10 -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+        http://supervisor/addons/self/info | jq -r '.data.ingress_url // empty' || true)"
+    if [[ -n "$INGRESS_URL" ]]; then
+        BASE_PATH="$(printf '%s' "$INGRESS_URL" | sed -E 's#/[^/]*$##; s#/$##')"
+    fi
+fi
+bashio::log.info "Control plane ingress base: ${BASE_PATH:-<root>}"
+
+mkdir -p /run/nginx
+sed -e "s#__PORT__#${CP_PORT}#g" \
+    -e "s#__BACKEND__#${BACKEND_PORT}#g" \
+    -e "s#__BASE__#${BASE_PATH}#g" \
+    /etc/nginx.conf.template > /run/nginx/hindsight.conf
+
+export PORT="${BACKEND_PORT}"
 export HOSTNAME="0.0.0.0"
 export NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--dns-result-order=ipv4first"
 export NODE_ENV=production
 export HINDSIGHT_CP_DATAPLANE_API_URL="http://127.0.0.1:8888"
-export HINDSIGHT_CP_PORT="${CP_PORT}"
+export HINDSIGHT_CP_PORT="${BACKEND_PORT}"
 
-bashio::log.info "Starting Hindsight Control Plane on port ${CP_PORT}"
+bashio::log.info "Starting Hindsight Control Plane on ${CP_PORT} (nginx -> ${BACKEND_PORT})"
 cd /opt/control-plane
-exec node server.js
+node server.js &
+CP_PID=$!
+trap 'kill "${CP_PID}" 2>/dev/null || true' EXIT
+
+for _ in $(seq 1 30); do
+    if curl -sf -o /dev/null --max-time 2 "http://127.0.0.1:${BACKEND_PORT}/dashboard"; then
+        break
+    fi
+    sleep 1
+done
+
+exec nginx -c /run/nginx/hindsight.conf -g 'daemon off;'

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.9
+
+- Rewrite the Control Plane's root-absolute asset/API paths at runtime through nginx,
+  using the ingress path from the Supervisor. Fixes broken images, assets and bank
+  create/click in the Home Assistant sidebar
+- Document the Hermes memory plugin in `local_external` mode in the README and addon docs
+
 ## 1.2.8
 
 - Remove the leading slash from `ingress_entry` so the sidebar URL has no double slash

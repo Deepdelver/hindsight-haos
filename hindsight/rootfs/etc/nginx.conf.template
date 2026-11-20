@@ -1,0 +1,42 @@
+server {
+    listen __PORT__;
+    server_name _;
+    proxy_buffering off;
+    gunzip on;
+
+    location / {
+        proxy_pass http://127.0.0.1:__BACKEND__;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Ingress-Path $http_x_ingress_path;
+        # Responses must be uncompressed for sub_filter to see the URLs.
+        proxy_set_header Accept-Encoding "";
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+
+        # Next.js emits root-absolute asset and API paths. Home Assistant's
+        # ingress proxy serves the app under /api/hassio_ingress/<token>/, so
+        # every absolute path must be prefixed with the runtime base path.
+        sub_filter_once off;
+        sub_filter_types text/html text/css text/javascript application/javascript application/json;
+
+        sub_filter 'href="/' 'href="__BASE__/';
+        sub_filter "href='/" "href='__BASE__/";
+        sub_filter 'src="/' 'src="__BASE__/';
+        sub_filter "src='/" "src='__BASE__/";
+        sub_filter 'action="/' 'action="__BASE__/';
+        sub_filter 'url(/' 'url(__BASE__/';
+        sub_filter '"/_next/' '"__BASE__/_next/';
+        sub_filter "'/_next/" "'__BASE__/_next/";
+        sub_filter '"/api/' '"__BASE__/api/';
+        sub_filter "'/api/" "'__BASE__/api/";
+        sub_filter '`/api/' '`__BASE__/api/';
+        sub_filter '"/v1/' '"__BASE__/v1/';
+        sub_filter "'/v1/" "'__BASE__/v1/";
+        sub_filter '`/v1/' '`__BASE__/v1/';
+
+        proxy_hide_header Content-Security-Policy;
+    }
+}
