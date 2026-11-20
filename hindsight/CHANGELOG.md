@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.10
+
+- Wrap the generated nginx config in `events`/`http` blocks so nginx actually starts
+
 ## 1.2.9
 
 - Rewrite the Control Plane's root-absolute asset/API paths at runtime through nginx,

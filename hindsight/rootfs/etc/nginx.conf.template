@@ -1,3 +1,12 @@
+worker_processes 1;
+error_log /dev/stderr warn;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
 server {
     listen __PORT__;
     server_name _;
@@ -39,4 +48,5 @@ server {
 
         proxy_hide_header Content-Security-Policy;
     }
+}
 }
