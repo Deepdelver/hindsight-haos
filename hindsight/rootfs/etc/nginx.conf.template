@@ -46,6 +46,33 @@ server {
         sub_filter "'/v1/" "'__BASE__/v1/";
         sub_filter '`/v1/' '`__BASE__/v1/';
 
+        # Client-side navigation routes (Next.js router uses root-absolute paths)
+        sub_filter '"/banks' '"__BASE__/banks';
+        sub_filter '`/banks' '`__BASE__/banks';
+        sub_filter '"/dashboard' '"__BASE__/dashboard';
+        sub_filter '`/dashboard' '`__BASE__/dashboard';
+        sub_filter '"/memories' '"__BASE__/memories';
+        sub_filter '`/memories' '`__BASE__/memories';
+        sub_filter '"/observations' '"__BASE__/observations';
+        sub_filter '`/observations' '`__BASE__/observations';
+        sub_filter '"/knowledge-banks' '"__BASE__/knowledge-banks';
+        sub_filter '`/knowledge-banks' '`__BASE__/knowledge-banks';
+        sub_filter '"/mental-models' '"__BASE__/mental-models';
+        sub_filter '`/mental-models' '`__BASE__/mental-models';
+        sub_filter '"/directives' '"__BASE__/directives';
+        sub_filter '`/directives' '`__BASE__/directives';
+        sub_filter '"/config' '"__BASE__/config';
+        sub_filter '`/config' '`__BASE__/config';
+        sub_filter '"/webhooks' '"__BASE__/webhooks';
+        sub_filter '`/webhooks' '`__BASE__/webhooks';
+        sub_filter '"/history' '"__BASE__/history';
+        sub_filter '"/aliases' '"__BASE__/aliases';
+        sub_filter '"/clone' '"__BASE__/clone';
+        sub_filter '"/export' '"__BASE__/export';
+        sub_filter '"/consolidate' '"__BASE__/consolidate';
+        sub_filter '"/prompts' '"__BASE__/prompts';
+        sub_filter '"/login' '"__BASE__/login';
+
         proxy_hide_header Content-Security-Policy;
     }
 }

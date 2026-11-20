@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.11
+
+- Rewrite client-side navigation routes too, so clicking a bank opens it inside ingress
+  instead of navigating to a Home Assistant 404
+
 ## 1.2.10
 
 - Wrap the generated nginx config in `events`/`http` blocks so nginx actually starts
