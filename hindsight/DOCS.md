@@ -194,6 +194,11 @@ PostgreSQL data lives in `/data` inside the addon container and is included in
 Home Assistant backups. The addon uses a cold backup, so Home Assistant stops it
 while the backup runs.
 
+The add-on updates automatically when a new version is published. Upstream API
+and UI versions are recorded in `hindsight/versions.json` and compared daily by
+`scripts/check_versions.py`; drift opens a review task instead of silently
+changing a running add-on.
+
 ## Using with Ollama
 
 If you run the Ollama addon on the same Home Assistant:
@@ -221,6 +226,11 @@ If you run the Ollama addon on the same Home Assistant:
 - **Retains retry with `429 Too Many Requests`** — the configured LLM provider is
   rate-limiting fact extraction (common with free hosted models). Use `mode: simple`
   for local models or a provider key with a higher quota; the worker retries safely.
+- **Daily version-watch task keeps reopening** — `scripts/check_versions.py`
+  compares `hindsight/versions.json` and the Dockerfile pin with npm/PyPI. When
+  upstream moves it opens one idempotent review task; it never changes the
+  running add-on. Run `python3 scripts/check_versions.py` for the current
+  comparison, then bump the API and UI pins together in a normal release.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
   current change set (key printed by the hook) must be `done` and both regression
   tests in `hindsight/tests/` must pass. Run `scripts/setup-hooks.sh global` once

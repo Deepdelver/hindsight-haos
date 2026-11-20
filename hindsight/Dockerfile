@@ -64,7 +64,7 @@ RUN \
     python3 -m venv /opt/hindsight-venv && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir --upgrade pip && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir \
-        "hindsight-api-slim[embedded-db,local-llm,local-onnx]"
+        "hindsight-api-slim[embedded-db,local-llm,local-onnx]==1.2.3"
 
 # Control Plane: Next.js standalone bundle, shipped as an npm package.
 # Node 22 matches the major the upstream image builds with.

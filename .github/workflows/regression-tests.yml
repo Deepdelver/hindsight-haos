@@ -19,3 +19,5 @@ jobs:
         run: python3 hindsight/tests/test_ingress_rewrite.py
       - name: Pre-push gate tests
         run: python3 hindsight/tests/test_prepush_pipeline.py
+      - name: Version watch tests
+        run: python3 hindsight/tests/test_version_watch.py

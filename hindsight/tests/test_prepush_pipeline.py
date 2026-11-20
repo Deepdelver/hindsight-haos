@@ -25,6 +25,7 @@ SETUP = ROOT / "scripts" / "setup-hooks.sh"
 REGRESSIONS = [
     "python3 hindsight/tests/test_ingress_rewrite.py",
     "python3 hindsight/tests/test_prepush_pipeline.py",
+    "python3 hindsight/tests/test_version_watch.py",
 ]
 
 FAKE_GIT = """#!/usr/bin/env bash
@@ -119,7 +120,7 @@ def run_gate(list_json, regression_exit=0, git_log=None):
         td = Path(td)
         bindir, repo = stage_repo(td)
         marker = td / "regression-ran"
-        for name in ("test_ingress_rewrite.py", "test_prepush_pipeline.py"):
+        for name in ("test_ingress_rewrite.py", "test_prepush_pipeline.py", "test_version_watch.py"):
             (repo / "hindsight" / "tests" / name).write_text(
                 "from pathlib import Path\n"
                 f"Path({str(marker)!r}).write_text('ran')\n"

@@ -63,6 +63,7 @@ case "$STATUS" in
     echo "Pipeline task for change set $KEY_SHA is done. Running regression tests before push..."
     python3 hindsight/tests/test_ingress_rewrite.py
     python3 hindsight/tests/test_prepush_pipeline.py
+    python3 hindsight/tests/test_version_watch.py
     echo "Push allowed."
     exit 0
     ;;
@@ -85,6 +86,7 @@ Assess the changes in this repository ($REPO) and finish these items before any 
 3. Tests: make sure hindsight/tests/ covers changed behaviour. Add or update tests, then run:
    python3 hindsight/tests/test_ingress_rewrite.py
    python3 hindsight/tests/test_prepush_pipeline.py
+   python3 hindsight/tests/test_version_watch.py
 4. Report: list files changed, the exact test commands and their results, and any residual risk.
 
 Do NOT commit and do NOT push. Leave any README/DOCS/test edits uncommitted in
