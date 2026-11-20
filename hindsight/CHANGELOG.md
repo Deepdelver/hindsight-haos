@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.17
+
+- Send no-store cache headers for the Control Plane so stale UI assets cannot survive an update
+
 ## 1.2.16
 
 - Serve the dashboard on two ports: direct access on 9999 without rewriting, ingress on 9997 with path rewriting

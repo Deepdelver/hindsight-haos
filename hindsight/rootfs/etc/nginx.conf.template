@@ -22,6 +22,7 @@ server {
         proxy_set_header Accept-Encoding "";
         proxy_read_timeout 86400s;
         proxy_send_timeout 86400s;
+        add_header Cache-Control "no-store" always;
     }
 }
 
@@ -85,6 +86,7 @@ server {
         # Force internal links to do a full page load, which works correctly.
         sub_filter '<head>' '<head><script>var B="__BASE__";function nav(u){u=String(u||"");if(u.indexOf(B)===0){if(location.pathname+location.search!==u){location.href=u;}return true;}if(u.charAt(0)==="/"&&u.indexOf("//")!==0){var t=B+u;if(location.pathname+location.search!==t){location.href=t;}return true;}return false;}document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href*=hassio_ingress]");if(a&&!a.target&&nav(a.getAttribute("href"))){e.preventDefault();e.stopPropagation();}},true);["pushState","replaceState"].forEach(function(m){var o=history[m];history[m]=function(s,t,u){if(!nav(u)){return o.apply(this,arguments);}};});</script>';
 
+        add_header Cache-Control "no-store" always;
         proxy_hide_header Content-Security-Policy;
     }
 }
