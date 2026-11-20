@@ -73,6 +73,10 @@ server {
         sub_filter '"/prompts' '"__BASE__/prompts';
         sub_filter '"/login' '"__BASE__/login';
 
+        # Bank selector parses the current path with /^\/banks\/.../; allow the
+        # ingress prefix in front of it.
+        sub_filter '^\\/banks\\/' '^.*\\/banks\\/';
+
         proxy_hide_header Content-Security-Policy;
     }
 }

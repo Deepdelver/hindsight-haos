@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.12
+
+- Rewrite the bank-selector path regex so a bank opens after clicking it in the sidebar
+
 
 ## 1.2.11
 
