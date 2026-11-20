@@ -155,8 +155,10 @@ The flow is:
 3. Re-run `git push`. The hook sees the completed task, runs the regression
    test itself and allows the push only if it passes.
 
-A new commit gets a new assessment task. The task's body contains the exact
-checklist; the script is `scripts/pre-push-pipeline.sh`. The test reads the real
+A new change set gets a new key: bump `.pipeline-id` (for example to a date or
+short unique id) in the commit that starts the work. The agent's doc/test
+commits keep that key, so they do not start another assessment. The task's body
+contains the exact checklist; the script is `scripts/pre-push-pipeline.sh`. The test reads the real
 `rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies
 them to representative HTML/JS. It fails if an API suffix gets the ingress base
 injected, if a navigation builder loses it, or if the bank-selector regex is no

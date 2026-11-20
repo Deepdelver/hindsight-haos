@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 HOOK = ROOT / ".githooks" / "pre-push"
 SCRIPT = ROOT / "scripts" / "pre-push-pipeline.sh"
+PIPELINE_ID = ROOT / ".pipeline-id"
 REGRESSION = "python3 hindsight/tests/test_ingress_rewrite.py"
 
 FAKE_GIT = """#!/usr/bin/env bash
@@ -86,7 +87,7 @@ def run_detection(list_json, prefix=""):
         detector = td / "detect.py"
         detector.write_text(snippet)
         env = clean_env({
-            "KEY": "prepush-TESTSHA",
+            "KEY": "prepush-TESTID",
             "BOARD": "hindsight-haos",
             "FAKE_LIST_JSON": list_json,
             "FAKE_PREFIX": prefix,
@@ -109,6 +110,7 @@ def run_gate(list_json, regression_exit=0):
         repo = td / "repo"
         (repo / "scripts").mkdir(parents=True)
         (repo / "hindsight" / "tests").mkdir(parents=True)
+        (repo / ".pipeline-id").write_text("TESTID\n")
         shutil.copy(SCRIPT, repo / "scripts" / SCRIPT.name)
         marker = td / "regression-ran"
         (repo / "hindsight" / "tests" / "test_ingress_rewrite.py").write_text(
@@ -132,6 +134,37 @@ def run_gate(list_json, regression_exit=0):
         return result.returncode, marker.exists(), log_text
 
 
+def run_gate_without_hermes():
+    """Gate must fail closed when the `hermes` CLI is unavailable.
+
+    README documents that a missing `hermes` binary aborts the push rather
+    than allowing it. Exercise that path with a minimal PATH that contains
+    the tools the script itself needs but no `hermes`.
+    """
+    with tempfile.TemporaryDirectory() as td:
+        td = Path(td)
+        bindir = td / "bin"
+        bindir.mkdir()
+        repo = td / "repo"
+        (repo / "scripts").mkdir(parents=True)
+        (repo / "hindsight" / "tests").mkdir(parents=True)
+        (repo / ".pipeline-id").write_text("TESTID\n")
+        shutil.copy(SCRIPT, repo / "scripts" / SCRIPT.name)
+        # Deliberately no `hermes` here. Provide only the tools the script
+        # and the fake git need; FAKE_GIT uses an `#!/usr/bin/env bash` shebang.
+        make_exec(bindir / "git", FAKE_GIT)
+        for tool in ("python3", "bash", "env"):
+            real = shutil.which(tool)
+            if real:
+                (bindir / tool).symlink_to(real)
+        bash = shutil.which("bash") or "/bin/bash"
+        env = {"PATH": str(bindir), "FAKE_REPO": str(repo)}
+        result = subprocess.run(
+            [bash, str(repo / "scripts" / SCRIPT.name)],
+            cwd=str(repo), capture_output=True, text=True, env=env, input="")
+        return result.returncode, result.stderr
+
+
 def main():
     ok = True
 
@@ -144,17 +177,19 @@ def main():
     ok &= check("pipeline script is executable", SCRIPT.is_file() and os.access(SCRIPT, os.X_OK))
     script = SCRIPT.read_text() if SCRIPT.is_file() else ""
     ok &= check("script fails closed (set -euo pipefail)", "set -euo pipefail" in script)
-    ok &= check("key is derived from HEAD", 'KEY="prepush-${SHA}"' in script)
-    ok &= check("SHA comes from git rev-parse HEAD", 'SHA="$(git rev-parse HEAD)"' in script)
+    ok &= check("stable pipeline-id file exists", PIPELINE_ID.is_file())
+    ok &= check("key is derived from .pipeline-id", 'KEY="prepush-${PIPELINE_ID}"' in script)
+    ok &= check("missing pipeline-id fails closed", "Missing .pipeline-id; refusing to push." in script)
+    ok &= check("HEAD is reported for context", 'SHA="$(git rev-parse HEAD)"' in script)
     ok &= check("done branch runs regression test", REGRESSION in script)
     ok &= check("task creation uses the commit key", '--idempotency-key "$KEY"' in script)
     ok &= check("gate has done/none/default branches",
                 all(branch in script for branch in ("done)", "none)", "*)")))
 
     # --- 2. Board detection snippet -----------------------------------------
-    done_json = '[{"idempotency_key":"prepush-TESTSHA","status":"done"}]'
-    running_json = '[{"idempotency_key":"prepush-TESTSHA","status":"running"}]'
-    body_json = '[{"body":"Pre-push gate for commit X (key prepush-TESTSHA).","status":"done"}]'
+    done_json = '[{"idempotency_key":"prepush-TESTID","status":"done"}]'
+    running_json = '[{"idempotency_key":"prepush-TESTID","status":"running"}]'
+    body_json = '[{"body":"Pre-push gate for commit X (key prepush-TESTID).","status":"done"}]'
     ok &= check("detection: no task -> none", run_detection("[]") == "none",
                 run_detection("[]"))
     ok &= check("detection: done task -> done", run_detection(done_json) == "done",
@@ -174,7 +209,7 @@ def main():
 
     rc, ran, log = run_gate("[]")
     ok &= check("gate creates keyed task and blocks push when none exists",
-                rc != 0 and not ran and "create" in log and "prepush-TESTSHA" in log,
+                rc != 0 and not ran and "create" in log and "prepush-TESTID" in log,
                 f"rc={rc} ran={ran} log={log!r}")
 
     rc, ran, log = run_gate(running_json)
@@ -185,6 +220,10 @@ def main():
     rc, ran, log = run_gate(done_json, regression_exit=1)
     ok &= check("gate blocks push when regression test fails",
                 rc != 0 and ran, f"rc={rc} ran={ran}")
+
+    rc, err = run_gate_without_hermes()
+    ok &= check("gate fails closed when hermes CLI is missing",
+                rc != 0, f"rc={rc} err={err!r}")
 
     print("\nRESULT:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

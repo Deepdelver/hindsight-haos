@@ -10,7 +10,14 @@ set -euo pipefail
 REPO="$(git rev-parse --show-toplevel)"
 cd "$REPO"
 SHA="$(git rev-parse HEAD)"
-KEY="prepush-${SHA}"
+# Stable key for a change set. Bump .pipeline-id when starting new work; the
+# agent's doc/test commits then keep the same key and cannot restart the gate.
+PIPELINE_ID="$(tr -d '[:space:]' < .pipeline-id 2>/dev/null || true)"
+if [ -z "$PIPELINE_ID" ]; then
+  echo "Missing .pipeline-id; refusing to push." >&2
+  exit 1
+fi
+KEY="prepush-${PIPELINE_ID}"
 BOARD="hindsight-haos"
 PROJECT="hindsight-haos"
 
@@ -55,7 +62,7 @@ case "$STATUS" in
       --idempotency-key "$KEY" \
       --goal \
       --body-file - <<EOF 2>&1 | tail -8
-Pre-push gate for commit $SHA (key $KEY).
+Pre-push gate for change set $PIPELINE_ID (HEAD $SHA, key $KEY).
 
 Assess the changes in this repository ($REPO) and finish these items before any push:
 
@@ -66,8 +73,8 @@ Assess the changes in this repository ($REPO) and finish these items before any 
 4. Report: list files changed, the exact test command and its result, and any residual risk.
 
 Do NOT commit and do NOT push. Leave any README/DOCS/test edits uncommitted in
-the working tree so the pre-push key for this commit stays valid. The parent
-session commits and pushes after this task is done.
+the working tree so the parent can include them under the same $PIPELINE_ID key.
+The parent session commits and pushes after this task is done.
 EOF
     echo "Pipeline triggered. Re-run the push after the task is completed."
     exit 1

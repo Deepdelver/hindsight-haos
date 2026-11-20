@@ -19,7 +19,7 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
 3. In expert mode, set:
    - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`, `custom`
    - **llm_api_key** — API key for the chosen provider (not needed for `ollama`)
-   - **llm_model** — Model name (default `gpt-4o-mini`)
+   - **llm_model** — Model name (default `gemma-4-e2b-it`)
    - **llm_base_url** — Custom endpoint (optional; used for Ollama or a proxy)
    - **embeddings_provider** — `onnx` (local, no key), or `local`, `openai`, `cohere`, `tei`, ...
    - **embeddings_model** — `auto` (default: let Hindsight choose and download its model), or an explicit model id
