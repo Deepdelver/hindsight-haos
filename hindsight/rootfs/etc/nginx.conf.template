@@ -7,6 +7,25 @@ events {
 }
 
 http {
+# Direct access (Open Web UI / host IP): plain proxy, no path rewriting.
+server {
+    listen __DIRECT_PORT__;
+    server_name _;
+    proxy_buffering off;
+    gunzip on;
+    location / {
+        proxy_pass http://127.0.0.1:__BACKEND__;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header Accept-Encoding "";
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+}
+
+# Home Assistant ingress: rewrite absolute paths to the runtime ingress base.
 server {
     listen __PORT__;
     server_name _;

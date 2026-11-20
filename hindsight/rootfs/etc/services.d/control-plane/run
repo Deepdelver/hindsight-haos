@@ -13,6 +13,7 @@ set -euo pipefail
 
 ENABLE_CP="${control_plane:-true}"
 CP_PORT="${control_plane_port:-9999}"
+INGRESS_PORT=9997
 BACKEND_PORT=9998
 
 if [ "${ENABLE_CP}" != "true" ]; then
@@ -44,7 +45,8 @@ fi
 bashio::log.info "Control plane ingress base: ${BASE_PATH:-<root>}"
 
 mkdir -p /run/nginx
-sed -e "s#__PORT__#${CP_PORT}#g" \
+sed -e "s#__DIRECT_PORT__#${CP_PORT}#g" \
+    -e "s#__PORT__#${INGRESS_PORT}#g" \
     -e "s#__BACKEND__#${BACKEND_PORT}#g" \
     -e "s#__BASE__#${BASE_PATH}#g" \
     /etc/nginx.conf.template > /run/nginx/hindsight.conf

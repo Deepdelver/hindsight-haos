@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.16
+
+- Serve the dashboard on two ports: direct access on 9999 without rewriting, ingress on 9997 with path rewriting
+
 ## 1.2.15
 
 - Force full page reloads for programmatic navigation too, so bank creation opens the new bank instead of a Next.js error
