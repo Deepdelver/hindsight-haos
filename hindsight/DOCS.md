@@ -178,9 +178,7 @@ http://<your-home-assistant-ip>:9999
 
 Use it to browse memories, manage banks, and monitor the system.
 
-It also appears as a **Hindsight** item in the Home Assistant sidebar (ingress is
-enabled in `config.yaml`, with `ingress_port: 9999`). Home Assistant proxies the UI, so
-you can open it from the sidebar on any device without exposing port 9999. The addon
+It also appears as a **Hindsight** item in the Home Assistant sidebar. Ingress runs on internal port **9997** (port 9999 is the direct UI); Home Assistant proxies the panel under `/api/hassio_ingress/.../`, so you can open it from the sidebar on any device without exposing port 9999. The addon
 page has **Auto update** and **Watchdog** toggles; the watchdog checks
 `http://[HOST]:[PORT:8888]/health` and restarts the addon if it stops responding.
 
@@ -214,3 +212,8 @@ If you run the Ollama addon on the same Home Assistant:
   empty `llm_api_key` with a provider that requires one.
 - **MCP endpoint refuses connections** — confirm port 8888 is published and that
   `mcp_enabled` is `true`.
+- **`Client Error / HTTP 404` in the web UI** — verify the pinned Control Plane version
+  in `Dockerfile` matches the `hindsight-api` version from `/version`, run
+  `python3 hindsight/tests/test_ingress_rewrite.py`, then hard-refresh the browser.
+- **Cannot select a bank from the sidebar UI** — the bank-selector regex rewrite is
+  missing from `nginx.conf.template`; the regression test above catches this.

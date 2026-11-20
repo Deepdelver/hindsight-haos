@@ -1,56 +1,91 @@
 # Hindsight HAOS
 
-Home Assistant OS addon for [Hindsight](https://hindsight.vectorize.io/) — persistent AI agent memory with retain, recall, and reflect APIs.
+Home Assistant OS add-on for [Hindsight](https://hindsight.vectorize.io/) — persistent AI agent memory with a REST API, an MCP endpoint and a web UI. It gives every agent on your network the same long-term memory: store context in one tool, retrieve it in another.
 
-Created and maintained by [Deepdelver](https://github.com/Deepdelver). This is an unofficial addon; the Hindsight project itself lives at [hindsight.vectorize.io](https://hindsight.vectorize.io/) and [github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight).
+Created and maintained by [Deepdelver](https://github.com/Deepdelver). This is an unofficial add-on; Hindsight itself lives at [hindsight.vectorize.io](https://hindsight.vectorize.io/) and [github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight).
 
-Official project links:
+## Features
 
-- Documentation: https://hindsight.vectorize.io/developer/
-- Source: https://github.com/vectorize-io/hindsight
-- This addon: https://github.com/Deepdelver/hindsight-haos
+**Memory engine (port 8888)**
+
+- **Retain** — store facts, preferences and context from conversations, synchronously or asynchronously.
+- **Recall** — hybrid retrieval: semantic/vector search, keyword/BM25 and graph expansion, combined and reranked.
+- **Reflect** — an agentic loop that gathers evidence and answers through the lens of a bank's disposition, mission and directives.
+- **Knowledge graph** — entities with temporal, semantic, entity and causal links; observations are consolidated from accumulated facts.
+- **Banks** — isolated memories per agent, user or project; aliases, per-bank configuration and bank templates.
+- **Documents** — retain files and text, split into passages, tagged, reprocessed and searched alongside memories.
+- **Mental models and pages** — curated, refreshable summaries derived from a bank's memories, with staleness tracking.
+- **Operations and diagnostics** — operation queue with progress, LLM request tracing, webhooks and an audit log (availability depends on the API version).
+- **MCP server** — `http://<host>:8888/mcp/<bank_id>/` for MCP-compatible clients.
+
+**Control Plane (port 9999, or via the HA sidebar)**
+
+- Browse and manage banks, memories, documents, entities, observations and mental models.
+- Run recall/reflect directly, trigger consolidation and inspect the graph.
+- Configure disposition, mission, directives, consolidation strategies and webhooks per bank.
+- Watch operations, LLM requests and system health.
+
+**Local by default**
+
+With `mode: simple` everything runs inside the add-on: a small llama.cpp LLM plus local ONNX embeddings and reranking. No API key, no external model server, no data leaving your machine. `mode: expert` lets you use hosted providers, Ollama or your own models.
 
 ## Installation
 
-1. In Home Assistant, go to **Settings** > **Apps** > **⋮** (top right) > **Repositories**
-2. Add this repository URL: `https://github.com/Deepdelver/hindsight-haos`
-3. Click **Install app** and find **Hindsight** in the list
-4. Start the addon — no API key or external model server is needed with the defaults
-5. On first start it downloads a small local LLM (~3.5 GB) and ONNX models; allow a few minutes
+1. In Home Assistant go to **Settings → Apps → ⋮ (top right) → Repositories**.
+2. Add `https://github.com/Deepdelver/hindsight-haos`.
+3. Install **Hindsight** and start it.
+4. On first start it downloads the local models (~3.5 GB) and builds the image; allow a few minutes.
 
-The first install builds the container on your Home Assistant (PostgreSQL 15, pgvector, the Hindsight API with local model support, and Node for the UI), so allow a few minutes.
+The sidebar panel **Hindsight** opens the Control Plane through Home Assistant ingress. Direct access is also available on port 9999.
 
-## What is Hindsight?
+## Ports
 
-Hindsight gives your AI agents persistent memory that works across all your tools — Hermes Agent, OpenClaw, OpenCode, Cursor, Claude Code, and any MCP-compatible client. Store context in one agent, retrieve it in another.
+| Port | Purpose |
+| --- | --- |
+| 8888 | REST API, MCP server, `/health` (watchdog) |
+| 9999 | Control Plane for direct/LAN access (no path rewriting) |
+| 9997 | Internal ingress port used by the Home Assistant sidebar |
 
-- **API Server**: Port 8888 (REST + MCP)
-- **Control Plane**: Port 9999 (Web UI)
-- **MCP endpoint**: `http://<your-ha-ip>:8888/mcp/<bank_id>/`
+Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_ingress/.../`. No port forwarding is needed for the UI.
 
-### Dashboard in the sidebar
+## Configuration
 
-The Control Plane web UI is available as a panel in the Home Assistant sidebar
-(**Hindsight**). Ingress is enabled in `config.yaml`, so Home Assistant proxies it at
-`https://<your-ha-host>/api/hassio_ingress/.../` — no port forwarding needed. The
-**Watchdog** toggle restarts the addon if the API health check on port 8888 stops
-answering, and **Auto update** keeps it current with this repository. Both toggles are
-on the addon's page in Home Assistant; the watchdog URL is defined in `config.yaml`.
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `mode` | `simple` | `simple` = local models, nothing to configure. `expert` = choose providers/models yourself |
+| `llm_provider` | `llamacpp` | LLM provider; `llamacpp` is local and free. Hosted: `openai`, `ollama`, `groq`, `anthropic`, `gemini`, `openrouter`, `nous`, ... |
+| `llm_api_key` | — | Needed only for hosted providers |
+| `llm_model` | `gemma-4-e2b-it` | Model name for the selected provider |
+| `llm_base_url` | — | Custom endpoint (Ollama, OpenAI-compatible proxy) |
+| `embeddings_provider` | `onnx` | Local ONNX embeddings by default |
+| `embeddings_model` | `auto` | Let Hindsight pick and download its default; set an id to pin |
+| `reranker_provider` | `onnx` | Local ONNX reranker; `rrf` needs no model |
+| `reranker_model` | `auto` | Let Hindsight pick its default; set an id to pin |
+| `llamacpp_model_path` | — | Optional GGUF path (otherwise auto-downloaded to `/data/hindsight-home/.hindsight/models`) |
+| `llamacpp_context_size` | `16384` | Local LLM context window |
+| `llamacpp_gpu_layers` | `0` | `0` = CPU, `-1` = all layers |
+| `mcp_enabled` | `true` | Expose the MCP server |
+| `control_plane` | `true` | Run the web UI |
+| `control_plane_port` | `9999` | Direct UI port |
+| `worker_id` | `hindsight-haos` | Stable worker identity across restarts |
+| `log_level` | `info` | `debug`, `info`, `warning`, `error` |
+| `env_vars` | `[]` | Any extra `HINDSIGHT_API_*` variable as `{name, value}` |
 
-## Hermes Agent (local external)
+In `simple` mode the provider/model fields are ignored; the local stack is always used. In `expert` mode they are passed through. `env_vars` works in both modes. A full option-to-environment-variable map and provider-specific notes are in [hindsight/DOCS.md](hindsight/DOCS.md).
 
-Hindsight ships as a Hermes memory provider in the official plugin catalog. To point it
-at this addon — no Hindsight API key needed:
+## Connecting agents
+
+### Hermes Agent (recommended)
+
+Hindsight ships as a Hermes memory-provider plugin in the official catalog. No API key is needed for the add-on:
 
 ```bash
 hermes plugins install hindsight --enable --yes-deps
-hermes config get memory.provider     # hindsight
+hermes config set memory.provider hindsight
 hermes memory status                  # Provider: hindsight, Status: available
 ```
 
-`hermes memory setup` is the interactive alternative. Then create
-`$HERMES_HOME/hindsight/config.json` (`~/.hermes/hindsight/config.json` for the default
-profile):
+Create `$HERMES_HOME/hindsight/config.json` (for the default profile `~/.hermes/hindsight/config.json`):
 
 ```json
 {
@@ -61,100 +96,55 @@ profile):
 }
 ```
 
-`api_url` must be the addon's own hostname on the HAOS internal network — get it from
-**Settings → Apps → Hindsight → Hostname** (the prefix is unique per installation). From
-another machine on the LAN use `http://<ha-ip>:8888` instead. Restart the gateway with
-`hermes gateway restart` after changing the config so a running process picks it up.
+Use the add-on's own hostname from **Settings → Apps → Hindsight → Hostname** (the prefix is unique per installation); from another machine use `http://<ha-ip>:8888`. Restart a running gateway with `hermes gateway restart` after changing the config. The `hermes` bank appears in the Control Plane after the first retain. `recall_min_scores.reranker` filters off-topic hits on a small bank.
 
-The `hermes` bank appears in the Control Plane after the first retain.
-`recall_min_scores.reranker` suppresses off-topic results on a small bank; remove it if
-you want every ranked hit. See the [official integration guide](https://hindsight.vectorize.io/sdks/integrations/hermes) for all options.
+Full reference: https://hindsight.vectorize.io/sdks/integrations/hermes
 
-## Configuration
+### MCP clients
 
-| Option | Default | Purpose |
-| --- | --- | --- |
-| `mode` | `simple` | `simple` = free local models, nothing to configure. `expert` = set every provider/model yourself |
-| `llm_provider` | `llamacpp` | LLM provider. `llamacpp` runs a small local model inside the addon — no key. Change to `openai`, `ollama`, `groq`, `anthropic`, ... for a different one |
-| `llm_api_key` | — | Only needed for hosted providers |
-| `llm_model` | `gemma-4-e2b-it` | Model name (default model for the chosen provider) |
-| `llm_base_url` | — | Custom endpoint (Ollama, OpenAI-compatible proxies) |
-| `embeddings_provider` | `onnx` | Local ONNX embeddings, no key. Hosted: `openai`, `cohere`, `tei`, ... |
-| `embeddings_model` | `auto` | `auto` lets Hindsight pick and download its default model. Set a model id to override |
-| `reranker_provider` | `onnx` | Local ONNX reranker, no key. `rrf` needs no model at all |
-| `reranker_model` | `auto` | `auto` lets Hindsight pick its default model; set a model id to override |
-| `llamacpp_model_path` | — | Optional GGUF path; otherwise auto-downloaded to `/data/hindsight-home/.hindsight/models` |
-| `llamacpp_context_size` | `16384` | Local LLM context window |
-| `llamacpp_gpu_layers` | `0` | GPU layers (`0` = CPU, `-1` = all) |
-| `mcp_enabled` | `true` | Expose the MCP server |
-| `control_plane` | `true` | Run the web UI (port 9999) |
-| `control_plane_port` | `9999` | Port for the web UI |
-| `worker_id` | `hindsight-haos` | Stable worker identity |
-| `log_level` | `info` | Log verbosity |
-
-An **env_vars** list is available for any additional `HINDSIGHT_API_*` variable.
-
-## Simple and expert mode
-
-`mode: simple` (the default) is the out-of-the-box setup: a local llama.cpp LLM with
-local ONNX embeddings and reranker. No API keys, no external model server, and every
-model is chosen automatically by Hindsight. Provider and model options are ignored in
-this mode — leave them as they are.
-
-Switch `mode` to `expert` to choose everything yourself: LLM provider/model/key/base
-URL, embeddings provider/model/key, reranker provider/model, llama.cpp model path,
-context size and GPU layers. This is the mode for paid subscriptions, Ollama on your
-network, or your own hosted models. The `env_vars` list is available in both modes for
-any other `HINDSIGHT_API_*` setting.
-
-### Automatic embeddings models
-
-`embeddings_model` and `reranker_model` default to `auto`. In that mode the addon sets
-only the provider and lets Hindsight choose its own model — it downloads the weights on
-first start and picks up upstream default changes on update. Set an explicit model id
-when you want to pin one; it is then passed to the selected provider (ONNX, local,
-OpenAI, FlashRank — see the table below).
-
-For the `onnx` provider an explicit model must be a Hugging Face repo containing
-`onnx/model.onnx`. Hindsight currently recommends `hindsight-ai/hs-embed-1` for agent
-memory. It needs no E5 query/passage prefix, so clear both when selecting it:
-
-```
-embeddings_model: hindsight-ai/hs-embed-1
-env_vars:
-  - name: HINDSIGHT_API_EMBEDDINGS_ONNX_QUERY_PREFIX
-    value: ""
-  - name: HINDSIGHT_API_EMBEDDINGS_ONNX_PASSAGE_PREFIX
-    value: ""
+```bash
+# Claude Code
+claude mcp add --transport http hindsight http://<ha-ip>:8888/mcp/default/
 ```
 
-Both models yield 384-dimensional vectors, but vectors from different models do not
-mix. On an install that already has memories, run `hindsight-admin reembed` after
-changing the model; a fresh install needs nothing.
-
-Hindsight always uses an LLM for fact extraction, consolidation and reflect. The defaults keep that local and free: built-in llama.cpp plus local ONNX embeddings/reranking. Switching `llm_provider` to a hosted provider needs the matching `llm_api_key`; switching `embeddings_provider`/`reranker_provider` to a hosted one needs its key (an `env_vars` entry such as `HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY=...`). Local models are slower and lower quality than a hosted model — pick what fits your hardware.
-
-## Layout
-
+```json
+{
+  "mcpServers": {
+    "hindsight": { "url": "http://<ha-ip>:8888/mcp/default/" }
+  }
+}
 ```
-hindsight/
-├── config.yaml          # addon metadata, options schema, ports
-├── build.json           # base image per architecture
-├── Dockerfile           # Debian base + PostgreSQL 15 + pgvector + hindsight-api-slim + Node/control plane
-├── apparmor.txt         # AppArmor profile
-├── rootfs/
-│   └── etc/
-│       ├── nginx.conf.template  # ingress-aware reverse proxy for the web UI
-│       ├── cont-init.d/
-        │   ├── 20-postgres.sh   # cluster init, database, pgvector
-        │   └── 30-config.sh     # options -> HINDSIGHT_API_* env
-        └── services.d/
-            ├── hindsight/
-            │   ├── run          # PostgreSQL + hindsight-api
-            │   └── finish       # clean PostgreSQL shutdown
-            └── control-plane/
-                └── run          # Next.js web UI (optional, menu-selectable)
+
+Use your bank id in place of `default`. An MCP entry is for clients that do not use the Hermes memory provider — do not configure both for the same client.
+
+## Stability
+
+This add-on is built to behave like a normal Home Assistant add-on: a pinned, reproducible image, health-checked startup, ingress that follows HA conventions, and regression tests for the parts that have broken before.
+
+- **Pinned versions.** The Dockerfile pins the Control Plane npm package (`@vectorize-io/hindsight-control-plane`) to a specific release. It must match the bundled `hindsight-api` version; a mismatch produces UI 404s and empty memory tabs. Both are pinned together in each release.
+- **Ingress-safe paths.** The UI receives its base path at runtime through `NEXT_PUBLIC_BASE_PATH`, so API calls are prefixed exactly once. Only the two genuine navigation URL builders are rewritten in JavaScript; API path suffixes are left alone and the bank-selector regex accepts the ingress prefix.
+- **Regression tests.** `python3 hindsight/tests/test_ingress_rewrite.py` checks the nginx template for all of the above. Run it before building or changing the template.
+- **No stale assets.** The ingress server sends `Cache-Control: no-store` so an update cannot leave old UI assets in the browser.
+- **Watchdog.** `http://[HOST]:[PORT:8888]/health` restarts the add-on if the API stops answering.
+- **Backups.** PostgreSQL data lives in `/data` and is included in Home Assistant backups (`backup: cold` — the add-on is stopped during backup).
+- **Release discipline.** Every change that must reach installed users bumps `version` in `hindsight/config.yaml`; Supervisor only offers an update for a new version. After pushing, reload the store (`POST /addons/reload`) and update the add-on, then verify both the direct port and the sidebar panel.
+
+## Development and testing
+
+```bash
+cd hindsight-haos
+python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression tests
 ```
+
+The test reads the real `rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies them to representative HTML/JS. It fails if an API suffix gets the ingress base injected, if a navigation builder loses it, or if the bank-selector regex is no longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template revision.
+
+## Troubleshooting
+
+- **Add-on does not appear in the store** — Supervisor drops add-ons whose `config.yaml` fails validation. Check **Settings → System → Logs → Supervisor** for `Can't read .../config.yaml`.
+- **Container exits at start** — check the add-on log. A common cause is an empty `llm_api_key` with a provider that requires one.
+- **`Client Error / HTTP 404` in the UI** — check that the Control Plane version matches the API version and that the ingress template passes the regression test; then do a hard refresh to discard cached assets.
+- **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.
+- **MCP endpoint refuses connections** — confirm port 8888 is published and `mcp_enabled` is `true`.
 
 ## License
 
