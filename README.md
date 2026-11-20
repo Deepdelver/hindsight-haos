@@ -131,12 +131,33 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
 
 ## Development and testing
 
+Before **any push to GitHub**, the agent assessment pipeline on the project's
+Kanban board must run for the commit being pushed. This is enforced by a local
+pre-push hook (`git config core.hooksPath .githooks`).
+
 ```bash
 cd hindsight-haos
 python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression tests
 ```
 
-The test reads the real `rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies them to representative HTML/JS. It fails if an API suffix gets the ingress base injected, if a navigation builder loses it, or if the bank-selector regex is no longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template revision.
+The flow is:
+
+1. `git push` triggers `.githooks/pre-push`, which creates a task on the
+   `hindsight-haos` Kanban board keyed to the current commit. The push is
+   aborted at this point.
+2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
+   behaviour, ports, options or troubleshooting changed, and adds or updates
+   tests in `hindsight/tests/`. It runs the regression test and reports.
+3. Re-run `git push`. The hook sees the completed task, runs the regression
+   test itself and allows the push only if it passes.
+
+A new commit gets a new assessment task. The task's body contains the exact
+checklist; the script is `scripts/pre-push-pipeline.sh`. The test reads the real
+`rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies
+them to representative HTML/JS. It fails if an API suffix gets the ingress base
+injected, if a navigation builder loses it, or if the bank-selector regex is no
+longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template
+revision.
 
 ## Troubleshooting
 

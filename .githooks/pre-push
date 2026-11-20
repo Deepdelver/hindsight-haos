@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Installed locally via: git config core.hooksPath .githooks
+# Triggers the Kanban agent assessment before any push to GitHub.
+exec "$(git rev-parse --show-toplevel)/scripts/pre-push-pipeline.sh"
