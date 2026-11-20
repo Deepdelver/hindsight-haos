@@ -217,3 +217,6 @@ If you run the Ollama addon on the same Home Assistant:
   `python3 hindsight/tests/test_ingress_rewrite.py`, then hard-refresh the browser.
 - **Cannot select a bank from the sidebar UI** — the bank-selector regex rewrite is
   missing from `nginx.conf.template`; the regression test above catches this.
+- **Retains retry with `429 Too Many Requests`** — the configured LLM provider is
+  rate-limiting fact extraction (common with free hosted models). Use `mode: simple`
+  for local models or a provider key with a higher quota; the worker retries safely.

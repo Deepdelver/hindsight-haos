@@ -144,6 +144,7 @@ The test reads the real `rootfs/etc/nginx.conf.template`, parses its `sub_filter
 - **Container exits at start** — check the add-on log. A common cause is an empty `llm_api_key` with a provider that requires one.
 - **`Client Error / HTTP 404` in the UI** — check that the Control Plane version matches the API version and that the ingress template passes the regression test; then do a hard refresh to discard cached assets.
 - **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.
+- **Retains keep retrying / `429 Too Many Requests` in the addon log** — a free hosted model is rate-limiting fact extraction. This is an upstream provider limit, not an add-on fault: switch `mode` to `simple` (local models) or use a provider key with a higher quota. Retains are retried by the worker, so memories are not lost.
 - **MCP endpoint refuses connections** — confirm port 8888 is published and `mcp_enabled` is `true`.
 
 ## License
