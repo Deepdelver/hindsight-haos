@@ -222,6 +222,7 @@ If you run the Ollama addon on the same Home Assistant:
   rate-limiting fact extraction (common with free hosted models). Use `mode: simple`
   for local models or a provider key with a higher quota; the worker retries safely.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
-  current commit must be `done` and `python3 hindsight/tests/test_ingress_rewrite.py`
-  must pass. The hook is local (`git config core.hooksPath .githooks`); see
-  README → Development and testing for the full flow.
+  current change set (key `prepush-$(cat .pipeline-id)`) must be `done` and
+  `python3 hindsight/tests/test_ingress_rewrite.py` must pass. The hook is local
+  (`git config core.hooksPath .githooks`); see README → Development and testing
+  for the full flow.

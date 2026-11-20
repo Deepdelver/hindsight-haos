@@ -132,7 +132,8 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
 ## Development and testing
 
 Before **any push to GitHub**, the agent assessment pipeline on the project's
-Kanban board must run for the commit being pushed. This is enforced by a local
+Kanban board must run for the change set being pushed (identified by the
+`.pipeline-id` file). This is enforced by a local
 pre-push hook. The hook file is committed (`.githooks/pre-push`), but the
 `core.hooksPath` setting is per-clone: run
 `git config core.hooksPath .githooks` once in each fresh clone. Pushes from a
@@ -147,7 +148,8 @@ python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tes
 The flow is:
 
 1. `git push` triggers `.githooks/pre-push`, which creates a task on the
-   `hindsight-haos` Kanban board keyed to the current commit. The push is
+   `hindsight-haos` Kanban board keyed to the change set in `.pipeline-id`
+   (the current HEAD is recorded in the task body for context). The push is
    aborted at this point.
 2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
    behaviour, ports, options or troubleshooting changed, and adds or updates
@@ -158,8 +160,9 @@ The flow is:
 A new change set gets a new key: bump `.pipeline-id` (for example to a date or
 short unique id) in the commit that starts the work. The agent's doc/test
 commits keep that key, so they do not start another assessment. The task's body
-contains the exact checklist; the script is `scripts/pre-push-pipeline.sh`. The test reads the real
-`rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies
+contains the exact checklist; the script is `scripts/pre-push-pipeline.sh`.
+
+The test reads the real `rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies
 them to representative HTML/JS. It fails if an API suffix gets the ingress base
 injected, if a navigation builder loses it, or if the bank-selector regex is no
 longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template
@@ -167,12 +170,13 @@ revision. `test_prepush_pipeline.py` checks the hook/script wiring and exercises
 the gate's decision logic (done / none / running, test failure) with fake
 `git` and `hermes` binaries; it does not touch the real board.
 
-If a push is blocked, check the assessment task for the current commit
-(`git rev-parse HEAD`): its status must be `done`, and the regression test must
-pass. The gate is fail-closed — when `hermes` is missing or the `hindsight-haos`
-board is not the active board in the push shell, the push is aborted rather than
-allowed. On this host the board is pinned by `HERMES_KANBAN_DB`; the `BOARD`
-variable inside the script is only informational.
+If a push is blocked, check the assessment task for the current change set
+(key `prepush-$(cat .pipeline-id)`; its body records the HEAD for context): its
+status must be `done`, and the regression test must pass. The gate is
+fail-closed — when `hermes` is missing or the `hindsight-haos` board is not the
+active board in the push shell, the push is aborted rather than allowed. On this
+host the board is pinned by `HERMES_KANBAN_DB`; the `BOARD` variable inside the
+script is only informational.
 
 ## Troubleshooting
 
