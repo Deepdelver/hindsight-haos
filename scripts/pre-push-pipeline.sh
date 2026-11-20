@@ -3,25 +3,28 @@
 #
 # Every push must be preceded by a Kanban task on this project's board that
 # assesses the changes and brings README/DOCS and tests up to date. The task
-# is keyed to the exact commit being pushed, so a re-run after completion is
-# allowed and a new commit starts a fresh assessment.
+# is keyed to the first commit of the change set (a commit without a
+# `Pipeline-Key:` trailer), so commits produced by the assessment itself do
+# not start a new task.
 set -euo pipefail
 
 REPO="$(git rev-parse --show-toplevel)"
 cd "$REPO"
 SHA="$(git rev-parse HEAD)"
-# Stable key for a change set. Bump .pipeline-id when starting new work; the
-# agent's doc/test commits then keep the same key and cannot restart the gate.
-PIPELINE_ID="$(tr -d '[:space:]' < .pipeline-id 2>/dev/null || true)"
-if [ -z "$PIPELINE_ID" ]; then
-  echo "Missing .pipeline-id; refusing to push." >&2
-  exit 1
-fi
-KEY="prepush-${PIPELINE_ID}"
 BOARD="hindsight-haos"
 PROJECT="hindsight-haos"
 
-# Read the status of the pipeline task for this commit from the board.
+# Determine the change-set key from commits not yet pushed. Pipeline commits
+# carry a Pipeline-Key trailer and are skipped.
+BASE="$(git rev-parse origin/main 2>/dev/null || true)"
+KEY_SHA=""
+if [ -n "$BASE" ]; then
+  KEY_SHA="$(git log --format='%H%x09%B' "$BASE..HEAD" | awk -F '\t' '$2 !~ /Pipeline-Key:/ {print $1; exit}')"
+fi
+[ -n "$KEY_SHA" ] || KEY_SHA="$SHA"
+KEY="prepush-${KEY_SHA}"
+
+# Read the status of the pipeline task for this change set from the board.
 STATUS="$(BOARD="$BOARD" KEY="$KEY" python3 - <<'PY'
 import json, os, subprocess
 key = os.environ["KEY"]
@@ -47,13 +50,14 @@ PY
 
 case "$STATUS" in
   done)
-    echo "Pipeline task for $SHA is done. Running regression tests before push..."
+    echo "Pipeline task for change set $KEY_SHA is done. Running regression tests before push..."
     python3 hindsight/tests/test_ingress_rewrite.py
+    python3 hindsight/tests/test_prepush_pipeline.py
     echo "Push allowed."
     exit 0
     ;;
   none)
-    echo "No assessment pipeline for $SHA. Creating one on board '$BOARD'..."
+    echo "No assessment pipeline for change set $KEY_SHA. Creating one on board '$BOARD'..."
     hermes kanban create \
       "Pre-push assessment: review changes, update docs and tests" \
       --project "$PROJECT" \
@@ -62,7 +66,7 @@ case "$STATUS" in
       --idempotency-key "$KEY" \
       --goal \
       --body-file - <<EOF 2>&1 | tail -8
-Pre-push gate for change set $PIPELINE_ID (HEAD $SHA, key $KEY).
+Pre-push gate for change set starting at $KEY_SHA (HEAD $SHA, key $KEY).
 
 Assess the changes in this repository ($REPO) and finish these items before any push:
 
@@ -70,17 +74,21 @@ Assess the changes in this repository ($REPO) and finish these items before any 
 2. Docs: make sure README.md and hindsight/DOCS.md describe the current behaviour, features, ports, configuration and troubleshooting. Update them if anything is missing or stale.
 3. Tests: make sure hindsight/tests/ covers changed behaviour. Add or update tests, then run:
    python3 hindsight/tests/test_ingress_rewrite.py
-4. Report: list files changed, the exact test command and its result, and any residual risk.
+   python3 hindsight/tests/test_prepush_pipeline.py
+4. Report: list files changed, the exact test commands and their results, and any residual risk.
 
 Do NOT commit and do NOT push. Leave any README/DOCS/test edits uncommitted in
-the working tree so the parent can include them under the same $PIPELINE_ID key.
-The parent session commits and pushes after this task is done.
+the working tree. The parent commits them with this trailer:
+
+    Pipeline-Key: $KEY_SHA
+
+That trailer keeps the change-set key stable, so the push will be allowed.
 EOF
     echo "Pipeline triggered. Re-run the push after the task is completed."
     exit 1
     ;;
   *)
-    echo "Assessment pipeline for $SHA is still '$STATUS'. Wait for it to finish, then re-run the push."
+    echo "Assessment pipeline for change set $KEY_SHA is still '$STATUS'. Wait for it to finish, then re-run the push."
     exit 1
     ;;
 esac

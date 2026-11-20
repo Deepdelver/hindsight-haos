@@ -132,12 +132,16 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
 ## Development and testing
 
 Before **any push to GitHub**, the agent assessment pipeline on the project's
-Kanban board must run for the change set being pushed (identified by the
-`.pipeline-id` file). This is enforced by a local
-pre-push hook. The hook file is committed (`.githooks/pre-push`), but the
-`core.hooksPath` setting is per-clone: run
-`git config core.hooksPath .githooks` once in each fresh clone. Pushes from a
-clone without that setting are not gated.
+Kanban board must run for the change set being pushed. Two layers enforce it:
+
+- **Locally:** a pre-push hook. Run `scripts/setup-hooks.sh global` once — it
+  writes a dispatcher to `~/.hermes/git-hooks` and sets `core.hooksPath`
+  globally. The dispatcher only gates repositories whose origin URL contains
+  `hindsight-haos`, so other repos are unaffected. `scripts/setup-hooks.sh
+  local` sets the hook for the current clone only.
+- **On GitHub:** branch protection on `main` requires a pull request and the
+  `regression` status check from `.github/workflows/regression-tests.yml`.
+  `--no-verify` can skip the local hook but cannot bypass the server-side rule.
 
 ```bash
 cd hindsight-haos
@@ -157,10 +161,10 @@ The flow is:
 3. Re-run `git push`. The hook sees the completed task, runs the regression
    test itself and allows the push only if it passes.
 
-A new change set gets a new key: bump `.pipeline-id` (for example to a date or
-short unique id) in the commit that starts the work. The agent's doc/test
-commits keep that key, so they do not start another assessment. The task's body
-contains the exact checklist; the script is `scripts/pre-push-pipeline.sh`.
+A new change set starts with any commit that lacks a `Pipeline-Key:` trailer;
+its SHA becomes the task key. Commits produced by the assessment carry that
+trailer, so they do not restart the gate — no manual id to bump. The task's
+body contains the exact checklist; the script is `scripts/pre-push-pipeline.sh`.
 
 The test reads the real `rootfs/etc/nginx.conf.template`, parses its `sub_filter` rules and applies
 them to representative HTML/JS. It fails if an API suffix gets the ingress base
@@ -170,13 +174,9 @@ revision. `test_prepush_pipeline.py` checks the hook/script wiring and exercises
 the gate's decision logic (done / none / running, test failure) with fake
 `git` and `hermes` binaries; it does not touch the real board.
 
-If a push is blocked, check the assessment task for the current change set
-(key `prepush-$(cat .pipeline-id)`; its body records the HEAD for context): its
-status must be `done`, and the regression test must pass. The gate is
-fail-closed — when `hermes` is missing or the `hindsight-haos` board is not the
-active board in the push shell, the push is aborted rather than allowed. On this
-host the board is pinned by `HERMES_KANBAN_DB`; the `BOARD` variable inside the
-script is only informational.
+If a push is blocked, look for the task keyed to the first unpushed commit
+without a `Pipeline-Key:` trailer (the key and HEAD are printed by the hook):
+its status must be `done`, and both regression tests must pass.
 
 ## Troubleshooting
 
