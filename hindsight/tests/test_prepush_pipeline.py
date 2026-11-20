@@ -3,7 +3,8 @@
 
 Covers:
 1. Hook, dispatcher and script wiring and fail-closed behaviour.
-2. Key derivation: the first unpushed commit without a `Pipeline-Key:` trailer.
+2. Key derivation: the first unpushed commit without a `Pipeline-Key:` trailer,
+   covering real multi-line git bodies and the all-pipeline-commits fallback.
 3. Board detection: done / none / running / malformed prefix.
 4. End-to-end with fake git/hermes: push allowed only when the task is done and
    both regression suites exit 0.
@@ -30,7 +31,7 @@ FAKE_GIT = """#!/usr/bin/env bash
 if [ "$1" = rev-parse ] && [ "$2" = --show-toplevel ]; then printf '%s\\n' "$FAKE_REPO"; exit 0; fi
 if [ "$1" = rev-parse ] && [ "$2" = HEAD ]; then printf '%s\\n' "HEADSHA"; exit 0; fi
 if [ "$1" = rev-parse ] && [ "$2" = origin/main ]; then printf '%s\\n' "BASESHA"; exit 0; fi
-if [ "$1" = log ]; then printf '%b' "${FAKE_GIT_LOG:-KEYSHA\\tstart work\\nLATERSHA\\tPipeline-Key: KEYSHA\\n}"; exit 0; fi
+if [ "$1" = log ]; then printf '%b' "${FAKE_GIT_LOG:-@@KEY@@LATERSHA\\tassessment docs\\n\\nPipeline-Key: KEYSHA\\n\\n@@KEY@@KEYSHA\\tstart work\\n\\n}"; exit 0; fi
 if [ "$1" = remote ] && [ "$2" = get-url ]; then printf '%s\\n' "${FAKE_REMOTE:-}"; exit 0; fi
 if [ "$1" = -C ] && [ "$3" = remote ] && [ "$4" = get-url ]; then printf '%s\\n' "${FAKE_REMOTE:-}"; exit 0; fi
 exit 1
@@ -113,7 +114,7 @@ def stage_repo(td, script=SCRIPT):
     return bindir, repo
 
 
-def run_gate(list_json, regression_exit=0):
+def run_gate(list_json, regression_exit=0, git_log=None):
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         bindir, repo = stage_repo(td)
@@ -131,6 +132,8 @@ def run_gate(list_json, regression_exit=0):
             "HERMES_LOG": str(log),
             "_BINDIR": bindir,
         })
+        if git_log is not None:
+            env["FAKE_GIT_LOG"] = git_log
         result = subprocess.run(["bash", str(repo / "scripts" / SCRIPT.name)],
                                 cwd=str(repo), capture_output=True, text=True,
                                 env=env, input="")
@@ -190,6 +193,7 @@ def main():
     ok &= check("manual .pipeline-id is gone", not (ROOT / ".pipeline-id").exists())
     ok &= check("script fails closed (set -euo pipefail)", "set -euo pipefail" in script)
     ok &= check("key comes from unpushed commits", "git log --format" in script)
+    ok &= check("key derivation groups multi-line commit bodies", "@@KEY@@%H%x09%B" in script)
     ok &= check("pipeline commits are skipped via trailer", "Pipeline-Key:" in script)
     ok &= check("HEAD is reported for context", 'SHA="$(git rev-parse HEAD)"' in script)
     for regression in REGRESSIONS:
@@ -225,6 +229,26 @@ def main():
     ok &= check("gate blocks push when regression test fails", rc != 0 and ran, f"rc={rc} ran={ran}")
     rc, err = run_gate_without_hermes()
     ok &= check("gate fails closed when hermes CLI is missing", rc != 0, f"rc={rc} err={err!r}")
+
+    # --- 3b. Key derivation with real, multi-line git bodies ------------------
+    # `git log --format=%B` puts a trailer on its own line. The default fake log
+    # above models that (newest assessment commit with a trailer, older
+    # change-set start without one); the create path echoes the derived key.
+    rc, ran, log = run_gate("[]")
+    ok &= check("key skips pipeline commit, uses change-set start",
+                rc != 0 and "prepush-KEYSHA" in log and "prepush-LATERSHA" not in log,
+                f"log={log!r}")
+
+    sole = r"@@KEY@@KEYSHA\tstart work\n\n"
+    rc, ran, log = run_gate("[]", git_log=sole)
+    ok &= check("key uses sole unpushed commit",
+                rc != 0 and "prepush-KEYSHA" in log, f"log={log!r}")
+
+    all_trailers = (r"@@KEY@@LATERSHA\tassessment docs\n\nPipeline-Key: KEYSHA\n\n"
+                    r"@@KEY@@KEYSHA\tstart work\n\nPipeline-Key: OLDER\n\n")
+    rc, ran, log = run_gate("[]", git_log=all_trailers)
+    ok &= check("key falls back to HEAD when all commits have trailers",
+                rc != 0 and "prepush-HEADSHA" in log, f"log={log!r}")
 
     # --- 4. Global dispatcher -------------------------------------------------
     ok &= check("dispatcher gates hindsight-haos repos",

@@ -151,15 +151,17 @@ python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tes
 
 The flow is:
 
-1. `git push` triggers `.githooks/pre-push`, which creates a task on the
-   `hindsight-haos` Kanban board keyed to the change set in `.pipeline-id`
+1. `git push` triggers the pre-push hook (the global dispatcher installed by
+   `scripts/setup-hooks.sh global`, or `.githooks/pre-push` in a local-only
+   setup), which creates a task on the `hindsight-haos` Kanban board keyed to
+   the change set — the first unpushed commit without a `Pipeline-Key:` trailer
    (the current HEAD is recorded in the task body for context). The push is
    aborted at this point.
 2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
    behaviour, ports, options or troubleshooting changed, and adds or updates
-   tests in `hindsight/tests/`. It runs the regression test and reports.
-3. Re-run `git push`. The hook sees the completed task, runs the regression
-   test itself and allows the push only if it passes.
+   tests in `hindsight/tests/`. It runs both regression tests and reports.
+3. Re-run `git push`. The hook sees the completed task, runs both regression
+   tests itself and allows the push only if they pass.
 
 A new change set starts with any commit that lacks a `Pipeline-Key:` trailer;
 its SHA becomes the task key. Commits produced by the assessment carry that

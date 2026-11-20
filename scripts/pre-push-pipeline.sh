@@ -15,11 +15,21 @@ BOARD="hindsight-haos"
 PROJECT="hindsight-haos"
 
 # Determine the change-set key from commits not yet pushed. Pipeline commits
-# carry a Pipeline-Key trailer and are skipped.
+# carry a Pipeline-Key trailer and are skipped. `%B` is multi-line: a trailer
+# sits on its own line, never on the subject line that follows the SHA. Group
+# lines into commit records with a marker and inspect each whole message,
+# otherwise the newest assessment commit would be mistaken for the key.
 BASE="$(git rev-parse origin/main 2>/dev/null || true)"
 KEY_SHA=""
 if [ -n "$BASE" ]; then
-  KEY_SHA="$(git log --format='%H%x09%B' "$BASE..HEAD" | awk -F '\t' '$2 !~ /Pipeline-Key:/ {print $1; exit}')"
+  KEY_SHA="$(git log --format='@@KEY@@%H%x09%B' "$BASE..HEAD" | awk '
+    /^@@KEY@@/ {
+      if (have && !trailer) { print sha; done = 1; exit }
+      split($0, rec, "\t"); sha = substr(rec[1], 8); trailer = 0; have = 1
+    }
+    /Pipeline-Key:/ { trailer = 1 }
+    END { if (!done && have && !trailer) print sha }
+  ')"
 fi
 [ -n "$KEY_SHA" ] || KEY_SHA="$SHA"
 KEY="prepush-${KEY_SHA}"
