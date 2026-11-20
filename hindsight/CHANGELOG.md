@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.8
+
+- Remove the leading slash from `ingress_entry` so the sidebar URL has no double slash
+  and opens `/dashboard` directly
+
 ## 1.2.7
 
 - Set `ingress_entry: /dashboard` so the sidebar panel opens the Control Plane directly

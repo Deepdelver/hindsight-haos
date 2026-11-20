@@ -9,7 +9,7 @@ environment:
   HINDSIGHT_API_LOG_LEVEL: info
 init: false
 ingress: true
-ingress_entry: /dashboard
+ingress_entry: dashboard
 ingress_port: 9999
 map:
   - type: app_config
@@ -70,6 +70,6 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.7"
+version: "1.2.8"
 watchdog: "http://[HOST]:[PORT:8888]/health"
 webui: "http://[HOST]:[PORT:9999]"
