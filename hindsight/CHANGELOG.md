@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.15
+
+- Force full page reloads for programmatic navigation too, so bank creation opens the new bank instead of a Next.js error
+
 ## 1.2.14
 
 - Stop rewriting double-quoted route fragments that corrupted API URLs with duplicate ingress prefixes, fixing bank creation and bank pages
