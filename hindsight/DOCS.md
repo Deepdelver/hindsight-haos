@@ -194,6 +194,11 @@ PostgreSQL data lives in `/data` inside the addon container and is included in
 Home Assistant backups. The addon uses a cold backup, so Home Assistant stops it
 while the backup runs.
 
+The add-on updates automatically when a new version is published. Upstream API
+and UI versions are recorded in `hindsight/versions.json` and compared daily by
+`scripts/check_versions.py`; drift opens a review task instead of silently
+changing a running add-on.
+
 ## Using with Ollama
 
 If you run the Ollama addon on the same Home Assistant:

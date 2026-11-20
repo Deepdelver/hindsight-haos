@@ -121,7 +121,19 @@ Use your bank id in place of `default`. An MCP entry is for clients that do not 
 
 This add-on is built to behave like a normal Home Assistant add-on: a pinned, reproducible image, health-checked startup, ingress that follows HA conventions, and regression tests for the parts that have broken before.
 
-- **Pinned versions.** The Dockerfile pins the Control Plane npm package (`@vectorize-io/hindsight-control-plane`) to a specific release. It must match the bundled `hindsight-api` version; a mismatch produces UI 404s and empty memory tabs. Both are pinned together in each release.
+- **Pinned versions.** The Dockerfile pins the Control Plane npm package
+  (`@vectorize-io/hindsight-control-plane`) to a specific release. The bundled
+  API is installed from PyPI at build time and recorded alongside the UI pin in
+  `hindsight/versions.json`. API and UI versions must match; a mismatch produces
+  UI 404s and empty memory tabs. Both are bumped together in one release.
+- **Automatic version watch.** A daily cron job runs
+  `scripts/check_versions.py --create-task`. It compares the recorded/pinned
+  versions with npm and PyPI and, on drift, opens one idempotent Kanban task.
+  Nothing changes at runtime: the normal assessment, tests and release flow
+  decide whether to bump the pins and publish a new add-on version.
+- **Add-on auto-update.** Home Assistant updates the add-on automatically when
+  a new version is published, without allowing unpinned upstream code into a
+  running container.
 - **Ingress-safe paths.** The UI receives its base path at runtime through `NEXT_PUBLIC_BASE_PATH`, so API calls are prefixed exactly once. Only the two genuine navigation URL builders are rewritten in JavaScript; API path suffixes are left alone and the bank-selector regex accepts the ingress prefix.
 - **Regression tests.** `python3 hindsight/tests/test_ingress_rewrite.py` checks the nginx template for all of the above. Run it before building or changing the template.
 - **No stale assets.** The ingress server sends `Cache-Control: no-store` so an update cannot leave old UI assets in the browser.
@@ -147,6 +159,8 @@ Kanban board must run for the change set being pushed. Two layers enforce it:
 cd hindsight-haos
 python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression tests
 python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tests
+python3 hindsight/tests/test_version_watch.py     # upstream version watch
+python3 scripts/check_versions.py                 # live comparison (no changes)
 ```
 
 The flow is:
