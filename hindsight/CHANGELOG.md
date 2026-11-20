@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.21
+
+- Pin `hindsight-api-slim` to 1.2.3 so the built image matches `versions.json` and the control-plane pin; a daily version watch now opens a review task instead of silently drifting.
+
 ## 1.2.20
 
 - Restore the bank-selector path rewrite (`^\/banks\/` → `^.*\/banks\/`). It was dropped with the JS literal rewrites in 1.2.19, so the bank dropdown could no longer recognize the selected bank under HA ingress.

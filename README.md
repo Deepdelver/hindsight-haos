@@ -122,10 +122,11 @@ Use your bank id in place of `default`. An MCP entry is for clients that do not 
 This add-on is built to behave like a normal Home Assistant add-on: a pinned, reproducible image, health-checked startup, ingress that follows HA conventions, and regression tests for the parts that have broken before.
 
 - **Pinned versions.** The Dockerfile pins the Control Plane npm package
-  (`@vectorize-io/hindsight-control-plane`) to a specific release. The bundled
-  API is installed from PyPI at build time and recorded alongside the UI pin in
-  `hindsight/versions.json`. API and UI versions must match; a mismatch produces
-  UI 404s and empty memory tabs. Both are bumped together in one release.
+  (`@vectorize-io/hindsight-control-plane`) to a specific release. The matching
+  API version validated for that release is recorded in
+  `hindsight/versions.json`; the API is installed from PyPI at build time at that
+  same pinned version. API and UI versions must match; a mismatch produces UI
+  404s and empty memory tabs. Both are bumped together in one release.
 - **Automatic version watch.** A daily cron job runs
   `scripts/check_versions.py --create-task`. It compares the recorded/pinned
   versions with npm and PyPI and, on drift, opens one idempotent Kanban task.
@@ -173,7 +174,8 @@ The flow is:
    aborted at this point.
 2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
    behaviour, ports, options or troubleshooting changed, and adds or updates
-   tests in `hindsight/tests/`. It runs both regression tests and reports.
+   tests in `hindsight/tests/`. It runs the regression tests (ingress,
+   pre-push gate and version watch) and reports.
 3. Re-run `git push`. The hook sees the completed task, runs both regression
    tests itself and allows the push only if they pass.
 
@@ -189,10 +191,13 @@ longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different templat
 revision. `test_prepush_pipeline.py` checks the hook/script wiring and exercises
 the gate's decision logic (done / none / running, test failure) with fake
 `git` and `hermes` binaries; it does not touch the real board.
+`test_version_watch.py` loads `scripts/check_versions.py` with a stubbed
+Dockerfile, `versions.json` and network calls, so it checks pin parsing, drift
+detection, the idempotent task key and the CLI exit codes offline.
 
 If a push is blocked, look for the task keyed to the first unpushed commit
 without a `Pipeline-Key:` trailer (the key and HEAD are printed by the hook):
-its status must be `done`, and both regression tests must pass.
+its status must be `done`, and all three regression suites must pass.
 
 ## Troubleshooting
 
