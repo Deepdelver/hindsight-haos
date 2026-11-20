@@ -73,6 +73,10 @@ server {
         sub_filter '`/banks' '`__BASE__/banks';
         sub_filter '`/knowledge-banks' '`__BASE__/knowledge-banks';
 
+        # The bank selector parses the current path with /^\/banks\/.../; allow the
+        # ingress prefix in front of it, otherwise selecting a bank fails.
+        sub_filter '^\\/banks\\/' '^.*\\/banks\\/';
+
         # Next.js client-side navigation cannot handle HA's ingress prefix.
         # Force internal links to do a full page load, which works correctly.
         sub_filter '<head>' '<head><script>var B="__BASE__";window.process=window.process||{};window.process.env=window.process.env||{};window.process.env.NODE_ENV=window.process.env.NODE_ENV||"production";window.process.env.NEXT_PUBLIC_BASE_PATH=B;function nav(u){u=String(u||"");if(u.indexOf(B)===0){if(location.pathname+location.search!==u){location.href=u;}return true;}if(u.charAt(0)==="/"&&u.indexOf("//")!==0){var t=B+u;if(location.pathname+location.search!==t){location.href=t;}return true;}return false;}document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href*=hassio_ingress]");if(a&&!a.target&&nav(a.getAttribute("href"))){e.preventDefault();e.stopPropagation();}},true);["pushState","replaceState"].forEach(function(m){var o=history[m];history[m]=function(s,t,u){if(!nav(u)){return o.apply(this,arguments);}};});</script>';

@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.20
+
+- Restore the bank-selector path rewrite (`^\/banks\/` → `^.*\/banks\/`). It was dropped with the JS literal rewrites in 1.2.19, so the bank dropdown could no longer recognize the selected bank under HA ingress.
+
 ## 1.2.19
 
 - Ship the ingress double-prefix fix as a new image: the control plane now receives the runtime HA ingress base through `NEXT_PUBLIC_BASE_PATH` on `window.process.env`, so `withBasePath()` prefixes each API call exactly once. Removed the nginx `sub_filter` rules that injected the base into API path suffixes (`/memories-timeseries`, `/observations/scopes`, ...), which produced URLs like `/api/banks/<id>/<base>/memories-timeseries` and the `Client Error / HTTP 404` toast. HTML asset/link rewriting and the direct :9999 port are unchanged. (The fix was recorded under 1.2.18, but that image had already been built, so a version bump was required for Supervisor to offer the update.)
