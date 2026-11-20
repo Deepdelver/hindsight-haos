@@ -2,6 +2,7 @@
 ## 1.2.18
 
 - Pin the Control Plane to `@vectorize-io/hindsight-control-plane` 1.2.3 to match hindsight-api 1.2.3, fixing UI/API version-mismatch 404s and empty Memories/Experience/Observations tabs
+- Fix the "Client Error / HTTP 404" toast on bank pages behind HA ingress. JS string rewriting also matched API path suffixes, producing double-prefixed URLs such as `/api/banks/<id>/<ingress-base>/memories-timeseries`. The browser now receives the runtime base path through `NEXT_PUBLIC_BASE_PATH` on `window.process.env`, so `withBasePath()` prefixes every API call exactly once. Removed the fragile JS literal rewrites; HTML asset and link rewriting stays.
 
 ## 1.2.17
 
