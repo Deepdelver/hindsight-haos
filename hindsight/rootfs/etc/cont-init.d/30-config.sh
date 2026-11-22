@@ -11,6 +11,9 @@ set -euo pipefail
 # =============================================================================
 
 LLM_PROVIDER="${llm_provider:-llamacpp}"
+# Keep the user's original choice: the key check and the placeholder-key rule
+# below must reason about 'custom' even after it is mapped to 'openai'.
+LLM_PROVIDER_RAW="$LLM_PROVIDER"
 LLM_API_KEY="${llm_api_key:-}"
 LLM_MODEL="${llm_model:-gemma-4-e2b-it}"
 LLM_BASE_URL="${llm_base_url:-}"
@@ -47,6 +50,18 @@ if [[ "$MODE" != "expert" ]]; then
     LLAMACPP_GPU_LAYERS="0"
 fi
 
+# 'custom' is an add-on schema value that the Hindsight API itself rejects
+# (ValueError: Invalid LLM provider: custom). Map it to 'openai', which speaks
+# the OpenAI-wire format every compatible gateway exposes. This runs after the
+# simple-mode override, so simple mode always stays on the local llamacpp stack.
+if [[ "$LLM_PROVIDER" == "custom" ]]; then
+    if [[ -z "$LLM_BASE_URL" ]]; then
+        bashio::log.error "llm_provider 'custom' requires llm_base_url. Set it in the addon Configuration tab, or choose openai/llamacpp."
+        bashio::exit.nok
+    fi
+    LLM_PROVIDER="openai"
+fi
+
 # True when the user has explicitly chosen a model instead of "auto".
 embeddings_model_set() {
     [[ -n "$EMBEDDINGS_MODEL" && "$EMBEDDINGS_MODEL" != "auto" ]]
@@ -55,15 +70,18 @@ reranker_model_set() {
     [[ -n "$RERANKER_MODEL" && "$RERANKER_MODEL" != "auto" ]]
 }
 
-# Local providers need no API key. Everything else does.
+# Local providers need no API key. Everything else does. Check the raw choice
+# as well, so a keyless 'custom' endpoint (mapped to 'openai' above) is allowed,
+# while simple mode stays keyless regardless of the stored provider.
 NO_KEY_PROVIDERS=" llamacpp ollama lmstudio custom "
-if [[ -z "$LLM_API_KEY" && "$NO_KEY_PROVIDERS" != *" $LLM_PROVIDER "* ]]; then
+if [[ -z "$LLM_API_KEY" && "$NO_KEY_PROVIDERS" != *" $LLM_PROVIDER "* && "$NO_KEY_PROVIDERS" != *" $LLM_PROVIDER_RAW "* ]]; then
     bashio::log.error "llm_api_key is empty. Set it in the addon Configuration tab, or choose a local provider (llamacpp, ollama, lmstudio, custom)."
     bashio::exit.nok
 fi
 
-mkdir -p /data/hindsight
-ENV_FILE=/data/hindsight/env
+DATA_DIR="${HINDSIGHT_DATA_DIR:-/data/hindsight}"
+mkdir -p "$DATA_DIR"
+ENV_FILE="${HINDSIGHT_ENV_FILE:-$DATA_DIR/env}"
 
 {
     echo "HINDSIGHT_API_DATABASE_URL=postgresql://postgres@127.0.0.1:5432/hindsight"
@@ -79,6 +97,11 @@ ENV_FILE=/data/hindsight/env
 
     if [[ -n "$LLM_API_KEY" ]]; then
         printf 'HINDSIGHT_API_LLM_API_KEY=%s\n' "$LLM_API_KEY"
+    elif [[ "$LLM_PROVIDER_RAW" == "custom" && "$LLM_PROVIDER" == "openai" ]]; then
+        # Upstream 'openai' refuses an empty API key even with a custom base
+        # URL. Keyless gateways ignore the bearer token, so emit a fixed,
+        # non-secret placeholder (never an 'sk-' token).
+        printf 'HINDSIGHT_API_LLM_API_KEY=%s\n' "local"
     fi
     if [[ -n "$LLM_BASE_URL" ]]; then
         printf 'HINDSIGHT_API_LLM_BASE_URL=%s\n' "$LLM_BASE_URL"
@@ -136,6 +159,11 @@ ENV_FILE=/data/hindsight/env
     # Optional passthrough for any other HINDSIGHT_API_* setting.
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
+        # jq -c emits JSON strings with surrounding quotes; strip them so the
+        # legacy KEY=VALUE form of env_vars is parsed like the object form.
+        if [[ "$item" == \"*\" ]]; then
+            item="${item:1:${#item}-2}"
+        fi
         if [[ "$item" == *=* ]]; then
             key="${item%%=*}"
             value="${item#*=}"
@@ -144,6 +172,14 @@ ENV_FILE=/data/hindsight/env
             value="$(jq -r '.value // empty' <<< "$item")"
         fi
         [[ -n "$key" && "$key" == HINDSIGHT_API_* ]] || continue
+        if [[ "$key" == "HINDSIGHT_API_LLM_PROVIDER" ]]; then
+            # An env_vars override could re-introduce 'custom' (or undo the
+            # mapping) after all guards above; the last line wins when the
+            # run script sources this file. Ignore it, loudly. >&2 keeps the
+            # warning out of the env file itself.
+            bashio::log.warning "env_vars override of HINDSIGHT_API_LLM_PROVIDER ignored; set llm_provider in the Configuration tab instead." >&2
+            continue
+        fi
         printf 'HINDSIGHT_API_%s=%s\n' "${key#HINDSIGHT_API_}" "$value"
     done < <(bashio::config 'env_vars' | jq -c '.[]')
 } > "$ENV_FILE"

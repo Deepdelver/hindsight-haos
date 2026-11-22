@@ -7,8 +7,8 @@ Covers:
    covering real multi-line git bodies and the all-pipeline-commits fallback.
 3. Board detection: done / none / running / malformed prefix.
 4. End-to-end with fake git/hermes: push allowed only when the task is done and
-   all four regression suites exit 0.
-5. The GitHub regression workflow runs the same four suites as the push hook.
+   all five regression suites exit 0.
+5. The GitHub regression workflow runs the same five suites as the push hook.
 
 Run: python3 hindsight/tests/test_prepush_pipeline.py
 """
@@ -29,6 +29,7 @@ REGRESSIONS = [
     "python3 hindsight/tests/test_ingress_rewrite.py",
     "python3 hindsight/tests/test_prepush_pipeline.py",
     "python3 hindsight/tests/test_version_watch.py",
+    "python3 hindsight/tests/test_continit_providers.py",
 ]
 
 FAKE_GIT = """#!/usr/bin/env bash
@@ -123,7 +124,7 @@ def run_gate(list_json, regression_exit=0, git_log=None):
         td = Path(td)
         bindir, repo = stage_repo(td)
         marker = td / "regression-ran"
-        for name in ("test_source_defaults.py", "test_ingress_rewrite.py", "test_prepush_pipeline.py", "test_version_watch.py"):
+        for name in ("test_source_defaults.py", "test_ingress_rewrite.py", "test_prepush_pipeline.py", "test_version_watch.py", "test_continit_providers.py"):
             (repo / "hindsight" / "tests" / name).write_text(
                 "from pathlib import Path\n"
                 f"Path({str(marker)!r}).write_text('ran')\n"
