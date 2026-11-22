@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.22
+
+- Default LLM-provider gewijzigd van lokale `llamacpp` naar `openrouter` met het `combo`-model via de OmniRoute-gateway (`http://192.168.1.251:20128/api/v1`). Fact-extractie bij retains liep vast op een uitgeput DeepSeek-model (HTTP 402 Insufficient Balance); de combo routeert automatisch over vrije providers zodat Hindsight niet stilzwijgend stopt. API-key blijft een lege default in de source (`password`-veld) en wordt per installatie ingevuld; nooit een credential in de repo committen.
+
 ## 1.2.21
 
 - Pin `hindsight-api-slim` to 1.2.3 so the built image matches `versions.json` and the control-plane pin; a daily version watch now opens a review task instead of silently drifting.

@@ -19,10 +19,11 @@ map:
 name: Hindsight
 options:
   env_vars: []
-  mode: simple
-  llm_provider: llamacpp
+  mode: expert
+  llm_provider: openrouter
   llm_api_key: ""
-  llm_model: gemma-4-e2b-it
+  llm_model: combo
+  llm_base_url: http://192.168.1.251:20128/api/v1
   embeddings_provider: onnx
   embeddings_model: auto
   reranker_provider: onnx
@@ -70,6 +71,6 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.21"
+version: "1.2.22"
 watchdog: "http://[HOST]:[PORT:8888]/health"
 webui: "http://[HOST]:[PORT:9999]"
