@@ -19,11 +19,10 @@ map:
 name: Hindsight
 options:
   env_vars: []
-  mode: expert
-  llm_provider: openrouter
+  mode: simple
+  llm_provider: llamacpp
   llm_api_key: ""
-  llm_model: combo
-  llm_base_url: http://192.168.1.251:20128/api/v1
+  llm_model: gemma-4-e2b-it
   embeddings_provider: onnx
   embeddings_model: auto
   reranker_provider: onnx

@@ -209,8 +209,25 @@ If you run the Ollama addon on the same Home Assistant:
 - **llm_base_url**: `http://homeassistant.local:11434`
 - **embeddings_provider**: `ollama`
 
+## Using an OpenAI-compatible gateway (OmniRoute, LiteLLM, ...)
+
+For a local gateway that aggregates many model providers behind one endpoint:
+
+- **mode**: `expert`
+- **llm_provider**: `openai` (or `openrouter` for an OpenRouter-style gateway)
+- **llm_api_key**: the gateway's API key (stored per-install, never in the repo)
+- **llm_model**: a routing alias such as `combo` / `auto`, if your gateway supports it
+- **llm_base_url**: the gateway's OpenAI-compatible base URL, e.g. `http://<host>:20128/api/v1`
+
 ## Troubleshooting
 
+- **Retains stop silently / `402 Insufficient Balance` or `429` in the addon log** —
+  fact extraction is mandatory: if the configured LLM provider is out of credits or
+  rate-limited, **every retain fails** and no new memories are stored, while recall
+  keeps working (the dashboard still shows old "last activity"). Fix the extraction
+  LLM: either switch `mode` to `simple` (local models, no key), or point
+  `llm_base_url` at a gateway whose `llm_model` fails over across providers (e.g.
+  a `combo` alias). Watch `last_write_at` on the bank to confirm retains resume.
 - **Addon does not appear in the store** — the Supervisor silently drops apps whose
   `config.yaml` fails validation. Check **Settings > System > Logs > Supervisor**
   for a line starting `Can't read .../config.yaml`.

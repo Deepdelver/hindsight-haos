@@ -1,7 +1,7 @@
 # Changelog
 ## 1.2.22
 
-- Default LLM-provider gewijzigd van lokale `llamacpp` naar `openrouter` met het `combo`-model via de OmniRoute-gateway (`http://192.168.1.251:20128/api/v1`). Fact-extractie bij retains liep vast op een uitgeput DeepSeek-model (HTTP 402 Insufficient Balance); de combo routeert automatisch over vrije providers zodat Hindsight niet stilzwijgend stopt. API-key blijft een lege default in de source (`password`-veld) en wordt per installatie ingevuld; nooit een credential in de repo committen.
+- Documented the fact-extraction failure mode: a hosted LLM that returns `402 Insufficient Balance` / `429` silently stops **all** retains (fact extraction is mandatory). Added guidance to route `llm_provider: openrouter` + `llm_model: combo` through a local OpenAI-compatible gateway (e.g. OmniRoute), so extraction fails over across free providers instead of dying with one depleted upstream. Source defaults stay `simple`/local and contain no credentials; the routed config is a per-install runtime setting.
 
 ## 1.2.21
 
