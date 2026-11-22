@@ -7,7 +7,8 @@ Covers:
    covering real multi-line git bodies and the all-pipeline-commits fallback.
 3. Board detection: done / none / running / malformed prefix.
 4. End-to-end with fake git/hermes: push allowed only when the task is done and
-   both regression suites exit 0.
+   all four regression suites exit 0.
+5. The GitHub regression workflow runs the same four suites as the push hook.
 
 Run: python3 hindsight/tests/test_prepush_pipeline.py
 """
@@ -22,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HOOK = ROOT / ".githooks" / "pre-push"
 SCRIPT = ROOT / "scripts" / "pre-push-pipeline.sh"
 SETUP = ROOT / "scripts" / "setup-hooks.sh"
+WORKFLOW = ROOT / ".github" / "workflows" / "regression-tests.yml"
 REGRESSIONS = [
     "python3 hindsight/tests/test_source_defaults.py",
     "python3 hindsight/tests/test_ingress_rewrite.py",
@@ -200,6 +202,10 @@ def main():
     ok &= check("HEAD is reported for context", 'SHA="$(git rev-parse HEAD)"' in script)
     for regression in REGRESSIONS:
         ok &= check(f"done branch runs {regression}", regression in script)
+    workflow = WORKFLOW.read_text() if WORKFLOW.is_file() else ""
+    ok &= check("GitHub regression workflow exists", WORKFLOW.is_file())
+    for regression in REGRESSIONS:
+        ok &= check(f"GitHub workflow runs {regression}", regression in workflow)
     ok &= check("task creation uses derived key", '--idempotency-key "$KEY"' in script)
     ok &= check("gate has done/none/default branches",
                 all(branch in script for branch in ("done)", "none)", "*)")))
