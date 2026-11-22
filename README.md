@@ -53,7 +53,7 @@ Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_i
 | Option | Default | Purpose |
 | --- | --- | --- |
 | `mode` | `simple` | `simple` = local models, nothing to configure. `expert` = choose providers/models yourself |
-| `llm_provider` | `llamacpp` | LLM provider; `llamacpp` is local and free. Hosted: `openai`, `ollama`, `groq`, `anthropic`, `gemini`, `openrouter`, `nous`, ... |
+| `llm_provider` | `llamacpp` | LLM provider; `llamacpp` is local and free. Hosted: `openai`, `ollama`, `groq`, `anthropic`, `gemini`, `openrouter`, `nous`, ... Since 1.2.24 the legacy `custom` choice is mapped to `openai` and requires `llm_base_url` |
 | `llm_api_key` | — | Needed only for hosted providers |
 | `llm_model` | `gemma-4-e2b-it` | Model name for the selected provider |
 | `llm_base_url` | `""` (empty) | Custom endpoint for Ollama / an OpenAI-compatible proxy; expert mode only (empty = provider default) |
@@ -207,7 +207,7 @@ its status must be `done`, and all four regression suites must pass.
 
 - **Add-on does not appear in the store** — Supervisor drops add-ons whose `config.yaml` fails validation. Check **Settings → System → Logs → Supervisor** for `Can't read .../config.yaml`.
 - **Container exits at start** — check the add-on log. A common cause is an empty `llm_api_key` with a provider that requires one.
-- **Add-on crash-loops with `Invalid LLM provider: custom`** — `custom` is selectable in the provider dropdown but rejected by the Hindsight API. Choose `openai` and set `llm_base_url` to your OpenAI-compatible gateway; keep `embeddings_provider: onnx`.
+- **Add-on crash-loops with `Invalid LLM provider: custom`** — fixed in 1.2.24: `custom` is mapped to `openai` (and requires `llm_base_url`). Update the add-on. On older versions, choose `openai` and set `llm_base_url` to your OpenAI-compatible gateway; keep `embeddings_provider: onnx`.
 - **`Client Error / HTTP 404` in the UI** — check that the Control Plane version matches the API version and that the ingress template passes the regression test; then do a hard refresh to discard cached assets.
 - **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.
 - **Retains keep retrying / `429 Too Many Requests` in the addon log** — a free hosted model is rate-limiting fact extraction. This is an upstream provider limit, not an add-on fault: switch `mode` to `simple` (local models) or use a provider key with a higher quota. Retains are retried by the worker, so memories are not lost.

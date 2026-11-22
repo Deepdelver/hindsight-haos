@@ -17,8 +17,8 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
    - **simple** (default) — local LLM + local ONNX embeddings/reranker, no keys, nothing else to set
    - **expert** — configure the providers and models yourself (see below)
 3. In expert mode, set:
-   - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`. Do not pick `custom`: the API rejects it (see Troubleshooting); for a gateway use `openai` plus `llm_base_url`.
-   - **llm_api_key** — API key for the chosen provider (not needed for `ollama`)
+   - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`. `custom` is kept for existing installs and is mapped to `openai` by the add-on (it requires `llm_base_url`); for a gateway prefer `openai` plus `llm_base_url` directly.
+   - **llm_api_key** — API key for the chosen provider (not needed for `ollama`, or for `custom` pointing at a keyless gateway)
    - **llm_model** — Model name (default `gemma-4-e2b-it`)
    - **llm_base_url** — Custom endpoint for Ollama or an OpenAI-compatible proxy (default empty; set it in the Configuration tab; expert mode only)
    - **embeddings_provider** — `onnx` (local, no key), or `local`, `openai`, `cohere`, `tei`, ...
@@ -214,11 +214,15 @@ If you run the Ollama addon on the same Home Assistant:
 For a local gateway that aggregates many model providers behind one endpoint:
 
 - **mode**: `expert`
-- **llm_provider**: `openai` — do NOT use `custom` here. `custom` is an add-on
-  schema value but the Hindsight API rejects it (`ValueError: Invalid LLM provider:
-  custom`) and the add-on crash-loops. `openai` speaks the OpenAI-wire format
-  that OmniRoute/LiteLLM expose.
-- **llm_api_key**: the gateway's API key (stored per-install, never in the repo)
+- **llm_provider**: `openai` (recommended) or `custom`. Since 1.2.24 the add-on
+  maps `custom` to `openai` automatically, because the Hindsight API itself
+  rejects `custom` (`ValueError: Invalid LLM provider: custom`). `custom`
+  requires a non-empty `llm_base_url`; without it the add-on stops at startup
+  with a clear error. `openai` speaks the OpenAI-wire format that
+  OmniRoute/LiteLLM expose.
+- **llm_api_key**: the gateway's API key (stored per-install, never in the repo).
+  Optional with `custom` for a keyless gateway: the add-on then sends a fixed
+  placeholder key (`local`). A gateway that enforces auth needs a real key.
 - **llm_model**: a routing alias such as `auto/best-free`, if your gateway supports it
 - **llm_base_url**: the gateway's OpenAI-compatible base URL, e.g. `http://<host>:20128/api/v1`
 - **embeddings_provider**: `onnx` — keep embeddings local even when the LLM is remote
@@ -235,12 +239,14 @@ For a local gateway that aggregates many model providers behind one endpoint:
 - **Addon does not appear in the store** — the Supervisor silently drops apps whose
   `config.yaml` fails validation. Check **Settings > System > Logs > Supervisor**
   for a line starting `Can't read .../config.yaml`.
-- **Container exits at start** — check the addon log. The most common cause is an
-  empty `llm_api_key` with a provider that requires one.
+- **Container exits at start** — check the addon log. Common causes: an empty
+  `llm_api_key` with a provider that requires one, or `llm_provider: custom`
+  without `llm_base_url` (the log says exactly which option is missing).
 - **Add-on crash-loops with `ValueError: Invalid LLM provider: custom`** —
-  `custom` appears in the add-on's provider dropdown but the Hindsight API
-  rejects it. Select `openai` and set `llm_base_url` to your OpenAI-compatible
-  gateway (see above); leave `embeddings_provider` on `onnx`.
+  fixed in 1.2.24: `custom` is now mapped to `openai` (requires `llm_base_url`).
+  Update the add-on; on older versions select `openai` and set `llm_base_url`
+  to your OpenAI-compatible gateway (see above); leave `embeddings_provider`
+  on `onnx`. The startup log shows `LLM: openai / <model>` after the mapping.
 - **MCP endpoint refuses connections** — confirm port 8888 is published and that
   `mcp_enabled` is `true`.
 - **`Client Error / HTTP 404` in the web UI** — verify the pinned Control Plane version

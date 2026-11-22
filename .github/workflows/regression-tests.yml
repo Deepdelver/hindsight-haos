@@ -23,3 +23,5 @@ jobs:
         run: python3 hindsight/tests/test_prepush_pipeline.py
       - name: Version watch tests
         run: python3 hindsight/tests/test_version_watch.py
+      - name: Cont-init provider mapping tests
+        run: python3 hindsight/tests/test_continit_providers.py

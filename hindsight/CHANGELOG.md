@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.24
+
+- Fix the `llm_provider: custom` crash-loop: cont-init now maps `custom` to `openai` (the Hindsight API rejects `custom` with `ValueError: Invalid LLM provider`). `custom` requires a non-empty `llm_base_url`; without it the add-on fails fast with a clear error instead of crash-looping. Keyless custom endpoints get a fixed placeholder API key (`local`) because upstream `openai` refuses an empty key; a configured `llm_api_key` is passed through unchanged. `env_vars` can no longer override `HINDSIGHT_API_LLM_PROVIDER` (ignored with a warning), so the mapping cannot be undone. In `simple` mode everything still resolves to the local `llamacpp` stack. New regression suite `hindsight/tests/test_continit_providers.py` runs in the pre-push gate and CI.
+
 ## 1.2.23
 
 - The GitHub regression workflow now runs the same four suites as the local pre-push hook, including the source-defaults guard. Docs clarify that `custom` is rejected by the Hindsight API and warn about the resulting crash-loop.
