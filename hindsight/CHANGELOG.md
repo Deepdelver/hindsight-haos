@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.22
+
+- Documented the fact-extraction failure mode: a hosted LLM that returns `402 Insufficient Balance` / `429` silently stops **all** retains (fact extraction is mandatory). Added guidance to route `llm_provider: openrouter` + `llm_model: combo` through a local OpenAI-compatible gateway (e.g. OmniRoute), so extraction fails over across free providers instead of dying with one depleted upstream. Source defaults stay `simple`/local and contain no credentials; the routed config is a per-install runtime setting.
+
 ## 1.2.21
 
 - Pin `hindsight-api-slim` to 1.2.3 so the built image matches `versions.json` and the control-plane pin; a daily version watch now opens a review task instead of silently drifting.

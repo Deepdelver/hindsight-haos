@@ -61,6 +61,7 @@ PY
 case "$STATUS" in
   done)
     echo "Pipeline task for change set $KEY_SHA is done. Running regression tests before push..."
+    python3 hindsight/tests/test_source_defaults.py
     python3 hindsight/tests/test_ingress_rewrite.py
     python3 hindsight/tests/test_prepush_pipeline.py
     python3 hindsight/tests/test_version_watch.py
