@@ -1,4 +1,9 @@
 # Changelog
+## 1.2.23
+
+- The GitHub regression workflow now runs the same four suites as the local pre-push hook, including the source-defaults guard. Docs clarify that `custom` is rejected by the Hindsight API and warn about the resulting crash-loop.
+- Expose `llm_base_url` in the add-on Configuration tab with an empty default, so a custom LLM endpoint (Ollama / OpenAI-compatible gateway) can be set without hand-editing options. Its schema type is `str` (not optional), matching the default. Source defaults stay `simple`/local with no credentials; in `simple` mode the base URL is ignored.
+
 ## 1.2.22
 
 - Documented the fact-extraction failure mode: a hosted LLM that returns `402 Insufficient Balance` / `429` silently stops **all** retains (fact extraction is mandatory). Added guidance to route `llm_provider: openrouter` + `llm_model: combo` through a local OpenAI-compatible gateway (e.g. OmniRoute), so extraction fails over across free providers instead of dying with one depleted upstream. Source defaults stay `simple`/local and contain no credentials; the routed config is a per-install runtime setting.

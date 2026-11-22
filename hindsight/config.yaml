@@ -23,6 +23,7 @@ options:
   llm_provider: llamacpp
   llm_api_key: ""
   llm_model: gemma-4-e2b-it
+  llm_base_url: ""
   embeddings_provider: onnx
   embeddings_model: auto
   reranker_provider: onnx
@@ -50,7 +51,7 @@ schema:
   llm_provider: list(llamacpp|openai|ollama|anthropic|gemini|groq|deepseek|openrouter|fireworks|nous|lmstudio|custom)
   llm_api_key: password
   llm_model: str
-  llm_base_url: str?
+  llm_base_url: str
   embeddings_provider: list(onnx|local|openai|cohere|tei|hindsight|litellm|litellm-sdk|openrouter|requesty|google)
   embeddings_model: str
   embeddings_api_key: password?
@@ -70,6 +71,6 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.22"
+version: "1.2.23"
 watchdog: "http://[HOST]:[PORT:8888]/health"
 webui: "http://[HOST]:[PORT:9999]"

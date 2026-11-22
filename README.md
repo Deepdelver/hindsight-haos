@@ -56,7 +56,7 @@ Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_i
 | `llm_provider` | `llamacpp` | LLM provider; `llamacpp` is local and free. Hosted: `openai`, `ollama`, `groq`, `anthropic`, `gemini`, `openrouter`, `nous`, ... |
 | `llm_api_key` | — | Needed only for hosted providers |
 | `llm_model` | `gemma-4-e2b-it` | Model name for the selected provider |
-| `llm_base_url` | — | Custom endpoint (Ollama, OpenAI-compatible proxy) |
+| `llm_base_url` | `""` (empty) | Custom endpoint for Ollama / an OpenAI-compatible proxy; expert mode only (empty = provider default) |
 | `embeddings_provider` | `onnx` | Local ONNX embeddings by default |
 | `embeddings_model` | `auto` | Let Hindsight pick and download its default; set an id to pin |
 | `reranker_provider` | `onnx` | Local ONNX reranker; `rrf` needs no model |
@@ -71,7 +71,7 @@ Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_i
 | `log_level` | `info` | `debug`, `info`, `warning`, `error` |
 | `env_vars` | `[]` | Any extra `HINDSIGHT_API_*` variable as `{name, value}` |
 
-In `simple` mode the provider/model fields are ignored; the local stack is always used. In `expert` mode they are passed through. `env_vars` works in both modes. A full option-to-environment-variable map and provider-specific notes are in [hindsight/DOCS.md](hindsight/DOCS.md).
+In `simple` mode the provider, model and base-URL fields are ignored; the local stack is always used. In `expert` mode they are passed through. `env_vars` works in both modes. A full option-to-environment-variable map and provider-specific notes are in [hindsight/DOCS.md](hindsight/DOCS.md).
 
 ## Connecting agents
 
@@ -158,6 +158,7 @@ Kanban board must run for the change set being pushed. Two layers enforce it:
 
 ```bash
 cd hindsight-haos
+python3 hindsight/tests/test_source_defaults.py   # source config defaults / no credentials
 python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression tests
 python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tests
 python3 hindsight/tests/test_version_watch.py     # upstream version watch
@@ -174,10 +175,10 @@ The flow is:
    aborted at this point.
 2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
    behaviour, ports, options or troubleshooting changed, and adds or updates
-   tests in `hindsight/tests/`. It runs the regression tests (ingress,
-   pre-push gate and version watch) and reports.
-3. Re-run `git push`. The hook sees the completed task, runs both regression
-   tests itself and allows the push only if they pass.
+   tests in `hindsight/tests/`. It runs all four regression suites (source
+   defaults, ingress, pre-push gate and version watch) and reports.
+3. Re-run `git push`. The hook sees the completed task, runs all four regression
+   suites itself and allows the push only if they pass.
 
 A new change set starts with any commit that lacks a `Pipeline-Key:` trailer;
 its SHA becomes the task key. Commits produced by the assessment carry that
@@ -188,8 +189,11 @@ The test reads the real `rootfs/etc/nginx.conf.template`, parses its `sub_filter
 them to representative HTML/JS. It fails if an API suffix gets the ingress base
 injected, if a navigation builder loses it, or if the bank-selector regex is no
 longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template
-revision. `test_prepush_pipeline.py` checks the hook/script wiring and exercises
-the gate's decision logic (done / none / running, test failure) with fake
+revision. `test_source_defaults.py` keeps `config.yaml` credential-free and
+checks the local `simple` / `llamacpp` defaults, the empty `llm_base_url` and
+its non-optional `str` schema. `test_prepush_pipeline.py` checks the hook/script
+wiring, that the GitHub workflow runs the same suites as the hook, and the
+gate's decision logic (done / none / running, test failure) with fake
 `git` and `hermes` binaries; it does not touch the real board.
 `test_version_watch.py` loads `scripts/check_versions.py` with a stubbed
 Dockerfile, `versions.json` and network calls, so it checks pin parsing, drift
@@ -197,12 +201,13 @@ detection, the idempotent task key and the CLI exit codes offline.
 
 If a push is blocked, look for the task keyed to the first unpushed commit
 without a `Pipeline-Key:` trailer (the key and HEAD are printed by the hook):
-its status must be `done`, and all three regression suites must pass.
+its status must be `done`, and all four regression suites must pass.
 
 ## Troubleshooting
 
 - **Add-on does not appear in the store** — Supervisor drops add-ons whose `config.yaml` fails validation. Check **Settings → System → Logs → Supervisor** for `Can't read .../config.yaml`.
 - **Container exits at start** — check the add-on log. A common cause is an empty `llm_api_key` with a provider that requires one.
+- **Add-on crash-loops with `Invalid LLM provider: custom`** — `custom` is selectable in the provider dropdown but rejected by the Hindsight API. Choose `openai` and set `llm_base_url` to your OpenAI-compatible gateway; keep `embeddings_provider: onnx`.
 - **`Client Error / HTTP 404` in the UI** — check that the Control Plane version matches the API version and that the ingress template passes the regression test; then do a hard refresh to discard cached assets.
 - **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.
 - **Retains keep retrying / `429 Too Many Requests` in the addon log** — a free hosted model is rate-limiting fact extraction. This is an upstream provider limit, not an add-on fault: switch `mode` to `simple` (local models) or use a provider key with a higher quota. Retains are retried by the worker, so memories are not lost.

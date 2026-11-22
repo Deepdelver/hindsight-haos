@@ -17,10 +17,10 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
    - **simple** (default) — local LLM + local ONNX embeddings/reranker, no keys, nothing else to set
    - **expert** — configure the providers and models yourself (see below)
 3. In expert mode, set:
-   - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`, `custom`
+   - **llm_provider** — `openai`, `anthropic`, `gemini`, `groq`, `deepseek`, `ollama`, `fireworks`, `openrouter`, `nous`. Do not pick `custom`: the API rejects it (see Troubleshooting); for a gateway use `openai` plus `llm_base_url`.
    - **llm_api_key** — API key for the chosen provider (not needed for `ollama`)
    - **llm_model** — Model name (default `gemma-4-e2b-it`)
-   - **llm_base_url** — Custom endpoint (optional; used for Ollama or a proxy)
+   - **llm_base_url** — Custom endpoint for Ollama or an OpenAI-compatible proxy (default empty; set it in the Configuration tab; expert mode only)
    - **embeddings_provider** — `onnx` (local, no key), or `local`, `openai`, `cohere`, `tei`, ...
    - **embeddings_model** — `auto` (default: let Hindsight choose and download its model), or an explicit model id
    - **embeddings_api_key** — Separate key for embeddings (falls back to `llm_api_key`)
@@ -207,17 +207,21 @@ If you run the Ollama addon on the same Home Assistant:
 - **llm_api_key**: leave empty
 - **llm_model**: your model, e.g. `qwen3.5:latest`
 - **llm_base_url**: `http://homeassistant.local:11434`
-- **embeddings_provider**: `ollama`
+- **embeddings_provider**: `onnx` (local) — `ollama` is not a valid value in this add-on's schema; keep the local ONNX embeddings or pick a supported provider such as `local` / `openai`
 
 ## Using an OpenAI-compatible gateway (OmniRoute, LiteLLM, ...)
 
 For a local gateway that aggregates many model providers behind one endpoint:
 
 - **mode**: `expert`
-- **llm_provider**: `openai` (or `openrouter` for an OpenRouter-style gateway)
+- **llm_provider**: `openai` — do NOT use `custom` here. `custom` is an add-on
+  schema value but the Hindsight API rejects it (`ValueError: Invalid LLM provider:
+  custom`) and the add-on crash-loops. `openai` speaks the OpenAI-wire format
+  that OmniRoute/LiteLLM expose.
 - **llm_api_key**: the gateway's API key (stored per-install, never in the repo)
-- **llm_model**: a routing alias such as `combo` / `auto`, if your gateway supports it
+- **llm_model**: a routing alias such as `auto/best-free`, if your gateway supports it
 - **llm_base_url**: the gateway's OpenAI-compatible base URL, e.g. `http://<host>:20128/api/v1`
+- **embeddings_provider**: `onnx` — keep embeddings local even when the LLM is remote
 
 ## Troubleshooting
 
@@ -233,6 +237,10 @@ For a local gateway that aggregates many model providers behind one endpoint:
   for a line starting `Can't read .../config.yaml`.
 - **Container exits at start** — check the addon log. The most common cause is an
   empty `llm_api_key` with a provider that requires one.
+- **Add-on crash-loops with `ValueError: Invalid LLM provider: custom`** —
+  `custom` appears in the add-on's provider dropdown but the Hindsight API
+  rejects it. Select `openai` and set `llm_base_url` to your OpenAI-compatible
+  gateway (see above); leave `embeddings_provider` on `onnx`.
 - **MCP endpoint refuses connections** — confirm port 8888 is published and that
   `mcp_enabled` is `true`.
 - **`Client Error / HTTP 404` in the web UI** — verify the pinned Control Plane version
@@ -249,6 +257,8 @@ For a local gateway that aggregates many model providers behind one endpoint:
   running add-on. Run `python3 scripts/check_versions.py` for the current
   comparison, then bump the API and UI pins together in a normal release.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
-  current change set (key printed by the hook) must be `done` and both regression
-  tests in `hindsight/tests/` must pass. Run `scripts/setup-hooks.sh global` once
-  per machine; see README → Development and testing for the full flow.
+  current change set (key printed by the hook) must be `done` and all four
+  regression suites in `hindsight/tests/` must pass (`test_source_defaults.py`,
+  `test_ingress_rewrite.py`, `test_prepush_pipeline.py`, `test_version_watch.py`).
+  Run `scripts/setup-hooks.sh global` once per machine; see README → Development
+  and testing for the full flow.
