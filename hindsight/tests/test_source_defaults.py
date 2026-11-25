@@ -9,11 +9,13 @@ that default. An optional (`str?`) key with a default contradicts HA's rules.
 
 No third-party deps: parses the small options/schema blocks with string checks.
 """
+
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 CFG = REPO / "hindsight" / "config.yaml"
+
 
 def main() -> int:
     errors = []
@@ -50,12 +52,10 @@ def main() -> int:
     if base_url is None:
         errors.append("llm_base_url must be present in options so it appears in the UI")
     elif base_url != "":
-        errors.append("llm_base_url default must be empty in source config, "
-                      f"got {base_url[:40]!r}")
+        errors.append(f"llm_base_url default must be empty in source config, got {base_url[:40]!r}")
     url_type = schema_type("llm_base_url")
     if url_type != "str":
-        errors.append("llm_base_url schema must be 'str' (it has a default), "
-                      f"got {url_type!r}")
+        errors.append(f"llm_base_url schema must be 'str' (it has a default), got {url_type!r}")
 
     # No credential-looking token anywhere in the source config.
     if "sk-" in text:
@@ -73,9 +73,12 @@ def main() -> int:
         for e in errors:
             print("FAIL:", e)
         return 1
-    print("source defaults OK: simple/llamacpp, empty api key and base URL, "
-          "str base-URL schema, quoted version, no token")
+    print(
+        "source defaults OK: simple/llamacpp, empty api key and base URL, "
+        "str base-URL schema, quoted version, no token"
+    )
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
