@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ad36a656874fa89a8072b20321a813949c2640ced0d3c84134f671a640ba9ae5",
+  "claims": [
+    {
+      "id": "claim_0fd3d788d6144928bf8232e54dc20c59",
+      "statement": "The add-on packages Hindsight as an unofficial Home Assistant OS add-on providing persistent memory through a REST API, MCP endpoint and web UI, with local llama.cpp and ONNX defaults in simple mode and hosted/Ollama options in expert mode.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L1-L5",
+          "version": "repo-lines-v1:sha256:e123c2b7607a5bc51ca19403d8a12ec814adb6c4385078cc1a7cb1ee0970751a:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzI2ZjNiYzZkY2IxODU4NjJmMWJhMGRlN2YzOGM3MzM0NWMwNzVhNDQ4MDg0MWFlYzEyNThiZGY3MDg3MGU2MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzM4ZTU4ZjYzMDczMzI3N2Q5YmNiMTNkOGFlOWZkYTg0OGFjOGUxODIxMzRhMDI5MWI2OGNmZjI5NDM2M2Q3OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2Y1NGJmOGE4Y2UyMWVjNGRhMGE5MjUxMTJlODNmN2FkYTcwNzlhMzc4OTMyMTczYjU5ZjdhOWZlNDA1ZWJkZSJ9"
+        },
+        {
+          "resource": "repo://README.md#L7-L30",
+          "version": "repo-lines-v1:sha256:434514b438a349fb7006d3a7b0f31fb1e4ec1ce6734491116654f0a5426ccd88:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5ZmVkNzRkOThiMGI5ZDFkMDIwOWU3YmYzYmM1M2MzNzI2YjUzMmQ1ZjFkOWJmMzAzZTkwNmJmMjFhZGE5ZjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlM2NhNDNjYzliOTA0NWM1ODkyZjE5ZjM0M2E1MWMxNmRjYzg4YWFiNmEzMTcxYWRkMjQ1ZjFhNDc5NmZjZjQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwODk3YjY4ODAyM2Q1MTg5NjgyYjVmZTk4ZjNkOTViMThhOTcwZmIyMTY0OGU3NGFjYTBkNzE2NDY0N2UyZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRkMDAyNGQ5MDc1YjQzOGNmYjljZDU3MDcyNjBiM2IxMTY2ZmNmYmVmMWE3YzcyY2ZiZjUxNzlhNThlZTgzYjQifQ"
+        },
+        {
+          "resource": "repo://hindsight/config.yaml#L20-L36",
+          "version": "repo-lines-v1:sha256:6627357289c03d623b0aff0f1a02a3a8154d49f0627ca4aee1456c2afe7d67c0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjOTUwMmFkMzJjZTk0N2U4MGVkMTcyYTMzZWU4YmYyM2VmNDkzOGEyOTMzNTFmYTZiNGJhMWUxZTIyOTQ3ZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5Mjc3Nzk1YzExYTllMjUzYWEyMDM1ZTJkYzVlZDAxMzM5ZWQ5NDJlYTFmZmExZDFlYzE3NTNmZjQ5ODk4YzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkODJiZGU4YmE0NjAwYWE1YzNkNDNkZGMzYzU5ZjJiZmI0M2ZmNjA4ODQzYjY1MjkzMzAzOTllMTMyYzJlZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2Y2M3OGU2YmIzMzdmY2IxODFjOTE3MGQzNWQwMDE3MGZlNTRlZmJiM2IyNmNmMzU1Y2UwMmJiYjc5ZWMyMzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a1fb52130c2043559415eaea34c5f95c",
+      "statement": "Installation adds the Deepdelver/hindsight-haos repository in Home Assistant, installs the Hindsight add-on and starts it; the first start downloads roughly 3.5 GB of local models.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L32-L39",
+          "version": "repo-lines-v1:sha256:372ef838988a45732982246ad09e8b8118546afde75dcbd482ae70d071e80d1c:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzMyZmRkY2YyMWJkZDZlOTQ1OTA5YzBjN2U5NDFiMjc5ZjY2MzE1ZTUyMzExMjI2MzAwZjAxY2Y2NjE1NmFlMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODQwYTRhOTdlNmZmZGIwMTI5ZTMyOWMzNzQwNjc2OWE3ZjdiMjI0YWE5YjdmNzQ2YmNlNzY2NmMzMTBhMjM0MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYThiYjIxYjlmMWI1OGQ0NDM0YTEyZmQ5N2U0MWE2MWZkMzRiMmIzZDAzN2M0ZmRjZjE3OThiYzQ4MjlkNzIzYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjU0MGQwZjg0ODY3OWE4MzUzNzlkM2UxNzQ3YzIxM2EzZDFkNjczOGUwMzNhZGM4MDQ2OTQyMzNlY2Y3OTAyYiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_07c885126f9e49dcaacdc4353cc65362",
+      "statement": "Clients reach the API and MCP endpoint on 8888, the direct Control Plane on 9999, the internal ingress proxy on 9997 and the Next.js backend on 9998; MCP clients use /mcp/<bank_id>/ and should not duplicate a native Hermes memory provider entry.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L103-L118",
+          "version": "repo-lines-v1:sha256:66c8c7ef27df3d7840dc11dc35422f90805edd5e08519476ee6d51e8553633c6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE3NmQxYzYzZTI4YmE2MjNkZWJjYjE5YzBlNGU4NTRiODQ1NjU1ZTU3NTg5NjQ4NDg0MjVmMmJhMWY4Yjk3ZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjNGMzMWNjNWEyMjk4OGE0ZDMyNzY3MjZjZmE4ZWZkYWVjZWVhOTY5MTllZWU2NzExNTFlZTFiNWY4MjYwZjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkMDEzZTEyM2UyMWIzOTg4ODA3ZGU3NDk3NzU5MDc5YzE3YTlhZDY4OGFlNDVhNzE4MDllNjVlZWQ2NmRlOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExODNjNWI0ODRlYWE5MWUwNWQ2MTM2NDExNDM0YWExYjZkMzZlNDcxZmQ3NmJkMjJjNmZiZjY2YzIwNDhkOTkifQ"
+        },
+        {
+          "resource": "repo://README.md#L41-L49",
+          "version": "repo-lines-v1:sha256:21f481a57055e9b1006a6220b284b57e8dc5d21a0db9bd63d6cfc13edc5db712:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTNlYTgyNGE4ZWQxMjBlMDI0ZjhiMzgxMGU2MDNiY2RlMzdlMzE0NDgwNDA3NDM3MjZiNzhmMjE5ZjU3MjhmOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjYmVkMzM0MmRlYmRlMjE2YmJmNDZjNWVlYzQxZmI5MmI4NjQ4MGEwNDIxODJkY2ZjY2MyZmU1NTA5ZDFmZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzUwN2RmNmZlNjZhY2QxMzQ0ZTY4OWRmODk3YTQ0NjY5ZjExNGFkOTQ2Y2ExZmMyOGRiMDg0MDg4YTAwNzIwNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTdkN2FmMzgwYzBkNmU2OGI3ZjRhOWFlYzVjMzA5M2QzMTc5YWQ2M2RkZDNiZDJiYTE1M2JlNmEwMTBlNjI2MyJ9"
+        },
+        {
+          "resource": "repo://hindsight/config.yaml#L40-L45",
+          "version": "repo-lines-v1:sha256:068303056dfa8e257fd65e548c22d7d8e490bc016463b611d91398c9af21fd1d:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjg2OGU1OGNhOGE4Zjg2MzZjM2Y4OTgwYTk3YTQxNjUyNWFkNTRkMDI0YmJhZjEwNDNlNDdkNTUyYmQzNzliMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjk0NmU2M2RiNGI0MGM3OGE2NGFmOGQyNTdiNmZlN2QzNDVjZTNkZTBkMjU0ODQzMThiYzNjZTY3OGNhNDY4YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzZjYzc4ZTZiYjMzN2ZjYjE4MWM5MTcwZDM1ZDAwMTcwZmU1NGVmYmIzYjI2Y2YzNTVjZTAyYmJiNzllYzIzMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWE5OTJhYjM4YjA5OWI0YWNlYWYzMzQ0MmI5MDk2ZTkzYTFiMTg1NWExNjJkODJkNjYwY2Q2NzY1ODBiZWM3NCJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/control-plane/run#L14-L17",
+          "version": "repo-lines-v1:sha256:867be5ecb32f6042d3e032a04f2a28441b0a63881eef4addce685b1f359f3966:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzlkYmI5MzQwZTJiYjhlN2YxMjRkY2UxY2FjY2FlZjkwM2FlZWIyYWNiYzI1YWQ4NzEwZWRiMTJkM2M5NzA5NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTI1YmUwMmUwZDA4MDUxZGFhNjI3YjIwZDBkZTE5ZjI2NGEwNGE4MGVkOGE4NmI2NTc4MjE3ZTBjMjBmYTY0NyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjdkNzJlYTQ4OTM2NjRjOTVmZjQwZjBlZGQ3OGQ5MTllNTkzY2I5MmUyYTE4NTgzOGI4NzdhNzNmZmUwY2U3OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjk4NWM2MzU0ZDJhMDc5ODhiYWFhMDYyMzJlODNiZjI1NDg4ZmE0YjRjZjE5ZmFiMWNkM2UzZWRhZmYwZDQ1ZSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-25T23:47:00.311Z"
+  }
+}

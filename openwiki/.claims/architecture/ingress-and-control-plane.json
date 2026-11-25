@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:29689d08a4a1e8036ebe9a10a138267ba637db66ef352688df23e4e401d0e012",
+  "claims": [
+    {
+      "id": "claim_3bb08e410c2b45c4a6dbef3a9650eafc",
+      "statement": "The control-plane service discovers the installation-specific ingress base path from the Supervisor's ingress_url at startup and renders nginx.conf.template with the direct port, ingress port, backend port and base path; a head script injects that base as NEXT_PUBLIC_BASE_PATH.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/rootfs/etc/nginx.conf.template#L80-L82",
+          "version": "repo-lines-v1:sha256:f0dc0630eb96b6abd1b8fe671317c86ebaacc2b0642b1f9ce98503ac95a1fa6c:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNThiMDgxYWRjZWM3OWY2ZDRlYzk0Mjk4YjliNTNmNGZmODlkNmUyYjE2MDgwMjExMmEyNzhhZjcxM2EwNDA0YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTQ5NTA3MzIxZjY3YjhkZGZmZjhiNGNhYmRlYmMxM2ZmZWJlMjMwZjdkMzdiNGIxMjY1OWVhYmM3NmRlOTNkNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjY5MzZlOTgyMWM5ZDUzMDIyYjJlY2I2OGQ4MTkxNjI4NTYwNmIzMWYwNzlkNjgwODFjY2I5MzVlMTdjYWE2ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2U1YzIzMTZmODk3NjJlMDg3YmEyMGE2ZjFhODQ3MWY0NDBkM2ViMjdmM2Y2N2MxNWFiOGM1MmFkYzJmYzM2YyJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/control-plane/run#L35-L52",
+          "version": "repo-lines-v1:sha256:566a5fd1439053a8984eac48988898c4e071b252ab9e286746c68327a326396f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3N2UyY2JkODM4MTc4YzhlODZkYTIxZmFmMTdlZDZjNzRjZjA0YmM1YWY2YTY5ODU1YjA2Mzg5M2Y0MTk4ODMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4MDRhNTdjZTcwOWNhYWQ2ZjgwNTM2NTYwNDE3OWFjNTY1ZWQyNmMwYjc3ZjY3ODBkODlmZjZiMzYzZGI0OTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNkNmI4Y2FhOGI3OTYyOGNmM2FkMGFiOGZhM2NjNzU2M2M1ZGNjMTAyMWJlYzg2NGNiMzBkMmRkNjkyMGVmODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2ZmI1NjZlNmI0ZWE5OTJkZjlkMDYwMDNmYjk1NTIzNjliNzZmZjJhNWZjN2M2YTJhYWJiMzlkYjFiYzliZTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b6b06c6fb4074488a79bdbfee9f92473",
+      "statement": "Ports 9997 and 9999 are two separate nginx servers: 9997 rewrites paths for Home Assistant ingress while 9999 is a plain direct proxy; both forward to the Next.js backend on loopback port 9998, which is not publicly exposed.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L41-L49",
+          "version": "repo-lines-v1:sha256:21f481a57055e9b1006a6220b284b57e8dc5d21a0db9bd63d6cfc13edc5db712:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTNlYTgyNGE4ZWQxMjBlMDI0ZjhiMzgxMGU2MDNiY2RlMzdlMzE0NDgwNDA3NDM3MjZiNzhmMjE5ZjU3MjhmOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjYmVkMzM0MmRlYmRlMjE2YmJmNDZjNWVlYzQxZmI5MmI4NjQ4MGEwNDIxODJkY2ZjY2MyZmU1NTA5ZDFmZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzUwN2RmNmZlNjZhY2QxMzQ0ZTY4OWRmODk3YTQ0NjY5ZjExNGFkOTQ2Y2ExZmMyOGRiMDg0MDg4YTAwNzIwNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTdkN2FmMzgwYzBkNmU2OGI3ZjRhOWFlYzVjMzA5M2QzMTc5YWQ2M2RkZDNiZDJiYTE1M2JlNmEwMTBlNjI2MyJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/nginx.conf.template#L10-L37",
+          "version": "repo-lines-v1:sha256:0b6f8f9117984584c840caa187d1fba120650424d7206b22e2ad0281e35f8b04:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlYzQ2YmJmMmYxNDZkMGMxY2UyMzNmNTM1NzZiYWNhNDVmOTI2YmZhNDAyNTZlNTdkYTU1ZDc4YTRkMDQ1MmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczYTBjOWYwMDlmNzgwNmE5MzdhNTEwZGFiZTI4OWZhMDRjNjRlYmFlYzNiYTNkZjdkYzMzZDQyMzg0NjhmOTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3ODljMGEwN2ZmYzJiMjBkYWI0Yzc1Yjk5MDFiMjc1NjVjYTQxMWE1NDEzMGU4NTRiNTMwNTQwZWJmM2MwNGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5YTUzM2UwMWJiNjJlODg4MTU0ZWQ5YWVmODFmYmQ5YzcxNDRmYzBhNDBhNjZlMjhmMmNjNjZkNWU4ZTA0MDgifQ"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/control-plane/run#L14-L17",
+          "version": "repo-lines-v1:sha256:867be5ecb32f6042d3e032a04f2a28441b0a63881eef4addce685b1f359f3966:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzlkYmI5MzQwZTJiYjhlN2YxMjRkY2UxY2FjY2FlZjkwM2FlZWIyYWNiYzI1YWQ4NzEwZWRiMTJkM2M5NzA5NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTI1YmUwMmUwZDA4MDUxZGFhNjI3YjIwZDBkZTE5ZjI2NGEwNGE4MGVkOGE4NmI2NTc4MjE3ZTBjMjBmYTY0NyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjdkNzJlYTQ4OTM2NjRjOTVmZjQwZjBlZGQ3OGQ5MTllNTkzY2I5MmUyYTE4NTgzOGI4NzdhNzNmZmUwY2U3OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjk4NWM2MzU0ZDJhMDc5ODhiYWFhMDYyMzJlODNiZjI1NDg4ZmE0YjRjZjE5ZmFiMWNkM2UzZWRhZmYwZDQ1ZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_7e1bdc3c7def43f4a38cfdfbef99b240",
+      "statement": "Only the two genuine client-side navigation builders (/banks and /knowledge-banks) and the bank-selector regex receive the ingress prefix; API path suffixes such as /memories-timeseries and /observations must stay bare to avoid nested-prefix HTTP 404s.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/rootfs/etc/nginx.conf.template#L62-L78",
+          "version": "repo-lines-v1:sha256:467fd23e3f9bdd5ac1b8ec6a6059e50b54e17300f79add147e7de48b2b243a7f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxNjNiMmE2Yzk2MTkwZTFmY2ViYjAzMjY1YTdjNTU1Yzk2YzJkNDQyNmQ1YTZmNzc2MTBiMDEyZGM1MTUxZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4ZGZhNGYyMDA0OTIyNjZhNDY4OTkwZjE2YzdhYzgyYjEwYjk1NThiYTdmZWViNWIzMmIyMDg0NmNkYmZiOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2MjEwZjE2MjZlZDhhYTlkNjM1MmY5NmRjYTBmYjhjZGRmY2JhNmEyODE4MzU3Yzc3MjgzZThlODQ2MzUwMmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2ODQwM2ZkYWViMzQxZDcyYjAwMjczMTk4ZGNiMTNjZjQ2MDNlODA5OWY3NTBiMmM3NzQ5MWY5MTVhMjk4ODMifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_ingress_rewrite.py#L88-L113",
+          "version": "repo-lines-v1:sha256:a80ecf0988b11ddc2485b21d3e6f615d9dfe6f129ff28a25322949832b1709a5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5MTRkYjRhMmEzNWU4NzYzZjg2MmYwYzNhYWZhODg0NDM0ZjFmNGZlOTZkODM3YTc4ZmEzYWNhNjQzNjA3MDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3YjNkNzEwYjdlY2MyYWZhM2QxZGY0ZTNjNTFiMGNjZjIyMjlhNGEwOWE2NmZjZGRhOGQzYjZlNDk5YjI2YTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI1ZTFjNmExMzNjNjViYTJmZTA2NmIwZThlNmFkZjc2ZTJiNmViZTJmMmY0NmMzMTk3YzE0OGFlYjg5MWExZjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_023da803c60b4032b4ebff43cb46ff3a",
+      "statement": "Ingress responses clear Accept-Encoding for sub_filter, send Cache-Control: no-store on every response and hide the upstream Content-Security-Policy header so the injection works and stale UI assets cannot survive an update.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L138-L140",
+          "version": "repo-lines-v1:sha256:f9e24e2c12f0c2be8c347ea2260107ce2a81bf03475495bcbb2dc8e93b82424c:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTRhM2I3OTBlYzE1ZDEyZTYzZmRjNmE5NjllYTRmNTdlOWY5MjY1N2Q3MDJiOThkOGVmOWVlYmE0MGRiZTYxNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTc0ZTlmOTZiZTQzODZjNTI3M2I4NzBkY2ExMzY0OTY4YThjMmE2ZDBlYWQxZWRhM2ZkYzc4Y2E2ODgxZWUwYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzQ4OWI3MGE0Njk0NjI0MjM4YmFmZjkyNmZiMDUwNGE0YjgwMjc2YWY1NDRkNTA3NTEyNTNmNTdlNzdmM2Q4ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjA3NzYyNzUxYzIwYzMzMmFlZDM5ZTBjOGJkNDdmMGZjOTVlOGQxMmI5MDcwMjcxNGM2ODgzZjU2OGRmNmUwMCJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/nginx.conf.template#L36-L46",
+          "version": "repo-lines-v1:sha256:a6b5c51e81cfc22c6837c872ed62a03cb9f6f1bc2fc82c650e861e8b611cbca2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiYmJhYTRmNjM5ZjYxYjNlZTMyMmViYTk0ZTNlZDU4NWI2MjQ3YmQ1N2ZiYjY0Mjk3Yjk2NzBiZmFhMDJlMWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxODAzMGEyZmU1NGVkZmZlNWJmNDQzZGIwZWVkZmI5NjM1Mjc2ZTk1YjlhMTVjNmY4Y2YzOWZiMjA5ZjA5YTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgzZmJhMWNiNDQwMjI0NTU2MDBjMjE4N2JmZTk2ZjNkMWM5MTk0MzVlMDZkY2YyN2VmMTUwNzk4ZTQ0MWQwMzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwMzY3NmVhYzE5OGY4MjU4NjM1NzNhNjU0YTM5YWFjZGJmYjI2MDk5NDI1MWVhZTYwNDc5MWUxNjY4YjkwMWEifQ"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/nginx.conf.template#L84-L85",
+          "version": "repo-lines-v1:sha256:97f5f2d262fc340c7240da7a21325e560cc572d136c82f67b334b5feac2b52ba:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTAwMmI5ZDYyY2ZmYjE2OGUwMjkyYWFkNTg3NjgzMDcwM2EzZDdiZTI0YTFiNThkM2M2ODFkODU1MmJiNWFlYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGVkZmY3ZmMzNDUwZGJlMWUzYWNiYmQwZDdkY2MzYTMxYjc5OTc4YjRlNWY4MzA2OGVlYmQxZWQ2YzY5OGMzOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWM5YWQ2MjVkMTVjZmRkMTNjODdiNjk2YWY3YzBlN2M3MWI1NWU4ODhhMjAxYTdiYmVhY2E2YWUwMzc2ZTVjZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmJlMTVmYjgyNzNjZTEzY2E0MTM3ZDYzM2RjZDAyNjRiNDQ3ZThiNmY5NjAyNTQxMDZkOTc3NWNhNWIzNDQxNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_930a9f2d9ec648aa955eecc223e3aff1",
+      "statement": "test_ingress_rewrite.py parses the real nginx template, applies its sub_filter rules to fixtures and asserts that navigation paths and the bank regex are prefixed while API suffixes stay bare and NEXT_PUBLIC_BASE_PATH is injected.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/tests/test_ingress_rewrite.py#L29-L43",
+          "version": "repo-lines-v1:sha256:9cff65ed6e26aab2c1de21b6d0186d45cd5e1550035f9913608253de0bc8d3aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllOGIzZDc4YTFkMjFiMDg3MWQ5MGM0Y2FiNjMyNjJkMjkwNGI4ZjhhZjliYzBlZmIyZmY4NGJlZTA2MjM0NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5NDE2ZTA5Zjc4YmEzMTZjMDMyNTY4MjEzYjg1NWVlNzU2ZTQxNTY1ZDkxOGYwOTUxOWM4MWZkNjIwZjQwNjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVhNDIwNDUyNzQ5NmE3ODFlNDA5Y2U4Yjc3ZTkxMDQyMmNlZGIyZmJmZmU0MDEwMWQ2YTkwNDE1ODQ0MTZjM2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQyZmM5OWM5MTZhMmE3ZGY5YWZhMmE5ODE2NWFmZGVmMTkwN2Y1NzM1OTk0M2YwY2NkNDU2YzVlZGY2MWNmODkifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_ingress_rewrite.py#L86-L140",
+          "version": "repo-lines-v1:sha256:c874660b700518ff3e6e22665866c8ee50be2d2ce324b4892d903e674c1ea683:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1NzNiNmY1ZTIwODRmM2I4MjE2MWI5OTM4MmIyODE5ODQ4MDc3NWU2NGMyYjI2OGMxODljMzkyY2JlODFkOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlOGNlZWU2NDFlNjU4ZDRkODEzN2MyZTRmZDkwN2VlZjg0NjQ4MjJiY2ZlYjc1ODhiMWM5YWI0NzgzMzA5MmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM2ZDVhYjhjMzQ0ZThmNjc4YTYwNTg3ZjYyNjM2YzY5MDliOTRmZjBkNjhjZGQzYTA4OTc5NGFhMzYwYTRlMTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkZTVkNmRmMGI3MjkzNDg1NmU3ODlmZmQ4ZDBmYTVlNzUzYjRiMzJlNTk5ZTg0NDdjZmI3ZGUxMGYyYmJmYmYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-25T23:47:00.311Z"
+  }
+}
