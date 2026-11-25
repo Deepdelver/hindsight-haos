@@ -8,6 +8,7 @@ whether and how to bump pins and ship a new add-on version.
 
 Run: python3 scripts/check_versions.py [--create-task]
 """
+
 import json
 import re
 import subprocess
@@ -34,8 +35,9 @@ def fetch_json(url):
 
 
 def pinned_control_plane():
-    match = re.search(r"@vectorize-io/hindsight-control-plane@([0-9][0-9A-Za-z.\-]*)",
-                      DOCKERFILE.read_text())
+    match = re.search(
+        r"@vectorize-io/hindsight-control-plane@([0-9][0-9A-Za-z.\-]*)", DOCKERFILE.read_text()
+    )
     return match.group(1) if match else None
 
 
@@ -79,10 +81,23 @@ def create_task(report):
         "5. Follow the normal Kanban assessment and PR/release flow. Do not push directly.\n"
     )
     result = subprocess.run(
-        ["hermes", "kanban", "create", "Assess Hindsight upstream version drift",
-         "--project", PROJECT, "--assignee", "default", "--idempotency-key", key,
-         "--body", body],
-        capture_output=True, text=True)
+        [
+            "hermes",
+            "kanban",
+            "create",
+            "Assess Hindsight upstream version drift",
+            "--project",
+            PROJECT,
+            "--assignee",
+            "default",
+            "--idempotency-key",
+            key,
+            "--body",
+            body,
+        ],
+        capture_output=True,
+        text=True,
+    )
     return key, result.returncode, (result.stdout + result.stderr).strip()
 
 

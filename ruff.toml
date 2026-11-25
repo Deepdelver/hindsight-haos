@@ -1,0 +1,14 @@
+# Zero Factory standard Ruff configuration for hindsight-haos.
+#
+# The Python code in this repository is tooling and standalone regression
+# scripts. Keep the lint set conservative (pyflakes + fatal pycodestyle) so
+# `ruff check --fix .` is deterministic and never rewrites test intent.
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"**/tests/*.py" = ["E402", "E741", "F401", "F403", "F811"]

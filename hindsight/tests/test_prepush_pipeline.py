@@ -12,6 +12,7 @@ Covers:
 
 Run: python3 hindsight/tests/test_prepush_pipeline.py
 """
+
 import os
 import re
 import shutil
@@ -24,6 +25,7 @@ HOOK = ROOT / ".githooks" / "pre-push"
 SCRIPT = ROOT / "scripts" / "pre-push-pipeline.sh"
 SETUP = ROOT / "scripts" / "setup-hooks.sh"
 WORKFLOW = ROOT / ".github" / "workflows" / "regression-tests.yml"
+PRECOMMIT = ROOT / ".zerofactory" / "precommit.sh"
 REGRESSIONS = [
     "python3 hindsight/tests/test_source_defaults.py",
     "python3 hindsight/tests/test_ingress_rewrite.py",
@@ -93,16 +95,17 @@ def run_detection(list_json, prefix=""):
         make_exec(bindir / "hermes", FAKE_HERMES)
         detector = td / "detect.py"
         detector.write_text(snippet)
-        env = clean_env({
-            "KEY": "prepush-KEYSHA",
-            "BOARD": "hindsight-haos",
-            "FAKE_LIST_JSON": list_json,
-            "FAKE_PREFIX": prefix,
-            "HERMES_LOG": str(td / "hermes.log"),
-            "_BINDIR": bindir,
-        })
-        result = subprocess.run(["python3", str(detector)], capture_output=True,
-                                text=True, env=env)
+        env = clean_env(
+            {
+                "KEY": "prepush-KEYSHA",
+                "BOARD": "hindsight-haos",
+                "FAKE_LIST_JSON": list_json,
+                "FAKE_PREFIX": prefix,
+                "HERMES_LOG": str(td / "hermes.log"),
+                "_BINDIR": bindir,
+            }
+        )
+        result = subprocess.run(["python3", str(detector)], capture_output=True, text=True, env=env)
         lines = result.stdout.strip().splitlines()
         return lines[-1].strip() if lines else f"<no output: {result.stderr.strip()}>"
 
@@ -124,24 +127,37 @@ def run_gate(list_json, regression_exit=0, git_log=None):
         td = Path(td)
         bindir, repo = stage_repo(td)
         marker = td / "regression-ran"
-        for name in ("test_source_defaults.py", "test_ingress_rewrite.py", "test_prepush_pipeline.py", "test_version_watch.py", "test_continit_providers.py"):
+        for name in (
+            "test_source_defaults.py",
+            "test_ingress_rewrite.py",
+            "test_prepush_pipeline.py",
+            "test_version_watch.py",
+            "test_continit_providers.py",
+        ):
             (repo / "hindsight" / "tests" / name).write_text(
                 "from pathlib import Path\n"
                 f"Path({str(marker)!r}).write_text('ran')\n"
                 f"raise SystemExit({regression_exit})\n"
             )
         log = td / "hermes.log"
-        env = clean_env({
-            "FAKE_REPO": str(repo),
-            "FAKE_LIST_JSON": list_json,
-            "HERMES_LOG": str(log),
-            "_BINDIR": bindir,
-        })
+        env = clean_env(
+            {
+                "FAKE_REPO": str(repo),
+                "FAKE_LIST_JSON": list_json,
+                "HERMES_LOG": str(log),
+                "_BINDIR": bindir,
+            }
+        )
         if git_log is not None:
             env["FAKE_GIT_LOG"] = git_log
-        result = subprocess.run(["bash", str(repo / "scripts" / SCRIPT.name)],
-                                cwd=str(repo), capture_output=True, text=True,
-                                env=env, input="")
+        result = subprocess.run(
+            ["bash", str(repo / "scripts" / SCRIPT.name)],
+            cwd=str(repo),
+            capture_output=True,
+            text=True,
+            env=env,
+            input="",
+        )
         log_text = log.read_text() if log.exists() else ""
         return result.returncode, marker.exists(), log_text
 
@@ -158,7 +174,12 @@ def run_gate_without_hermes():
         env = {"PATH": str(bindir), "FAKE_REPO": str(repo)}
         result = subprocess.run(
             [bash, str(repo / "scripts" / SCRIPT.name)],
-            cwd=str(repo), capture_output=True, text=True, env=env, input="")
+            cwd=str(repo),
+            capture_output=True,
+            text=True,
+            env=env,
+            input="",
+        )
         return result.returncode, result.stderr
 
 
@@ -172,15 +193,44 @@ def run_dispatcher(remote):
         script.write_text(f"#!/usr/bin/env bash\ntouch {str(marker)!r}\n")
         script.chmod(0o755)
         setup = SETUP.read_text()
-        dispatch = re.search(r"cat > \"\$HOOKDIR/pre-push\" <<'DISPATCH'\n(.*?)\nDISPATCH", setup, re.S)
+        dispatch = re.search(
+            r"cat > \"\$HOOKDIR/pre-push\" <<'DISPATCH'\n(.*?)\nDISPATCH", setup, re.S
+        )
         if not dispatch:
             return None
         dispatcher = td / "dispatch"
         make_exec(dispatcher, dispatch.group(1))
         env = clean_env({"FAKE_REPO": str(repo), "FAKE_REMOTE": remote, "_BINDIR": bindir})
-        subprocess.run(["bash", str(dispatcher)], cwd=str(repo),
-                       capture_output=True, text=True, env=env, input="")
+        subprocess.run(
+            ["bash", str(dispatcher)],
+            cwd=str(repo),
+            capture_output=True,
+            text=True,
+            env=env,
+            input="",
+        )
         return marker.exists()
+
+
+def run_precommit(phase, hookdir=None, binary=None):
+    """Run one Zero Factory precommit phase and return (rc, combined output)."""
+    env = os.environ.copy()
+    if hookdir is not None:
+        env.update(
+            {
+                "GIT_CONFIG_COUNT": "1",
+                "GIT_CONFIG_KEY_0": "core.hooksPath",
+                "GIT_CONFIG_VALUE_0": str(hookdir),
+            }
+        )
+    result = subprocess.run(
+        [str(binary or PRECOMMIT), phase],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    return result.returncode, (result.stdout + result.stderr).strip()
 
 
 def main():
@@ -208,34 +258,58 @@ def main():
     for regression in REGRESSIONS:
         ok &= check(f"GitHub workflow runs {regression}", regression in workflow)
     ok &= check("task creation uses derived key", '--idempotency-key "$KEY"' in script)
-    ok &= check("gate has done/none/default branches",
-                all(branch in script for branch in ("done)", "none)", "*)")))
+    ok &= check(
+        "gate has done/none/default branches",
+        all(branch in script for branch in ("done)", "none)", "*)")),
+    )
 
     # --- 2. Board detection ---------------------------------------------------
     done_json = '[{"idempotency_key":"prepush-KEYSHA","status":"done"}]'
     running_json = '[{"idempotency_key":"prepush-KEYSHA","status":"running"}]'
     body_json = '[{"body":"Pre-push gate for commit X (key prepush-KEYSHA).","status":"done"}]'
     ok &= check("detection: no task -> none", run_detection("[]") == "none", run_detection("[]"))
-    ok &= check("detection: done task -> done", run_detection(done_json) == "done", run_detection(done_json))
-    ok &= check("detection: running task -> running", run_detection(running_json) == "running", run_detection(running_json))
-    ok &= check("detection: body containing key also matches", run_detection(body_json) == "done", run_detection(body_json))
-    ok &= check("detection: tolerates a warning line before JSON",
-                run_detection(done_json, prefix="hermes startup warning") == "done",
-                run_detection(done_json, prefix="hermes startup warning"))
+    ok &= check(
+        "detection: done task -> done", run_detection(done_json) == "done", run_detection(done_json)
+    )
+    ok &= check(
+        "detection: running task -> running",
+        run_detection(running_json) == "running",
+        run_detection(running_json),
+    )
+    ok &= check(
+        "detection: body containing key also matches",
+        run_detection(body_json) == "done",
+        run_detection(body_json),
+    )
+    ok &= check(
+        "detection: tolerates a warning line before JSON",
+        run_detection(done_json, prefix="hermes startup warning") == "done",
+        run_detection(done_json, prefix="hermes startup warning"),
+    )
 
     # --- 3. End-to-end gate ---------------------------------------------------
     rc, ran, log = run_gate(done_json)
-    ok &= check("gate allows push when task done and tests pass",
-                rc == 0 and ran and "create" not in log, f"rc={rc} ran={ran} log={log!r}")
+    ok &= check(
+        "gate allows push when task done and tests pass",
+        rc == 0 and ran and "create" not in log,
+        f"rc={rc} ran={ran} log={log!r}",
+    )
     rc, ran, log = run_gate("[]")
-    ok &= check("gate creates keyed task and blocks push when none exists",
-                rc != 0 and not ran and "create" in log and "prepush-KEYSHA" in log,
-                f"rc={rc} ran={ran} log={log!r}")
+    ok &= check(
+        "gate creates keyed task and blocks push when none exists",
+        rc != 0 and not ran and "create" in log and "prepush-KEYSHA" in log,
+        f"rc={rc} ran={ran} log={log!r}",
+    )
     rc, ran, log = run_gate(running_json)
-    ok &= check("gate blocks push while assessment is running",
-                rc != 0 and not ran and "create" not in log, f"rc={rc} ran={ran} log={log!r}")
+    ok &= check(
+        "gate blocks push while assessment is running",
+        rc != 0 and not ran and "create" not in log,
+        f"rc={rc} ran={ran} log={log!r}",
+    )
     rc, ran, log = run_gate(done_json, regression_exit=1)
-    ok &= check("gate blocks push when regression test fails", rc != 0 and ran, f"rc={rc} ran={ran}")
+    ok &= check(
+        "gate blocks push when regression test fails", rc != 0 and ran, f"rc={rc} ran={ran}"
+    )
     rc, err = run_gate_without_hermes()
     ok &= check("gate fails closed when hermes CLI is missing", rc != 0, f"rc={rc} err={err!r}")
 
@@ -244,26 +318,80 @@ def main():
     # above models that (newest assessment commit with a trailer, older
     # change-set start without one); the create path echoes the derived key.
     rc, ran, log = run_gate("[]")
-    ok &= check("key skips pipeline commit, uses change-set start",
-                rc != 0 and "prepush-KEYSHA" in log and "prepush-LATERSHA" not in log,
-                f"log={log!r}")
+    ok &= check(
+        "key skips pipeline commit, uses change-set start",
+        rc != 0 and "prepush-KEYSHA" in log and "prepush-LATERSHA" not in log,
+        f"log={log!r}",
+    )
 
     sole = r"@@KEY@@KEYSHA\tstart work\n\n"
     rc, ran, log = run_gate("[]", git_log=sole)
-    ok &= check("key uses sole unpushed commit",
-                rc != 0 and "prepush-KEYSHA" in log, f"log={log!r}")
+    ok &= check(
+        "key uses sole unpushed commit", rc != 0 and "prepush-KEYSHA" in log, f"log={log!r}"
+    )
 
-    all_trailers = (r"@@KEY@@LATERSHA\tassessment docs\n\nPipeline-Key: KEYSHA\n\n"
-                    r"@@KEY@@KEYSHA\tstart work\n\nPipeline-Key: OLDER\n\n")
+    all_trailers = (
+        r"@@KEY@@LATERSHA\tassessment docs\n\nPipeline-Key: KEYSHA\n\n"
+        r"@@KEY@@KEYSHA\tstart work\n\nPipeline-Key: OLDER\n\n"
+    )
     rc, ran, log = run_gate("[]", git_log=all_trailers)
-    ok &= check("key falls back to HEAD when all commits have trailers",
-                rc != 0 and "prepush-HEADSHA" in log, f"log={log!r}")
+    ok &= check(
+        "key falls back to HEAD when all commits have trailers",
+        rc != 0 and "prepush-HEADSHA" in log,
+        f"log={log!r}",
+    )
 
     # --- 4. Global dispatcher -------------------------------------------------
-    ok &= check("dispatcher gates hindsight-haos repos",
-                run_dispatcher("https://github.com/Deepdelver/hindsight-haos.git") is True)
-    ok &= check("dispatcher ignores other repos",
-                run_dispatcher("https://github.com/other/repo.git") is False)
+    ok &= check(
+        "dispatcher gates hindsight-haos repos",
+        run_dispatcher("https://github.com/Deepdelver/hindsight-haos.git") is True,
+    )
+    ok &= check(
+        "dispatcher ignores other repos",
+        run_dispatcher("https://github.com/other/repo.git") is False,
+    )
+
+    # --- 5. Zero Factory precommit gate --------------------------------------
+    ok &= check("zf precommit exists", PRECOMMIT.is_file())
+    ok &= check(
+        "zf precommit is executable",
+        PRECOMMIT.is_file() and os.access(PRECOMMIT, os.X_OK),
+    )
+    gate = PRECOMMIT.read_text() if PRECOMMIT.is_file() else ""
+    ok &= check("zf precommit has bash shebang", gate.startswith("#!/usr/bin/env bash"))
+    ok &= check("zf precommit fails fast", "set -e" in gate)
+    ok &= check("zf precommit cds to repo root", 'cd "$ROOT_DIR"' in gate)
+    for func in ("run_format()", "run_build()", "run_test()", "install_hook()"):
+        ok &= check(f"zf precommit defines {func}", func in gate)
+    for case in ("format)", "build)", "test)", "install-hook)", "all | *)"):
+        ok &= check(f"zf precommit dispatches {case}", case in gate)
+    for regression in REGRESSIONS:
+        ok &= check(
+            f"zf precommit registers {regression}",
+            regression.replace("python3 ", "") in gate,
+        )
+    for phase in ("format", "build"):
+        rc, out = run_precommit(phase)
+        ok &= check(f"zf precommit {phase} phase exits 0", rc == 0, out[-500:])
+    with tempfile.TemporaryDirectory() as td:
+        hooks = Path(td) / "hooks"
+        rc, out = run_precommit("install-hook", hookdir=hooks)
+        linked = hooks / "pre-commit"
+        ok &= check(
+            "zf precommit install-hook links a valid pre-commit hook",
+            rc == 0 and linked.is_symlink() and linked.resolve() == PRECOMMIT,
+            out[-500:],
+        )
+        # A symlinked hook must still find the repo root: BASH_SOURCE points at
+        # the hook, not at .zerofactory/precommit.sh. Running via the link is
+        # the only way to catch a wrong ROOT_DIR (ruff would silently see an
+        # empty directory).
+        rc, out = run_precommit("format", binary=linked)
+        ok &= check(
+            "zf precommit hook resolves repo root through the symlink",
+            rc == 0 and "No Python files found" not in out,
+            out[-500:],
+        )
 
     print("\nRESULT:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
