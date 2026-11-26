@@ -24,6 +24,12 @@ options:
   llm_api_key: ""
   llm_model: gemma-4-e2b-it
   llm_base_url: ""
+  # Optional dedicated consolidation route (expert mode only). Empty means
+  # "reuse the normal LLM settings"; no credential belongs in these defaults.
+  consolidation_llm_provider: ""
+  consolidation_llm_model: ""
+  consolidation_llm_base_url: ""
+  consolidation_llm_api_key: ""
   embeddings_provider: onnx
   embeddings_model: auto
   reranker_provider: onnx
@@ -53,6 +59,12 @@ schema:
   llm_api_key: password
   llm_model: str
   llm_base_url: str
+  # Same types as the main LLM options: non-optional because a "" default is
+  # declared above (an optional `str?` with a default is invalid in HA).
+  consolidation_llm_provider: str
+  consolidation_llm_model: str
+  consolidation_llm_base_url: str
+  consolidation_llm_api_key: password
   embeddings_provider: list(onnx|local|openai|cohere|tei|hindsight|litellm|litellm-sdk|openrouter|requesty|google)
   embeddings_model: str
   embeddings_api_key: password?
@@ -71,6 +83,6 @@ slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.25"
+version: "1.2.26"
 watchdog: "http://[HOST]:[PORT:8888]/health"
 webui: "http://[HOST]:[PORT:9999]"

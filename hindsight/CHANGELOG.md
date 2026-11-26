@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.26
+
+- Expose a dedicated consolidation-LLM route in expert mode: `consolidation_llm_provider`, `consolidation_llm_model`, `consolidation_llm_base_url` and `consolidation_llm_api_key` map to Hindsight 1.3.0's `HINDSIGHT_API_CONSOLIDATION_LLM_*` variables. Verified against the local 1.3.0 configuration reference and `hindsight_api/config.py` — each variable falls back to its normal `HINDSIGHT_API_LLM_*` counterpart when unset. All four options default to `""`, so an upgrade writes no new variable and keeps today's routing. `simple` mode resets them to empty, so a stored expert value cannot turn a local-only install into a remote caller. This is an operational throughput fix for the pending-consolidation backlog, not a recall/capture fix; the model recommendation must be measured on the real 52,758-character prompt (no measured model finished inside 240 s here, so no "fast" claim is made). Regression coverage: `test_source_defaults.py` checks the four empty defaults and schema types, and `test_continit_providers.py` covers present, partial, absent and simple-mode mapping (cases h–k). Upstream pins stay at 1.3.0.
+
 ## 1.2.25
 
 - Bump both upstream pins from 1.2.3 to 1.3.0: `hindsight-api-slim[local-llm,local-onnx]` (PyPI) and `@vectorize-io/hindsight-control-plane` (npm). Compatibility was verified before bumping: npm 1.3.0 carries gitHead `937886199e0e…`, the upstream `Release v1.3.0` commit updates the Python packages and the Control Plane together, and both packages were published on 2026-11-24. The two extras used by this add-on still exist and no configuration key was removed or renamed. Upstream 1.3.0 ships migration work (PR #6825 fixes the migration search_path) and enables knowledge banks by default; allow extra time for the first start and wait for `/health`.
