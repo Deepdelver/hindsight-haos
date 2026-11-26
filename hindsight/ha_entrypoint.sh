@@ -425,7 +425,11 @@ run_one_script() {
     fi
   fi
 
-  sed -i '1a exit 0' "$script"
+  # Never rewrite the script after running it. These files are invoked again on
+  # every add-on start (and a supervisor may restart a service in place), so the
+  # old post-run `exit 0` injection here turned the second run into a no-op -- and in
+  # source mode it left an `exit` statement in a file sourced by this shell.
+  # The shebang rewrite above is idempotent and deliberately stays.
 }
 
 if [ -d /etc/cont-init.d ]; then
