@@ -175,9 +175,13 @@ def main():
             "task creation is idempotent and targeted at the hindsight-haos board",
             rc == 0
             and len(calls) == 1
-            and calls[0][:5] == [
-                "hermes", "zerofactory", "create",
-                "Assess Hindsight upstream version drift", "--description",
+            and calls[0][:5]
+            == [
+                "hermes",
+                "zerofactory",
+                "create",
+                "Assess Hindsight upstream version drift",
+                "--description",
             ]
             and "--board" in calls[0]
             and "deepdelver-hindsight-haos" in calls[0]

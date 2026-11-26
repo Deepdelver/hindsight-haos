@@ -87,24 +87,39 @@ def create_task(report):
         "1. Verify the releases and compatibility (API and control plane must match).\n"
         "2. Update hindsight/versions.json and both Dockerfile pins so the API pin matches recorded_api.\n"
         "3. Update README.md / hindsight/DOCS.md and CHANGELOG.md; bump config.yaml version.\n"
-        "4. Run all five regression suites in hindsight/tests/: test_source_defaults.py,\n"
-        "   test_ingress_rewrite.py, test_prepush_pipeline.py, test_version_watch.py\n"
-        "   and test_continit_providers.py.\n"
+        "4. Run all six regression suites in hindsight/tests/: test_source_defaults.py,\n"
+        "   test_ingress_rewrite.py, test_prepush_pipeline.py, test_version_watch.py,\n"
+        "   test_continit_providers.py and test_setup_gh_issues.py.\n"
         "5. Follow the Zero Factory flow: commit on a task branch, let the factory run precommit, open a PR, and let auto-merge + deployment handle the rest. Do not push directly to main.\n"
     )
     result = subprocess.run(
-        ["hermes", "zerofactory", "create",
-         "Assess Hindsight upstream version drift",
-         "--description", body,
-         "--board", "deepdelver-hindsight-haos",
-         "--repo", "deepdelver-hindsight-haos",
-         "--assignee", "zf-builder",
-         "--status", "todo",
-         "--priority", "P1",
-         "--category", "feature",
-         "--dedup-key", key,
-         "--actor", "watchdog"],
-        capture_output=True, text=True)
+        [
+            "hermes",
+            "zerofactory",
+            "create",
+            "Assess Hindsight upstream version drift",
+            "--description",
+            body,
+            "--board",
+            "deepdelver-hindsight-haos",
+            "--repo",
+            "deepdelver-hindsight-haos",
+            "--assignee",
+            "zf-builder",
+            "--status",
+            "todo",
+            "--priority",
+            "P1",
+            "--category",
+            "feature",
+            "--dedup-key",
+            key,
+            "--actor",
+            "watchdog",
+        ],
+        capture_output=True,
+        text=True,
+    )
     return key, result.returncode, (result.stdout + result.stderr).strip()
 
 

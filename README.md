@@ -212,6 +212,7 @@ python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression t
 python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tests
 python3 hindsight/tests/test_version_watch.py     # upstream version watch
 python3 hindsight/tests/test_continit_providers.py # provider mapping / crash-loop guard
+python3 hindsight/tests/test_setup_gh_issues.py   # GitHub issue templates + labels
 python3 scripts/check_versions.py                 # live comparison (no changes)
 ```
 
@@ -225,10 +226,10 @@ The flow is:
    aborted at this point.
 2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
    behaviour, ports, options or troubleshooting changed, and adds or updates
-   tests in `hindsight/tests/`. It runs all five regression suites (source
-   defaults, ingress, pre-push gate, version watch and cont-init provider
-   mapping) and reports.
-3. Re-run `git push`. The hook sees the completed task, runs all five regression
+   tests in `hindsight/tests/`. It runs all six regression suites (source
+   defaults, ingress, pre-push gate, version watch, cont-init provider mapping
+   and GitHub issue setup) and reports.
+3. Re-run `git push`. The hook sees the completed task, runs all six regression
    suites itself and allows the push only if they pass.
 
 A new change set starts with any commit that lacks a `Pipeline-Key:` trailer;
@@ -252,7 +253,18 @@ detection, the idempotent task key and the CLI exit codes offline.
 
 If a push is blocked, look for the task keyed to the first unpushed commit
 without a `Pipeline-Key:` trailer (the key and HEAD are printed by the hook):
-its status must be `done`, and all five regression suites must pass.
+its status must be `done`, and all six regression suites must pass.
+
+## GitHub issues and Zero Factory triage
+
+Bug reports and feature proposals use the YAML forms in
+`.github/ISSUE_TEMPLATE/`. Both forms apply the `zerofactory` label, which is
+the explicit human signal for Zero Factory to open a human-gated Triage task;
+blank issues are disabled and questions are directed to GitHub Discussions.
+`python3 scripts/setup_gh_issues.py --path . --align` regenerates the
+repo-aware `config.yml`, preserves customized forms that already carry the
+label, and provisions the standard labels (`zerofactory`, `ai-investigate`,
+`bug`, `feature`, `p0`–`p3`) via the GitHub CLI when authenticated.
 
 ## Troubleshooting
 
