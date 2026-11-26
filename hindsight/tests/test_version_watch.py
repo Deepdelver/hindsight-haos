@@ -135,10 +135,12 @@ def main():
             key,
         )
         ok &= check(
-            "task creation is idempotent and targeted",
+            "task creation is idempotent and targeted at the hindsight-haos board",
             rc == 0
             and len(calls) == 1
-            and calls[0][:3] == ["hermes", "kanban", "create"]
+            and calls[0][:5] == ["hermes", "kanban", "--board", "hindsight-haos", "create"]
+            and "--board" in calls[0]
+            and "hindsight-haos" in calls[0]
             and "--idempotency-key" in calls[0]
             and key in calls[0]
             and "--assignee" in calls[0]

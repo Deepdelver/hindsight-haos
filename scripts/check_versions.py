@@ -84,6 +84,8 @@ def create_task(report):
         [
             "hermes",
             "kanban",
+            "--board",
+            BOARD,
             "create",
             "Assess Hindsight upstream version drift",
             "--project",
