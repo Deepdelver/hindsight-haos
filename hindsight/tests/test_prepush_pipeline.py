@@ -9,6 +9,9 @@ Covers:
 4. End-to-end with fake git/hermes: push allowed only when the task is done and
    all five regression suites exit 0.
 5. The GitHub regression workflow runs the same five suites as the push hook.
+6. Suite-list drift guard: the five places that spell out the regression suite
+   paths must describe the same set, with a self-check that proves the guard
+   fails on a missing suite or a mistyped path.
 
 Run: python3 hindsight/tests/test_prepush_pipeline.py
 """
@@ -26,6 +29,7 @@ SCRIPT = ROOT / "scripts" / "pre-push-pipeline.sh"
 SETUP = ROOT / "scripts" / "setup-hooks.sh"
 WORKFLOW = ROOT / ".github" / "workflows" / "regression-tests.yml"
 PRECOMMIT = ROOT / ".zerofactory" / "precommit.sh"
+CHECK_VERSIONS = ROOT / "scripts" / "check_versions.py"
 REGRESSIONS = [
     "python3 hindsight/tests/test_source_defaults.py",
     "python3 hindsight/tests/test_ingress_rewrite.py",
@@ -244,6 +248,88 @@ def run_precommit(phase, hookdir=None, binary=None):
     return result.returncode, (result.stdout + result.stderr).strip()
 
 
+def _first_group(text, pattern):
+    match = re.search(pattern, text, re.S)
+    return match.group(1) if match else ""
+
+
+# The five places that spell out the regression suites. Two of them live in
+# the pre-push script (the done branch and the assessment task body), so they
+# are labelled separately and parsed from disjoint regions of the same file.
+SUITE_PATH = re.compile(r"hindsight/tests/[A-Za-z0-9_./-]+\.py")
+
+
+def extract_precommit_suites(text):
+    return set(SUITE_PATH.findall(_first_group(text, r"REGRESSION_SUITES=\((.*?)\)")))
+
+
+def extract_prepush_run_suites(text):
+    block = _first_group(text, r'case "\$STATUS" in\s*\n\s*done\)(.*?)\n\s*;;')
+    return set(SUITE_PATH.findall(block))
+
+
+def extract_prepush_body_suites(text):
+    block = _first_group(text, r"--body-file - <<EOF[^\n]*\n(.*?)\nEOF")
+    return set(SUITE_PATH.findall(block))
+
+
+def extract_workflow_suites(text):
+    return set(re.findall(r"run:\s*python3\s+(hindsight/tests/\S+\.py)", text))
+
+
+def extract_check_versions_suites(text):
+    block = _first_group(text, r"body = \((.*?)\n    \)")
+    names = re.findall(r"test_[A-Za-z0-9_]+\.py", block)
+    return {"hindsight/tests/" + name for name in names}
+
+
+SUITE_SOURCES = (
+    ("precommit REGRESSION_SUITES", PRECOMMIT, extract_precommit_suites),
+    ("pre-push done branch", SCRIPT, extract_prepush_run_suites),
+    ("pre-push task body", SCRIPT, extract_prepush_body_suites),
+    ("GitHub workflow", WORKFLOW, extract_workflow_suites),
+    ("version-watch task body", CHECK_VERSIONS, extract_check_versions_suites),
+)
+
+
+def load_suite_sources():
+    return {label: path.read_text() for label, path, _ in SUITE_SOURCES}
+
+
+def suite_parity(texts):
+    """Map each source label to the set of suite paths it actually lists."""
+    return {label: frozenset(extractor(texts[label])) for label, _, extractor in SUITE_SOURCES}
+
+
+def parity_ok(sets):
+    """All five sources must parse and resolve to one identical set."""
+    parsed = [set(paths) for paths in sets.values()]
+    return bool(parsed) and all(parsed) and len({frozenset(p) for p in parsed}) == 1
+
+
+def guard_self_check(texts):
+    """Prove the guard fails for a missing suite and for a mistyped path."""
+    missing_label = "pre-push task body"
+    missing_text = texts[missing_label].replace(
+        "   python3 hindsight/tests/test_continit_providers.py\n", ""
+    )
+    wrong_label = "GitHub workflow"
+    wrong_text = texts[wrong_label].replace(
+        "python3 hindsight/tests/test_ingress_rewrite.py",
+        "python3 hindsight/tests/test_ingress_rewrit.py",
+    )
+    return {
+        "self-check: missing-suite mutation applied": missing_text != texts[missing_label],
+        "self-check: wrong-path mutation applied": wrong_text != texts[wrong_label],
+        "self-check: guard rejects a source missing one suite": not parity_ok(
+            suite_parity({**texts, missing_label: missing_text})
+        ),
+        "self-check: guard rejects a mistyped suite path": not parity_ok(
+            suite_parity({**texts, wrong_label: wrong_text})
+        ),
+    }
+
+
 def main():
     ok = True
     script = SCRIPT.read_text() if SCRIPT.is_file() else ""
@@ -430,6 +516,23 @@ def main():
             rc == 0 and "No Python files found" not in out,
             out[-500:],
         )
+
+    expected = {regression.replace("python3 ", "") for regression in REGRESSIONS}
+    sources = load_suite_sources()
+    sets = suite_parity(sources)
+    for label, paths in sets.items():
+        ok &= check(
+            f"suite guard parses {label}",
+            paths == expected,
+            f"got {sorted(paths)}",
+        )
+    ok &= check(
+        "suite guard: all five sources list the same five suites",
+        parity_ok(sets),
+        f"sets={ {label: len(paths) for label, paths in sets.items()} }",
+    )
+    for name, condition in guard_self_check(sources).items():
+        ok &= check(name, condition, "")
 
     print("\nRESULT:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
