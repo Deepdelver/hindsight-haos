@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:a1d33dd6217409b0c90cfada6458c1319b41f19fe887d0965fe9e529053d52a1",
+  "claims": [
+    {
+      "id": "claim_65b7c5936d464499a7da570f5aa53f6b",
+      "statement": "The Hindsight API pip package and the Control Plane npm package are pinned in the Dockerfile at the same version and recorded together in versions.json; a mismatch causes UI 404s and empty memory tabs, so both are bumped in one release.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L124-L129",
+          "version": "repo-lines-v1:sha256:9372de07401059df4e016f2134bbef8fe3eca8d04683defde85d6faa0ce9a00a:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODFkMDVmNDk1OTU1NDkyOTViOWUzNjUxNzg2MTNmY2ZhY2JjMDVkYzM0ZjBhYWRhOGNmNzdlMTlkMjc2NDkwNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWEzNjZiNzkwNDc4YjFjN2RhODFkYzVmYjRmMzdlZjAwYzFkMDE2NTYxOGNjMTBhZWIxOWVhN2NjZmZjMTE4NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWVkOGFiYTVhNGJmN2ViM2IyZTY4OTM3MDNhNzBlMjE5MzA2ZGY4MjQzODg2ODExNDY0ZWM5Yzk4ZTFiNzM3ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOThiMmM3NzYxODFjYmQ3YTE5NTE3N2E3NDEzNzExZTU1N2VjMTNjOGYzMmEzYTkwOTI0NmMwMDJkZWNjYzc0ZiJ9"
+        },
+        {
+          "resource": "repo://hindsight/Dockerfile#L57-L90",
+          "version": "repo-lines-v1:sha256:89e7501fd0f2258359f971e4dab659ba576275d23243ff6df8657b8db0564119:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZWZjODUzY2JhM2QzZDMzZTE2ODRmOTJlZTc2MjlmYzMzMWFhZGRjYmFiNDM0YTBkOTdiYjE4MjJhYTQwZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0ZjQxNmJkNzVhY2U3NjZlZDQwZGRhYmIwZDkwOTA0N2U3M2QwZjJmYTc2MmUyZTU0NzhkYTEwNTUwYTYxOWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM1MjljOWQ5YmRkZWYyZDVhMTU1NGJhYWY5YjJiNGRjOWI5NTI4YzFiOGNiNjk1Mjk0ZWIxM2VjMDBiYmVhZDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzMDk2NDU3NzFmYWEyNjM1ZWUxYjVkZmFiYzFkMDcxODE4YzQ1ODZiNTIyZjIyZmM5YTM3ZDQzNzMwMjJjYzcifQ"
+        },
+        {
+          "resource": "repo://hindsight/versions.json#L1-L4",
+          "version": "repo-lines-v1:sha256:6073a0de5d7b018d35d54cad39270d04249d56a807b65af67786b99916760bc4:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmYjA4ZmRhMWFjYjk1N2I2MTE2YmQzNzgxMWExZmU0MWEwMTYxMWMwNjMxZWRiZjc4NmQ2ODg5YTI3YTU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_224fceb9c5fc44fc8ea6c1bc4aa9543e",
+      "statement": "check_versions.py fetches npm and PyPI latest versions, compares them with numeric version tuples to avoid build-metadata false drift, and reports API, control-plane and Dockerfile-pin drift separately with exit codes 0, 2 and 3.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/check_versions.py#L104-L125",
+          "version": "repo-lines-v1:sha256:cad122944e1cf58732bc8526a744df7eb6475fbb09212c124f35c6f7da252b44:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyZTMxMjU3ZGMwYWUxZDU5MzAzN2MyODBjOWFkNTA4MTliOGE2YzhjZjcyOGJlMDcxNmQwMGEzZWVjYzA0YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlZGMzNTg2NGQ3ZDVjZjgyZGZkNjhiMjUxOGE2MGUwNDRlODA5ZjY5NWRlMjhhNjZjMjFlNDdlNDE2MDg4NDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3MGJlYjA5NzJiNzZhZGExZmUxYjU5NGRhZTgyOWZhZDJjNjYyMmY4ZjZlYjkyMTEyNjRkZjRhNDBlZjU2Y2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkNDEzNDBjYzIzOWExNTljZTliNjAyMmU5ZjYzMjI4MzJlMmVhZDc2Y2FlOWU0NzU0ZDIxMGViOGZiNmQ1ZTgifQ"
+        },
+        {
+          "resource": "repo://scripts/check_versions.py#L22-L56",
+          "version": "repo-lines-v1:sha256:9b034059ee10d6b4421b58f23ce081222daa57a125f4f6b7b8d4582af966720f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2OGU0M2U5MzRkYTBhNDU3OTZhZDUzNGVkMTNmYmVmOTNhZjM5NGU1YmI1OTdhMzAyOTRjMWIyMDJmYjRhYzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhMWJlZjk3MjRhOTdkNTkyOTc1YzZjNGFiM2ExYzhjOWM1YTNlNDkxZjI3Yjk4NzQxYzZlNmFmYTVjODFiMjUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3NWY5MTQyYTdiNzU1Y2I2YzgyYzY2MDQwYzk0NDM4YmExNmI2YTE0N2M3MGUyZDI2OGM0ZWJjNmZhZDcwZGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6ec3cebe5e664c1abf42599570af3088",
+      "statement": "With --create-task the version watch opens one idempotent Kanban assessment task keyed by the latest API and control-plane versions and never changes pins or runtime code itself.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L130-L134",
+          "version": "repo-lines-v1:sha256:00f4ce1ccef3a5bc5bc6c8a4676e64e5a7731396996f19666a8162f2af5294b4:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWZlNzNlODg4ZGViMmJkNGNkMDc1YzJlYTZhNTY5MjZiZmRmYTRmMjIxN2FhM2FiN2QzODdlNThiYWY4ODg2OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzhlOWUwZWI3MzVhY2QxNTU3ZmU1ZjBmYzhmZWJlM2E0ZmNmMTk2NWI5YWFkODZmZTlmOTU1ZDk1MjkwMWU4ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTgxNjYyZmUzZmEyNDc2MGU4ZDMxNjM3Zjc0OWZlY2IxMzQ4ZjBhMzFiMTEzY2UyNTlmYzI5MjIwNTU5ZDYyOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzQ4OWI3MGE0Njk0NjI0MjM4YmFmZjkyNmZiMDUwNGE0YjgwMjc2YWY1NDRkNTA3NTEyNTNmNTdlNzdmM2Q4ZSJ9"
+        },
+        {
+          "resource": "repo://scripts/check_versions.py#L68-L101",
+          "version": "repo-lines-v1:sha256:0cfffda60506127223a4c19533e9228d7e26d56bf4d7625f5514ef5131d9e6dc:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0YTZjZTkzMGIzYzZlYWFjY2RkMjczY2I3NGY4NmYxNDhjNjgwOGNkZTEzMjlhNTRkNTU0NzY1YzEzYTM0MjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2OGMzYTU0MzA5Yjk4YjU4OTY4M2U0ZjQwNjg1NTk1YzlhMGQ2OTgyNjM2OWVhZWE5Yjc2ZDEyMzUyODNmM2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRmYmQwMDkzMTRiYzI3MDg0MTY3MzRhMDJhZTVmZjM5YTFlNDhhMDUwYmU5MWY0M2IyZmFhOTIwMDJjNjJiZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg5M2JkNjZlMmJiNzFmM2I4YTkyNDA2NGJiZjdiMDdjNTkwM2E3NzNmYTRmOGMzNTQ2MDYwMzg2NjcxZDNhNzMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_da98d84435914eb388527cd9fe058750",
+      "statement": "The pre-push pipeline derives its change-set key from the first unpushed commit without a Pipeline-Key trailer so commits produced by the assessment itself do not start a new task.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/pre-push-pipeline.sh#L17-L35",
+          "version": "repo-lines-v1:sha256:ee74850ac3b61950e13f3f912d025830e0d26c43c289a0716bb514e5bfb5d6ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzOTg3ZTNiODU0NDQ5ZGQzNTUzNzEyYmFmODk0OGM5ZGRmNTNiNjk1MTk2YjkzY2NiYTM0ZTFhYmFjMjMxNWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkNGRmMTBkNTk2NmJjNzFlMGE3YTY3ZTUyMmJmZWY4NjcxMzFhMzliNDFiODMxZTcyNTkwMDFlOTFhOGM0MTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjM2RmOTI4OGFhMGQ3YjBiYmMxNjI5MTc5ZTk2MzJhYjk5MzVkNjc4YjdjYmY4YTQ2YzliZDcxMDZhNzMzNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhMjk0NjFjNDRjYjBjN2M2ZWI5N2I4ZDk4ZDMzNmVjZDUzNmY5MjAwYmVjZmRmZTQyZDY0MTBlZmFmMzg4MzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9866e688e2424d4785e4ce6bb2378b24",
+      "statement": "A push is allowed only when the keyed Kanban assessment task is done, at which point the pipeline runs five regression suites; a missing or running task creates a task or blocks the push.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/pre-push-pipeline.sh#L37-L108",
+          "version": "repo-lines-v1:sha256:4b156cc25d176e784fbbce00545da0a2c41e190c26379cbab4e79364ee793df0:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3MDYzMmU2OTE0ZjA2MjM1OWI1NmNiOWVmMWUwMzU4MzQyZGEzYWE5MzEwZTEyMjZkZDdmNzA2NjJjZTFjZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmMzA0NjhlNTliZjc3YTVlZGQ5ZWVjMzQzNGQ1ODU0MTU3MDg1ZmU0MmViYzExMmUzOWNiYzk5OWFiOWVlZjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc2MWZlOGJjNDM4NDU5ZGQzNGU2MGEyZWQxODUzZWEwOGVmYmJmODQyZWQwODkwMWQ1YmYyZjJlNjRiMWE3N2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0YTJiZWNmZjhhZmIzNGRiMjYwZGFiYzk2OTE1ZmZlY2ZkZTg0ODkyOTU0MWM2MTkzZGU2ZDE2NGMyMWU4ZGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5d58d05668b2430a828de6973e7bb9ff",
+      "statement": "GitHub branch protection on main requires a pull request and the regression status check from the GitHub Actions workflow, which runs all five suites; --no-verify skips only the local hook.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/regression-tests.yml#L1-L27",
+          "version": "repo-lines-v1:sha256:974970d4baef890c3b39f25a38ae593d3f04769eab74a86825622769ed811094:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNjY0MWZjOGUwMTk5ZTc2YjJhZjEzNTcwZDM2ZDYwNTVmMTEyMjBkNjNlY2Y5NzVmNjIxODYzNWYwNWQzMGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5ZWExMmE3Nzg3Mzc2ZjBhZDM2NGUyMTAyMmY4Y2FkYzFhODU4OTExN2YxZjQ5Y2MyZjZiZDQ1N2JjZjhjNmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://README.md#L155-L157",
+          "version": "repo-lines-v1:sha256:1127863f465c0be89c5ec3372e55bcb1e9b9ba567a6c1e15a0360f524c816d90:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzFhODkyMDMxOGNjZWYwZjY5MWNiOTA2NmJlMDZlNDRlOWUyMzEzMDhiY2NmZTIyMWM3NjUzZjhiN2VlM2Y1OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWNiNThhZTM5YWExYjdlOTQ2YWI5NWYzNWRjZjE4NjY0YWFiODdlNDMyODM4ZWNmMDgwOGQzOWM1YjQzMzUzMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTYxOTQ3M2NmNDE0OGE1YWIyMTIyNzU5ZjU0NGE2NzQ4YmQ2NTFjYzU2YjQ5NjdjMGI2NDAzMTY2MGM0MjQwOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDI4YzVjZWQwNTdlNDMxNzY5NDNjNTU5NDE4OTRkYzhlZjA5ODhlMzFkOTc4MWJjNDQ1Y2JkYmQ0YTgxMzQ3NiJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-25T23:47:00.311Z"
+  }
+}
