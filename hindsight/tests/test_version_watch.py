@@ -175,16 +175,26 @@ def main():
             "task creation is idempotent and targeted at the hindsight-haos board",
             rc == 0
             and len(calls) == 1
-            and calls[0][:5] == ["hermes", "kanban", "--board", "hindsight-haos", "create"]
+            and calls[0][:5]
+            == [
+                "hermes",
+                "zerofactory",
+                "create",
+                "Assess Hindsight upstream version drift",
+                "--description",
+            ]
             and "--board" in calls[0]
-            and "hindsight-haos" in calls[0]
-            and "--idempotency-key" in calls[0]
+            and "deepdelver-hindsight-haos" in calls[0]
+            and "--repo" in calls[0]
+            and "--dedup-key" in calls[0]
             and key in calls[0]
             and "--assignee" in calls[0]
-            and "--project" in calls[0],
+            and "zf-builder" in calls[0]
+            and "--status" in calls[0]
+            and "todo" in calls[0],
             str(calls),
         )
-        body = calls[0][calls[0].index("--body") + 1]
+        body = calls[0][calls[0].index("--description") + 1]
         ok &= check(
             "task body reports both Dockerfile pins",
             "Dockerfile API pin: 1.2.3" in body and "Dockerfile control-plane pin: 1.2.3" in body,
