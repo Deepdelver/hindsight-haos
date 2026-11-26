@@ -87,6 +87,7 @@ Assess the changes in this repository ($REPO) and finish these items before any 
 1. Assessment: review commits/diff since origin/main and identify behaviour changes, new/removed options, ports, config keys and defaults. Note any risk or regression.
 2. Docs: make sure README.md and hindsight/DOCS.md describe the current behaviour, features, ports, configuration and troubleshooting. Update them if anything is missing or stale.
 3. Tests: make sure hindsight/tests/ covers changed behaviour. Add or update tests, then run:
+   python3 hindsight/tests/test_source_defaults.py
    python3 hindsight/tests/test_ingress_rewrite.py
    python3 hindsight/tests/test_prepush_pipeline.py
    python3 hindsight/tests/test_version_watch.py
