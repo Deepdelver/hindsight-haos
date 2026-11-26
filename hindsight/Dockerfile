@@ -63,7 +63,7 @@ RUN \
     python3 -m venv /opt/hindsight-venv && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir --upgrade pip && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir \
-        "hindsight-api-slim[local-llm,local-onnx]==1.2.3"
+        "hindsight-api-slim[local-llm,local-onnx]==1.3.0"
 
 # Control Plane: Next.js standalone bundle, shipped as an npm package.
 # Node 22 matches the major the upstream image builds with.
@@ -81,7 +81,7 @@ RUN \
     mkdir -p /opt/control-plane && \
     cd /opt/control-plane && \
     npm install --no-audit --no-fund --omit=dev \
-        @vectorize-io/hindsight-control-plane@1.2.3 && \
+        @vectorize-io/hindsight-control-plane@1.3.0 && \
     # The package ships a standalone/ directory; copy it to the root so
     # server.js is found. Keep node_modules: server.js still requires `next`.
     cp -a node_modules/@vectorize-io/hindsight-control-plane/standalone/. /opt/control-plane/ && \
