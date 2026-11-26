@@ -33,6 +33,19 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
    - **log_level** — `debug`, `info`, `warning`, `error`
 4. Start the addon
 
+## Version compatibility
+
+This add-on pins both upstream components to **1.3.0**:
+`hindsight-api-slim[local-llm,local-onnx]==1.3.0` from PyPI and
+`@vectorize-io/hindsight-control-plane@1.3.0` from npm. Both 1.3.0 packages were
+published on 2026-11-24 from the same upstream `Release v1.3.0` commit
+(`937886199e0e…`). API and Control Plane must stay in sync — a mismatch causes
+404s and empty memory tabs. The pair is recorded in `hindsight/versions.json` and
+compared daily by `scripts/check_versions.py`. No configuration key was removed or
+renamed in 1.3.0; the release does ship migration work and enables knowledge banks
+by default, so the first start after upgrading from 1.2.3 can take longer. Wait for
+`/health` before using the UI.
+
 ## Configuration options
 
 Every option is also exported as an environment variable, and the **env_vars** list
@@ -263,8 +276,60 @@ For a local gateway that aggregates many model providers behind one endpoint:
   running add-on. Run `python3 scripts/check_versions.py` for the current
   comparison, then bump the API and UI pins together in a normal release.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
-  current change set (key printed by the hook) must be `done` and all four
+  current change set (key printed by the hook) must be `done` and all five
   regression suites in `hindsight/tests/` must pass (`test_source_defaults.py`,
-  `test_ingress_rewrite.py`, `test_prepush_pipeline.py`, `test_version_watch.py`).
+  `test_ingress_rewrite.py`, `test_prepush_pipeline.py`, `test_version_watch.py`,
+  and `test_continit_providers.py`).
   Run `scripts/setup-hooks.sh global` once per machine; see README → Development
   and testing for the full flow.
+
+### Growing Observations / Pending count (consolidation backlog)
+
+A rising **Observations** count with many `consolidation_state=pending` memories
+means the LLM extractor cannot keep up, not that the add-on is broken. In the
+2026-11-26 incident bank `hermes` held 1566 pending memories: the `auto/best-fast`
+alias on OmniRoute failed over through dead providers (502/404/400, 60–115 s per
+call) and consolidation on 14k-token prompts took 110–327 s. The runtime fix was a
+working `combo` extraction route plus tighter per-bank consolidation limits; no
+source change was needed.
+
+Diagnose before changing anything:
+
+1. `GET /v1/default/banks/<bank>/memories/list?consolidation_state=pending&limit=1`
+   — read `total` for the backlog size; `GET /v1/default/banks/<bank>/stats` shows
+   `pending_consolidation` / `failed_consolidation`.
+2. `GET /v1/default/banks/<bank>/operations?type=consolidation&limit=20` — check
+   `status`, `error_message`, `retry_count` and `progress.total` for stuck work.
+3. `GET /v1/default/banks/<bank>/llm-requests?limit=20` — check `provider`,
+   `model`, `status` and `duration_ms` for the failing calls.
+
+A dead extraction route leaves `/health` green and shows provider `502/404/400`
+statuses with slow traces (tens of seconds to ~5 minutes). The earlier OmniRoute
+heap-503 was different: the gateway returned `503` for every route at once with
+heap/OOM pressure in its own log, and had to be recovered at the gateway level
+first. Do not confuse the two.
+
+Safe mitigations (runtime only; keep the repository config credential-free):
+
+- Use the add-on **env_vars** to select a working route/model, e.g.
+  `{name: HINDSIGHT_API_LLM_MODEL, value: combo}` (plus gateway URL/key if used).
+  Keep `mode: simple`, `llm_provider: llamacpp` and empty `llm_api_key` /
+  `llm_base_url` in the source defaults; override only in installed options.
+- Tighten per-bank consolidation with the `updates` wrapper (example values tune
+  to your context window):
+
+  ```bash
+  curl -X PATCH 'http://<ha-ip>:8888/v1/default/banks/<bank>' \
+    -H 'Content-Type: application/json' \
+    -d '{"updates":{
+          "consolidation_max_memories_per_round": 10,
+          "consolidation_llm_parallelism": 2,
+          "consolidation_source_facts_max_tokens": 4000
+        }}'
+  ```
+
+Watch `pending_consolidation` drop while `total_observations` grows. **Never delete
+pending memories to clear the backlog** — consolidation regenerates observations
+from them, so deletion destroys derived knowledge permanently. Failed operations
+can be retried from the Operations screen (`POST .../operations/{id}/retry`) once
+the route is healthy.

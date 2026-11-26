@@ -121,12 +121,15 @@ Use your bank id in place of `default`. An MCP entry is for clients that do not 
 
 This add-on is built to behave like a normal Home Assistant add-on: a pinned, reproducible image, health-checked startup, ingress that follows HA conventions, and regression tests for the parts that have broken before.
 
-- **Pinned versions.** The Dockerfile pins the Control Plane npm package
-  (`@vectorize-io/hindsight-control-plane`) to a specific release. The matching
-  API version validated for that release is recorded in
-  `hindsight/versions.json`; the API is installed from PyPI at build time at that
-  same pinned version. API and UI versions must match; a mismatch produces UI
-  404s and empty memory tabs. Both are bumped together in one release.
+- **Pinned versions.** The Dockerfile pins both upstream components to **1.3.0**:
+  `hindsight-api-slim[local-llm,local-onnx]` from PyPI and
+  `@vectorize-io/hindsight-control-plane` from npm. Both 1.3.0 packages were
+  published on 2026-11-24 from the same upstream `Release v1.3.0` commit; the
+  pair is recorded in `hindsight/versions.json`. API and UI versions must match;
+  a mismatch produces UI 404s and empty memory tabs. Both are bumped together in
+  one release (add-on 1.2.25). No config key was removed or renamed in 1.3.0,
+  but the API ships migration work and enables knowledge banks by default: wait
+  for `/health` on the first start after upgrading.
 - **Automatic version watch.** A daily cron job runs
   `scripts/check_versions.py --create-task`. It compares the recorded/pinned
   versions with npm and PyPI and, on drift, opens one idempotent Kanban task.
@@ -162,7 +165,7 @@ python3 hindsight/tests/test_source_defaults.py   # source config defaults / no 
 python3 hindsight/tests/test_ingress_rewrite.py   # ingress rewrite regression tests
 python3 hindsight/tests/test_prepush_pipeline.py  # pre-push gate regression tests
 python3 hindsight/tests/test_version_watch.py     # upstream version watch
-python3 hindsight/tests/test_continit_providers.py # cont-init provider mapping
+python3 hindsight/tests/test_continit_providers.py # provider mapping / crash-loop guard
 python3 hindsight/tests/test_setup_gh_issues.py   # GitHub issue templates + labels
 python3 scripts/check_versions.py                 # live comparison (no changes)
 ```
@@ -178,8 +181,8 @@ The flow is:
 2. The agent assesses the diff, updates `README.md` / `hindsight/DOCS.md` where
    behaviour, ports, options or troubleshooting changed, and adds or updates
    tests in `hindsight/tests/`. It runs all six regression suites (source
-   defaults, ingress, pre-push gate, version watch, cont-init mapping and
-   GitHub issue setup) and reports.
+   defaults, ingress, pre-push gate, version watch, cont-init provider mapping
+   and GitHub issue setup) and reports.
 3. Re-run `git push`. The hook sees the completed task, runs all six regression
    suites itself and allows the push only if they pass.
 
@@ -226,6 +229,63 @@ label, and provisions the standard labels (`zerofactory`, `ai-investigate`,
 - **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.
 - **Retains keep retrying / `429 Too Many Requests` in the addon log** — a free hosted model is rate-limiting fact extraction. This is an upstream provider limit, not an add-on fault: switch `mode` to `simple` (local models) or use a provider key with a higher quota. Retains are retried by the worker, so memories are not lost.
 - **MCP endpoint refuses connections** — confirm port 8888 is published and `mcp_enabled` is `true`.
+
+### Growing Observations / Pending count (consolidation backlog)
+
+If the **Observations** tab keeps climbing and a bank has hundreds or thousands of
+`consolidation_state=pending` memories, the LLM extractor is falling behind. This is
+almost always a routing problem, not an add-on bug. On 2026-11-26 bank `hermes`
+reached 1566 pending memories: the `auto/best-fast` alias on OmniRoute failed over
+through dead providers (502/404/400, 60–115 s per call) and consolidation on
+14k-token prompts took 110–327 s, so the worker could not drain the queue.
+
+Diagnose in this order (replace `<bank>` with the bank id, e.g. `hermes`):
+
+1. Count the backlog and check how old it is:
+   `GET /v1/default/banks/<bank>/memories/list?consolidation_state=pending&limit=1`
+   (read `total`; `GET /v1/default/banks/<bank>/stats` also reports
+   `pending_consolidation` and `failed_consolidation`).
+2. See whether consolidation work is queued, running or retrying, and how far it got:
+   `GET /v1/default/banks/<bank>/operations?type=consolidation&limit=20`
+   (check `status`, `error_message`, `retry_count` and `progress.total`).
+3. Inspect the LLM calls behind those operations:
+   `GET /v1/default/banks/<bank>/llm-requests?limit=20`
+   (check `provider`, `model`, `status`, `duration_ms` and the timestamps).
+
+**Dead extraction route vs. the old OmniRoute heap-503.** A dead route keeps the
+gateway and `/health` green, but `llm-requests` shows scattered provider
+`502/404/400` statuses — often several providers in sequence — with slow traces
+(tens of seconds up to ~5 minutes). The earlier OmniRoute heap-503 was a
+gateway-level failure: the proxy returned `503` for every route at once and its own
+log showed heap/OOM pressure. Inspect `llm-requests` before changing anything;
+a gateway-level 503 must be fixed at the gateway first.
+
+Safe runtime mitigations (per-install, no add-on rebuild and no source change):
+
+- Point extraction at a working route through the add-on **env_vars**, for example
+  `{name: HINDSIGHT_API_LLM_MODEL, value: combo}` (plus the matching gateway base
+  URL/key if applicable). Leave the source `config.yaml` on `mode: simple`,
+  `llm_provider: llamacpp` with empty `llm_api_key` / `llm_base_url` — routing
+  overrides belong in the installed options, never in the repository.
+- Tighten the per-bank consolidation limits so each call fits the model context.
+  Use the bank-config PATCH with the required `updates` wrapper (adjust the numbers
+  to your model):
+
+  ```bash
+  curl -X PATCH 'http://<ha-ip>:8888/v1/default/banks/<bank>' \
+    -H 'Content-Type: application/json' \
+    -d '{"updates":{
+          "consolidation_max_memories_per_round": 10,
+          "consolidation_llm_parallelism": 2,
+          "consolidation_source_facts_max_tokens": 4000
+        }}'
+  ```
+
+Then watch `pending_consolidation` fall while `total_observations` rises. **Do not
+delete pending memories to clear the backlog**: observations are regenerated by
+consolidation from those memories, so deleting them permanently loses the derived
+knowledge. Once the route is healthy, failed operations can be retried from the
+Operations screen (`POST .../operations/{id}/retry`).
 
 ## License
 

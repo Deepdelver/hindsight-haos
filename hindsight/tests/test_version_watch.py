@@ -27,7 +27,10 @@ def load_module(tmp):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     dockerfile = tmp / "Dockerfile"
-    dockerfile.write_text("npm install @vectorize-io/hindsight-control-plane@1.2.3 && \\\n")
+    dockerfile.write_text(
+        'pip install "hindsight-api-slim[embedded-db,local-llm,local-onnx]==1.2.3" && \\\n'
+        "npm install @vectorize-io/hindsight-control-plane@1.2.3 && \\\n"
+    )
     versions = tmp / "versions.json"
     versions.write_text(json.dumps({"hindsight_api": "1.2.3", "control_plane": "1.2.3"}))
     setattr(mod, "DOCKERFILE", dockerfile)
@@ -62,6 +65,16 @@ def main():
             "parses Dockerfile pin",
             mod.pinned_control_plane() == "1.2.3",
             str(mod.pinned_control_plane()),
+        )
+        pinned_api = getattr(mod, "pinned_api", None)
+
+        def api_pin():
+            return pinned_api() if pinned_api else None
+
+        ok &= check(
+            "parses API pin from Dockerfile",
+            api_pin() == "1.2.3",
+            str(api_pin()),
         )
         ok &= check(
             "version tuples compare numerically", mod.vtuple("1.2.10") > mod.vtuple("1.2.3")
@@ -102,6 +115,29 @@ def main():
             str(report),
         )
 
+        # The API pin in the Dockerfile must match the API version recorded in
+        # versions.json; a mismatch is what caused the historical 404 toasts.
+        report = mod.assess("1.2.3", "1.2.3")
+        ok &= check(
+            "equal API pins produce no pin drift",
+            report["drift"].get("api_pin") is False and not report["update_available"],
+            str(report),
+        )
+        ok &= check(
+            "report exposes the Dockerfile API pin",
+            report.get("pinned_api") == "1.2.3",
+            str(report),
+        )
+
+        mod.VERSIONS.write_text(json.dumps({"hindsight_api": "1.2.4", "control_plane": "1.2.3"}))
+        report = mod.assess("1.2.3", "1.2.3")
+        ok &= check(
+            "API pin mismatch detected",
+            bool(report["drift"].get("api_pin")) and report["update_available"],
+            str(report),
+        )
+        mod.VERSIONS.write_text(json.dumps({"hindsight_api": "1.2.3", "control_plane": "1.2.3"}))
+
         ok &= check(
             "recorded versions read from versions.json",
             mod.recorded_versions() == ("1.2.3", "1.2.3"),
@@ -123,6 +159,7 @@ def main():
                     "recorded_api": "1.2.3",
                     "recorded_control_plane": "1.2.3",
                     "pinned_control_plane": "1.2.3",
+                    "pinned_api": "1.2.3",
                     "latest_api": "1.2.4",
                     "latest_control_plane": "1.2.4",
                 }
@@ -135,15 +172,23 @@ def main():
             key,
         )
         ok &= check(
-            "task creation is idempotent and targeted",
+            "task creation is idempotent and targeted at the hindsight-haos board",
             rc == 0
             and len(calls) == 1
-            and calls[0][:3] == ["hermes", "kanban", "create"]
+            and calls[0][:5] == ["hermes", "kanban", "--board", "hindsight-haos", "create"]
+            and "--board" in calls[0]
+            and "hindsight-haos" in calls[0]
             and "--idempotency-key" in calls[0]
             and key in calls[0]
             and "--assignee" in calls[0]
             and "--project" in calls[0],
             str(calls),
+        )
+        body = calls[0][calls[0].index("--body") + 1]
+        ok &= check(
+            "task body reports both Dockerfile pins",
+            "Dockerfile API pin: 1.2.3" in body and "Dockerfile control-plane pin: 1.2.3" in body,
+            body,
         )
 
     # main() exit codes: 0 up to date, 2 drift (report only), 3 fetch failure,

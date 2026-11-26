@@ -38,7 +38,8 @@ KEY="prepush-${KEY_SHA}"
 STATUS="$(BOARD="$BOARD" KEY="$KEY" python3 - <<'PY'
 import json, os, subprocess
 key = os.environ["KEY"]
-out = subprocess.run(["hermes", "kanban", "list", "--json"],
+board = os.environ["BOARD"]
+out = subprocess.run(["hermes", "kanban", "--board", board, "list", "--json"],
                      capture_output=True, text=True).stdout
 start = out.find("[")
 if start < 0:
@@ -72,7 +73,7 @@ case "$STATUS" in
     ;;
   none)
     echo "No assessment pipeline for change set $KEY_SHA. Creating one on board '$BOARD'..."
-    hermes kanban create \
+    hermes kanban --board "$BOARD" create \
       "Pre-push assessment: review changes, update docs and tests" \
       --project "$PROJECT" \
       --assignee default \
@@ -87,6 +88,7 @@ Assess the changes in this repository ($REPO) and finish these items before any 
 1. Assessment: review commits/diff since origin/main and identify behaviour changes, new/removed options, ports, config keys and defaults. Note any risk or regression.
 2. Docs: make sure README.md and hindsight/DOCS.md describe the current behaviour, features, ports, configuration and troubleshooting. Update them if anything is missing or stale.
 3. Tests: make sure hindsight/tests/ covers changed behaviour. Add or update tests, then run:
+   python3 hindsight/tests/test_source_defaults.py
    python3 hindsight/tests/test_ingress_rewrite.py
    python3 hindsight/tests/test_prepush_pipeline.py
    python3 hindsight/tests/test_version_watch.py

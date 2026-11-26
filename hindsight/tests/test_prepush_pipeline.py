@@ -7,8 +7,8 @@ Covers:
    covering real multi-line git bodies and the all-pipeline-commits fallback.
 3. Board detection: done / none / running / malformed prefix.
 4. End-to-end with fake git/hermes: push allowed only when the task is done and
-   all five regression suites exit 0.
-5. The GitHub regression workflow runs the same five suites as the push hook.
+   all six regression suites exit 0.
+5. The GitHub regression workflow runs the same six suites as the push hook.
 
 Run: python3 hindsight/tests/test_prepush_pipeline.py
 """
@@ -47,12 +47,16 @@ exit 1
 
 FAKE_HERMES = """#!/usr/bin/env bash
 printf '%s\\n' "$*" >> "$HERMES_LOG"
-if [ "$1" = kanban ] && [ "$2" = list ]; then
-  [ -n "${FAKE_PREFIX:-}" ] && printf '%s\\n' "$FAKE_PREFIX"
-  printf '%s\\n' "$FAKE_LIST_JSON"
-  exit 0
+if [ "$1" = kanban ]; then
+  # The global --board flag sits before the subcommand; accept both shapes.
+  if [ "$2" = "--board" ]; then sub="${4:-}"; else sub="${2:-}"; fi
+  if [ "$sub" = list ]; then
+    [ -n "${FAKE_PREFIX:-}" ] && printf '%s\\n' "$FAKE_PREFIX"
+    printf '%s\\n' "$FAKE_LIST_JSON"
+    exit 0
+  fi
+  if [ "$sub" = create ]; then exit 0; fi
 fi
-if [ "$1" = kanban ] && [ "$2" = create ]; then exit 0; fi
 exit 1
 """
 
@@ -85,10 +89,11 @@ def detection_snippet():
     return match.group(1) if match else None
 
 
-def run_detection(list_json, prefix=""):
+def run_detection_with_log(list_json, prefix=""):
+    """Return the detected status plus the fake hermes argv log."""
     snippet = detection_snippet()
     if snippet is None:
-        return "<no-snippet>"
+        return "<no-snippet>", ""
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         bindir = td / "bin"
@@ -96,19 +101,25 @@ def run_detection(list_json, prefix=""):
         make_exec(bindir / "hermes", FAKE_HERMES)
         detector = td / "detect.py"
         detector.write_text(snippet)
+        log = td / "hermes.log"
         env = clean_env(
             {
                 "KEY": "prepush-KEYSHA",
                 "BOARD": "hindsight-haos",
                 "FAKE_LIST_JSON": list_json,
                 "FAKE_PREFIX": prefix,
-                "HERMES_LOG": str(td / "hermes.log"),
+                "HERMES_LOG": str(log),
                 "_BINDIR": bindir,
             }
         )
         result = subprocess.run(["python3", str(detector)], capture_output=True, text=True, env=env)
         lines = result.stdout.strip().splitlines()
-        return lines[-1].strip() if lines else f"<no output: {result.stderr.strip()}>"
+        status = lines[-1].strip() if lines else f"<no output: {result.stderr.strip()}>"
+        return status, log.read_text() if log.exists() else ""
+
+
+def run_detection(list_json, prefix=""):
+    return run_detection_with_log(list_json, prefix)[0]
 
 
 def stage_repo(td, script=SCRIPT):
@@ -261,6 +272,11 @@ def main():
         ok &= check(f"GitHub workflow runs {regression}", regression in workflow)
     ok &= check("task creation uses derived key", '--idempotency-key "$KEY"' in script)
     ok &= check(
+        "board is passed to both kanban calls",
+        'kanban", "--board", board, "list' in script
+        and 'hermes kanban --board "$BOARD" create' in script,
+    )
+    ok &= check(
         "gate has done/none/default branches",
         all(branch in script for branch in ("done)", "none)", "*)")),
     )
@@ -288,6 +304,15 @@ def main():
         run_detection(done_json, prefix="hermes startup warning") == "done",
         run_detection(done_json, prefix="hermes startup warning"),
     )
+    _, list_log = run_detection_with_log(done_json)
+    detected_argv = list_log.split()
+    ok &= check(
+        "detection list targets the hindsight-haos board",
+        "list" in detected_argv
+        and "--board" in detected_argv
+        and "hindsight-haos" in detected_argv,
+        f"log={list_log!r}",
+    )
 
     # --- 3. End-to-end gate ---------------------------------------------------
     rc, ran, log = run_gate(done_json)
@@ -301,6 +326,19 @@ def main():
         "gate creates keyed task and blocks push when none exists",
         rc != 0 and not ran and "create" in log and "prepush-KEYSHA" in log,
         f"rc={rc} ran={ran} log={log!r}",
+    )
+    calls = [line.split() for line in log.splitlines() if line.strip()]
+    list_argv = next((argv for argv in calls if "list" in argv), [])
+    create_argv = next((argv for argv in calls if "create" in argv), [])
+    ok &= check(
+        "gate list targets the hindsight-haos board",
+        "list" in list_argv and "--board" in list_argv and "hindsight-haos" in list_argv,
+        f"list_argv={list_argv!r}",
+    )
+    ok &= check(
+        "gate create targets the hindsight-haos board",
+        "create" in create_argv and "--board" in create_argv and "hindsight-haos" in create_argv,
+        f"create_argv={create_argv!r}",
     )
     rc, ran, log = run_gate(running_json)
     ok &= check(

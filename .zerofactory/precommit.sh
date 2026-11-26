@@ -4,7 +4,7 @@
 # Phases follow the tooling this repository already uses:
 #   format -> ruff (ruff.toml); no other Python formatter is configured
 #   build  -> python3 -m compileall -q . (there is no package/build manifest)
-#   test   -> the five standalone regression suites also run by
+#   test   -> the six standalone regression suites also run by
 #            scripts/pre-push-pipeline.sh and .github/workflows/regression-tests.yml
 #            (stdlib only: no pytest stack to install)
 set -e
