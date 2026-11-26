@@ -38,7 +38,8 @@ KEY="prepush-${KEY_SHA}"
 STATUS="$(BOARD="$BOARD" KEY="$KEY" python3 - <<'PY'
 import json, os, subprocess
 key = os.environ["KEY"]
-out = subprocess.run(["hermes", "kanban", "list", "--json"],
+board = os.environ["BOARD"]
+out = subprocess.run(["hermes", "kanban", "--board", board, "list", "--json"],
                      capture_output=True, text=True).stdout
 start = out.find("[")
 if start < 0:
@@ -71,7 +72,7 @@ case "$STATUS" in
     ;;
   none)
     echo "No assessment pipeline for change set $KEY_SHA. Creating one on board '$BOARD'..."
-    hermes kanban create \
+    hermes kanban --board "$BOARD" create \
       "Pre-push assessment: review changes, update docs and tests" \
       --project "$PROJECT" \
       --assignee default \

@@ -57,14 +57,13 @@ RUN \
 # Hindsight API: slim core plus the local model extras.
 # - local-llm: built-in llama.cpp LLM (no API key, GGUF auto-downloaded on first run)
 # - local-onnx: in-process ONNX embeddings and reranker (no API key)
-# - embedded-db: pg0 fallback (we use PostgreSQL 15 separately, but keep it available)
 # Installed into a dedicated venv so it never conflicts with system python.
 RUN \
     echo "Installing hindsight-api-slim with local model support" && \
     python3 -m venv /opt/hindsight-venv && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir --upgrade pip && \
     /opt/hindsight-venv/bin/pip install --no-cache-dir \
-        "hindsight-api-slim[embedded-db,local-llm,local-onnx]==1.2.3"
+        "hindsight-api-slim[local-llm,local-onnx]==1.2.3"
 
 # Control Plane: Next.js standalone bundle, shipped as an npm package.
 # Node 22 matches the major the upstream image builds with.
@@ -98,10 +97,6 @@ ARG MODULES="00-banner.sh 00-global_var.sh"
 
 COPY ha_automodules.sh /ha_automodules.sh
 RUN chmod 744 /ha_automodules.sh && /ha_automodules.sh "$MODULES" && rm /ha_automodules.sh
-
-ENV PACKAGES=""
-COPY ha_autoapps.sh /ha_autoapps.sh
-RUN chmod 744 /ha_autoapps.sh && /ha_autoapps.sh "$PACKAGES" && rm /ha_autoapps.sh
 
 ################
 # 4 Entrypoint #
