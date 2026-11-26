@@ -10,6 +10,7 @@ Provisions:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -240,11 +241,21 @@ STANDARD_LABELS = [
 
 
 def detect_repo_from_git(cwd: Path) -> str | None:
-    """Detect 'owner/repo' from git remote get-url origin."""
+    """Detect 'owner/repo' from git remote get-url origin.
+
+    Git hooks expose GIT_DIR/GIT_WORK_TREE, which otherwise override ``cwd``
+    and make git report the *hook's* repository instead of the target
+    directory. Strip those variables so detection stays scoped to ``cwd``
+    even when the generator runs from a pre-push hook.
+    """
+    env = dict(os.environ)
+    for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_PREFIX"):
+        env.pop(key, None)
     try:
         res = subprocess.run(
             ["git", "remote", "get-url", "origin"],
             cwd=str(cwd),
+            env=env,
             capture_output=True,
             text=True,
             timeout=5,

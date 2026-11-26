@@ -17,6 +17,7 @@ Run: python3 hindsight/tests/test_setup_gh_issues.py
 from __future__ import annotations
 
 import importlib.util
+import os
 import subprocess
 import sys
 import tempfile
@@ -201,6 +202,16 @@ def main():
             ok &= check(
                 "detection survives a subprocess error", mod.detect_repo_from_git(ROOT) is None
             )
+        with patch.dict(
+            os.environ,
+            {"GIT_DIR": str(ROOT / ".git"), "GIT_WORK_TREE": str(ROOT)},
+        ):
+            hook_env_result = mod.detect_repo_from_git(repo)
+        ok &= check(
+            "detection ignores git env inherited from a hook",
+            hook_env_result is None,
+            str(hook_env_result),
+        )
 
         # --- 6. Label provisioning --------------------------------------------
         expected_labels = {
