@@ -36,6 +36,7 @@ REGRESSION_SUITES=(
   "hindsight/tests/test_prepush_pipeline.py"
   "hindsight/tests/test_version_watch.py"
   "hindsight/tests/test_continit_providers.py"
+  "hindsight/tests/test_setup_gh_issues.py"
 )
 
 ensure_ruff() {
