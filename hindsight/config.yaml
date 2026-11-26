@@ -33,7 +33,6 @@ options:
   log_level: info
   control_plane: true
   control_plane_port: 9999
-  ingress: false
 panel_admin: false
 panel_icon: mdi:brain
 panel_title: Hindsight
@@ -68,7 +67,6 @@ schema:
   log_level: list(debug|info|warning|error)
   control_plane: bool
   control_plane_port: port
-  ingress: bool
 slug: hindsight
 startup: services
 udev: true
