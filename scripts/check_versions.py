@@ -76,8 +76,9 @@ def create_task(report):
         "1. Verify the releases and compatibility (API and control plane must match).\n"
         "2. Update hindsight/versions.json and the control-plane pin in the Dockerfile.\n"
         "3. Update README.md / hindsight/DOCS.md and CHANGELOG.md; bump config.yaml version.\n"
-        "4. Run all four regression suites in hindsight/tests/: test_source_defaults.py,\n"
-        "   test_ingress_rewrite.py, test_prepush_pipeline.py and test_version_watch.py.\n"
+        "4. Run all five regression suites in hindsight/tests/: test_source_defaults.py,\n"
+        "   test_ingress_rewrite.py, test_prepush_pipeline.py, test_version_watch.py\n"
+        "   and test_continit_providers.py.\n"
         "5. Follow the normal Kanban assessment and PR/release flow. Do not push directly.\n"
     )
     result = subprocess.run(
