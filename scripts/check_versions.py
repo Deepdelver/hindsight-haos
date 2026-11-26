@@ -2,8 +2,8 @@
 """Check whether upstream Hindsight releases moved past the versions in the add-on.
 
 Without --create-task this only reports and exits 2 when an update is available.
-With --create-task it opens one idempotent Kanban assessment task on the
-hindsight-haos board; the normal agent assessment/release pipeline then decides
+With --create-task it opens one idempotent Zero Factory task on the
+deepdelver-hindsight-haos board; the normal factory pipeline then decides
 whether and how to bump pins and ship a new add-on version.
 
 Run: python3 scripts/check_versions.py [--create-task]
@@ -90,28 +90,21 @@ def create_task(report):
         "4. Run all five regression suites in hindsight/tests/: test_source_defaults.py,\n"
         "   test_ingress_rewrite.py, test_prepush_pipeline.py, test_version_watch.py\n"
         "   and test_continit_providers.py.\n"
-        "5. Follow the normal Kanban assessment and PR/release flow. Do not push directly.\n"
+        "5. Follow the Zero Factory flow: commit on a task branch, let the factory run precommit, open a PR, and let auto-merge + deployment handle the rest. Do not push directly to main.\n"
     )
     result = subprocess.run(
-        [
-            "hermes",
-            "kanban",
-            "--board",
-            BOARD,
-            "create",
-            "Assess Hindsight upstream version drift",
-            "--project",
-            PROJECT,
-            "--assignee",
-            "default",
-            "--idempotency-key",
-            key,
-            "--body",
-            body,
-        ],
-        capture_output=True,
-        text=True,
-    )
+        ["hermes", "zerofactory", "create",
+         "Assess Hindsight upstream version drift",
+         "--description", body,
+         "--board", "deepdelver-hindsight-haos",
+         "--repo", "deepdelver-hindsight-haos",
+         "--assignee", "zf-builder",
+         "--status", "todo",
+         "--priority", "P1",
+         "--category", "feature",
+         "--dedup-key", key,
+         "--actor", "watchdog"],
+        capture_output=True, text=True)
     return key, result.returncode, (result.stdout + result.stderr).strip()
 
 
@@ -132,7 +125,7 @@ def main():
     print("Update available.")
     if create:
         key, rc, output = create_task(report)
-        print(f"Kanban task key: {key} (create rc={rc})")
+        print(f"Zero Factory task key: {key} (create rc={rc})")
         if output:
             print(output[-500:])
         return 0 if rc == 0 else 3
