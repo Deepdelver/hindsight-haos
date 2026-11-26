@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:509f0c2029567d67544950434052f7e5d2518b02c3ec888f319928bb0da0b62f",
+  "claims": [
+    {
+      "id": "claim_fbafafa7ba7e4d5d8749c9fba5b20558",
+      "statement": "The image installs the Hindsight API into /opt/hindsight-venv and the Control Plane from npm at the same pinned version, and versions.json records that matching version pair.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/Dockerfile#L57-L90",
+          "version": "repo-lines-v1:sha256:89e7501fd0f2258359f971e4dab659ba576275d23243ff6df8657b8db0564119:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzZWZjODUzY2JhM2QzZDMzZTE2ODRmOTJlZTc2MjlmYzMzMWFhZGRjYmFiNDM0YTBkOTdiYjE4MjJhYTQwZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0ZjQxNmJkNzVhY2U3NjZlZDQwZGRhYmIwZDkwOTA0N2U3M2QwZjJmYTc2MmUyZTU0NzhkYTEwNTUwYTYxOWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM1MjljOWQ5YmRkZWYyZDVhMTU1NGJhYWY5YjJiNGRjOWI5NTI4YzFiOGNiNjk1Mjk0ZWIxM2VjMDBiYmVhZDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzMDk2NDU3NzFmYWEyNjM1ZWUxYjVkZmFiYzFkMDcxODE4YzQ1ODZiNTIyZjIyZmM5YTM3ZDQzNzMwMjJjYzcifQ"
+        },
+        {
+          "resource": "repo://hindsight/versions.json#L1-L4",
+          "version": "repo-lines-v1:sha256:6073a0de5d7b018d35d54cad39270d04249d56a807b65af67786b99916760bc4:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmYjA4ZmRhMWFjYjk1N2I2MTE2YmQzNzgxMWExZmU0MWEwMTYxMWMwNjMxZWRiZjc4NmQ2ODg5YTI3YTU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a6f5fb9d139f4f2cbdad08b9ff1a2c0b",
+      "statement": "Because the add-on sets init: false, ha_entrypoint.sh runs as PID 1 and installs its SIGTERM/SIGINT trap before the Supervisor wait and cont-init chain so early stop signals are not discarded.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/config.yaml#L10-L13",
+          "version": "repo-lines-v1:sha256:2366d7459c2d7f724d86a06604b9682ae510bce739c0fdc8a7d835a56e54e8c3:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGM1MTJkOWZlOTkzMDQyMDdlMTQyMDk3NDBhZWE5MTQ2MDY2YjhjOWIxOTdiYTAyNzAwMWE4NGQzZTNjY2JiYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjE1YTg1OTJlZjNiYzk1ZjExNTExZTFhNzMzYzY4NjBhMTFjM2IzZDk1YzQwNTI2MWJmN2M4ZjRjZDM0MWRlYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGRlODhmYWE3NTMzMmJhMzgwYzFmMzQ4ZWQyZTZkYTJmNTQzODUwY2NiMzUyNDg1ODI1NjAwZjU2NWYwODdhNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTc2YTIyNDVlM2MyNzBlMmUyZTNjMDIxMjY5YjE5MzBhNjMxZmM0M2RiOTVhNzNkNjIwNjUyNjcwMzI5NmUxNCJ9"
+        },
+        {
+          "resource": "repo://hindsight/ha_entrypoint.sh#L23-L65",
+          "version": "repo-lines-v1:sha256:a3f6bbeadebb967b39ae689e8c50cb6ee08916613b08d3cce674db70c120c789:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmOWRiYmE5M2I1MWZkYjUwNmQxNzVjMzY3YWI4YzI0NTI2ODdhMjdmMzA2NDVhMzEwN2ExNGZlNzczMThlZTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3NjlkMjM3Y2Q0MjBiOWQzOGI5ODFhMGE0ZjY3NzAxOTBhNGE4M2RjYTFmZTU2YzRmNWJhMWUyY2JjMGVmNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzYTNmZTc0Yjc2NjAzMGQzYjI3YzNjNzU3YTI3NmJhYThlODgyYTc0NDNmMTkxMmE1NzJjYzYyYjNmM2IwOWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJlMWJmMmE2MDVhNmFmMDE0ZmNkNmRmZjliY2Y4YmU0NTEwMDZlNWVmYTY2MTYzNDRkMzFlZGQ0ZTNhMjU4MjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d1690a89dfd5434c9ffe6e4472dc6af0",
+      "statement": "The entrypoint writes the s6 container environment into a temporary directory and renames it into place because the image's ENTRYPOINT override skips s6 stage 1, and a partial envdir could hide SUPERVISOR_TOKEN from with-contenv scripts.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/Dockerfile#L117-L119",
+          "version": "repo-lines-v1:sha256:6141e933eda930f4face0ae42c1a37431f30861c3d9518c5e30030927d321244:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2JiN2NlN2I2MGZmYjU4NGYxM2EzZjNhNjVkNzI5NDdmMjk1NGEzMDFmMDJhYWQ2MWJmNDU5YzdkOGFhYWY0MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGU1NTlkYzA4MDE0YjJhYmU1NzNkNjY2Mjk0ZGU3MTI5OTI1OWMyZTMxZDM0MTYyNjBkMjlkMjNjYWE0MWRjNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWQwNmU3MjQzOWMzZGU5Y2NjMjJjNGRmZWYyOWVlNThjNWRjYmJiYWI1YzgyZjQ0YTU0MTdlNDk0OTBlYmMxMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGQ3MGNjY2I0ZjNlYWRlNWExNTJjNzU4NjAxYjJhYzAyMGY5NTM1MzAyNzFkZGY3MTc3OWZjOTFhM2U4ZjdiZiJ9"
+        },
+        {
+          "resource": "repo://hindsight/ha_entrypoint.sh#L219-L270",
+          "version": "repo-lines-v1:sha256:8d05d527006e0b67a48bb57d3641bb64afd15a28b8640b45d542a9f2e40d356b:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUyMDRmNzRlYzlhM2VjMmViMjkwNzkwN2ZiNjAzY2ZjOTVlOGYyMzc0MGFmNTkyZmY1OGE5MWUxNWMwNDkzZTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3NjlkMjM3Y2Q0MjBiOWQzOGI5ODFhMGE0ZjY3NzAxOTBhNGE4M2RjYTFmZTU2YzRmNWJhMWUyY2JjMGVmNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMxY2UxYWExMTY5NWQ5YjUxNTcwZGExNWYyMzlkNzBkMmY1Y2FkNThhNzg1MGQyYThkYTljZWQ1ODYxZDQ4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhNDYyOGVjZTVhZTVhNmVkYWZiNTY2M2Q3YzU0Y2Y1NTNlMjZlMGQ0YWE4ODE5OTk1YWNmYWM0MjQyYmI0NmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8fecfe7d6d814f02b35753cfdaab6ff4",
+      "statement": "The hindsight service creates the database and enables the pgvector extension before exec'ing hindsight-api, while its finish script stops PostgreSQL in fast mode.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/hindsight/finish#L5-L11",
+          "version": "repo-lines-v1:sha256:4d31c4a207a167f58a5cf86b0cd5c2b4b4fce8368e5afaa44a1cf0ddee0729df:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGM0Mjk3YWMyNGRmZGRiNzU0MDMzNGNjMmNkOWNkOThlNGJkYzZiYTc0NjRkN2M3OGMwZTdhMTQ2ZjRiY2ZjMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTU4N2JkMDM0YzUwMWEwOTA1Y2YxZWVmOTY3YmU2ODU5ZjU1NjAzOTlkNGFhNGUwNmU4ZjI5OTdlNGU5OWRjMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzM4OGE3YzFmYjVkOWUzNWYyNmRkY2EyNDZmNDdmNTZmOWJhY2Y1OWVhNTliY2FiMzk3MjViOGY0OTM0Y2RhMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/hindsight/run#L23-L53",
+          "version": "repo-lines-v1:sha256:6a141ed88ce3e551ca7b39a5f778defdebc7a2b3a0e2e85acd15aa1a717cae29:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ3ZTgxMmFjYjY5OWE0ZjMwNjdkMzg4YWNhMzIxM2EwZGRiYjg4Y2RhYzliMmMwYzNkNGUxZjM0MzMzOTZmYzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNDE2Zjc5NWJmZmNlYjk5YjUxMmExNmM4ZmMzNTQ1ODcwNDQ5NWQzMjY0MmE5MDQyMzlmMzQwNGZjNzM1YzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2MTAzYzc3MjQ5NTIzM2ZkMDkxYzFkMTcyY2EwMzZhMDJkNGVjOTNkZjVjN2RjN2I1Mzc1NGI3ODBhNmI4ZTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_afa4b8775c21426699628c36bb122e3e",
+      "statement": "PostgreSQL data, the generated env file and model caches live under /data, and the add-on declares backup: cold so Supervisor stops the container before backing them up.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/config.yaml#L1-L5",
+          "version": "repo-lines-v1:sha256:c9fb8cae69e43590f235b199801097b69619633f453d2ce7d5eb0c3bce2ef59c:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGY1MzI4NjRiNjExMjUyMzY0MWVjOTg4ZjI1YzllNTRlNzdlNjM2OTUyYTYyNTZjZjYzZmM0M2MxMTMzZDM1ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWE1NmZiMDI5NTk4YWE2N2E0MmM1ZTFlNmM3NWZlYTg3ZTI5ZjQ0MzUzOTU4MTRlNWRmOTUyOWIzODBjNmNjNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2Y2MzBiYWU1YzUzZTliZThlMTRmZjI5ZWE4N2YwNWQwMjJjNTgwNjY1NWI5ZGU5NDVmZGIyMWZkNGE2YzAxZSJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/20-postgres.sh#L9-L11",
+          "version": "repo-lines-v1:sha256:61d3a1359b3e4510802d27815fc6e6d0cde74ff260af59e289fc6bc98a6ae875:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmMyOWMxOTA1YmViNjBjYTYxMDBiN2JiYTFjMjRjMGYzODhjZTI0NTE3OGQ0N2JjMjA5NzM5ZTRmOWYzNDk0YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2Q3YjI4MzE4ZDk2ODk3YTE5NjUzOGVhYWNlODZhYmYzZWIwNDRiZDdhZjkwNDEzYzllNDc3NGY4NzA5YjkxYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGQ1YzE3YTQyYmUyODJhMTZiZTlkM2U0YTI4MTNkOTUwNTRmOWI1ZWMwMmZhMzIwZjY3MWJkYzk3OTFkYWJkNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjFmOTlkODk5MWExYzZiOWE2NzVmYWQ5YWEzOGM2NDY2YWFmNDk2YmY5OGQ2YzE1MWFiNzhlZGQyZjJlY2RhZiJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/hindsight/run#L13-L15",
+          "version": "repo-lines-v1:sha256:04c7a75b77a66bc6f2960b6591866600b6c894f449dc672a05b6ae31636d4076:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWRkOWUwN2M4MWFlZmFmNTE1NDQxNjcxNTczOGI1Mjg1NTNiNjU0ZjhmMjFmZjhhOTVkMDQ5MWE5Y2M0ZTk0YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTI5MmMxZWUzMzg0MDhiYjU4YTNjNTI1ZTUzYzgzZGQxOTM4OGM3ZjNlOGRhOGRjZTAwODVmMDI1MjQ0ZmZhOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTEyM2I0MmYyODkwNDdjMDdjZDViZjA3ZTNiMjljMDA3ODEzNDgyNmMzYmM3NmYwZDQ4MTdmNTIyNzlkZWNlOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTU3NTE5ZDk5MDY1ODNlNjFhMWVkMmEyZWUzZWE5NzkxZWRjYTQ3YmIwMzVjNWQyN2MxZjE0N2Y3ZjMwMjYyMCJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-25T23:47:00.311Z"
+  }
+}

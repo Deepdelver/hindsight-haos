@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/architecture/addon-runtime.md": {
+      "pageVersion": "sha256:509f0c2029567d67544950434052f7e5d2518b02c3ec888f319928bb0da0b62f",
+      "completedBy": "hermes",
+      "completedRunId": "46bb6f87-7909-4c2c-b138-899e6e496eed",
+      "gitHead": "adabaef8d55c7c2ccd5e797fbbb254b42c4021aa",
+      "sourceFingerprint": "sha256:1b4e7df870380ce038d441bc4b3704ce87175b0b693fc86548259c8331a91599"
+    },
+    "/openwiki/architecture/configuration-and-models.md": {
+      "pageVersion": "sha256:a5e5f7f135c15198401d6c67e10aedb2bae30807d604e44054cb016536d5aa20",
+      "completedBy": "hermes",
+      "completedRunId": "46bb6f87-7909-4c2c-b138-899e6e496eed",
+      "gitHead": "adabaef8d55c7c2ccd5e797fbbb254b42c4021aa",
+      "sourceFingerprint": "sha256:1b4e7df870380ce038d441bc4b3704ce87175b0b693fc86548259c8331a91599"
+    },
+    "/openwiki/architecture/ingress-and-control-plane.md": {
+      "pageVersion": "sha256:29689d08a4a1e8036ebe9a10a138267ba637db66ef352688df23e4e401d0e012",
+      "completedBy": "hermes",
+      "completedRunId": "46bb6f87-7909-4c2c-b138-899e6e496eed",
+      "gitHead": "adabaef8d55c7c2ccd5e797fbbb254b42c4021aa",
+      "sourceFingerprint": "sha256:1b4e7df870380ce038d441bc4b3704ce87175b0b693fc86548259c8331a91599"
+    },
+    "/openwiki/quickstart.md": {
+      "pageVersion": "sha256:ad36a656874fa89a8072b20321a813949c2640ced0d3c84134f671a640ba9ae5",
+      "completedBy": "hermes",
+      "completedRunId": "46bb6f87-7909-4c2c-b138-899e6e496eed",
+      "gitHead": "adabaef8d55c7c2ccd5e797fbbb254b42c4021aa",
+      "sourceFingerprint": "sha256:1b4e7df870380ce038d441bc4b3704ce87175b0b693fc86548259c8331a91599"
+    },
+    "/openwiki/workflows/release-and-version-watch.md": {
+      "pageVersion": "sha256:a1d33dd6217409b0c90cfada6458c1319b41f19fe887d0965fe9e529053d52a1",
+      "completedBy": "hermes",
+      "completedRunId": "46bb6f87-7909-4c2c-b138-899e6e496eed",
+      "gitHead": "adabaef8d55c7c2ccd5e797fbbb254b42c4021aa",
+      "sourceFingerprint": "sha256:1b4e7df870380ce038d441bc4b3704ce87175b0b693fc86548259c8331a91599"
+    },
+    "/openwiki/workflows/testing-and-regressions.md": {
+      "pageVersion": "sha256:3ee49a7605768f050f52cc711461c2dbc681a730b2d36c80dbb8eae0220c6e61",
+      "completedBy": "hermes",
+      "completedRunId": "46bb6f87-7909-4c2c-b138-899e6e496eed",
+      "gitHead": "adabaef8d55c7c2ccd5e797fbbb254b42c4021aa",
+      "sourceFingerprint": "sha256:1b4e7df870380ce038d441bc4b3704ce87175b0b693fc86548259c8331a91599"
+    }
+  }
+}

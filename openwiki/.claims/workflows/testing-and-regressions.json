@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:3ee49a7605768f050f52cc711461c2dbc681a730b2d36c80dbb8eae0220c6e61",
+  "claims": [
+    {
+      "id": "claim_99c1b79947b4408ebb51a56234edfed5",
+      "statement": "precommit.sh runs three phases: ruff check --fix plus ruff format with a pinned 0.17.6 auto-install fallback, compileall -q . as the build, and five stdlib-only regression suites as tests.",
+      "evidence": [
+        {
+          "resource": "repo://.zerofactory/precommit.sh#L41-L90",
+          "version": "repo-lines-v1:sha256:42b2bce7c12292de5d0ba6372adaaa92b3f04880773a915032e85eb184737695:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmYzcyZTkzYmQ0NmNhYmVkYjJlMGU0MWI2ZDI0ZDU2YzZiYjVjNDc3ZjZlMWQ1OGNiNTVlNzRmYTY1NmU2YmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiODU1Y2FlY2FiMWRhMjI4ZTc4OGJhNDAxNGNmNTAwYWFlMDBmMzI2OWQ0M2E2OTYxNTFhOTU3MzQ2ZDY5ZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhODI1ZmViOTBhYmY0MzRmMTEwNDkxYmVlZWUwNTMwOGRhZWE3YTEyNDFkZTI3NGNlNTRiMzcxOGYxMTEyMjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_efa6293956e1408fbec42bb84d2a1e49",
+      "statement": "Because install-hook links precommit.sh into the git hooks directory, the script walks its symlink chain to derive ROOT_DIR from the real script path so every phase runs from the repository root under both standard and custom hooks paths.",
+      "evidence": [
+        {
+          "resource": "repo://.zerofactory/precommit.sh#L12-L28",
+          "version": "repo-lines-v1:sha256:0419eeaf1705bbd462c654c154af8674e6b5bf607a99cec4458f362c911ff497:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1Y2U0ZWFhNWZhZjZlMjY1NDliY2M2ZmUzNDgyODhlOGY3MjAzNjg2NzRjMTc4ZGQ2NDA5MDRkMzYwNzI3MzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlN2EwYjg5YmE1YmZlNzk3NzlkNWM0MTQ3YmQ3MjRlZTBmZDk0ODNjZmNkMDZjY2U3MjljYTJiZDM4ZDM4NGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMWEwMWMxMjZhOTliOGE4YTBhOTk3N2RiNTRkZDQyMzZkYWU3NzNlYjA4ZTQ0Y2RhZDY2OWMwNDQ2ZmU1YTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcwZWQxZjk2ZDU1MTljYzEyZTc5ZGQ5NTNhZTY2N2ZiNTFhNTQ5YjA4MTk0ZjIwZTYxYzllOWJjYTQ4NDZhNDYifQ"
+        },
+        {
+          "resource": "repo://.zerofactory/precommit.sh#L92-L108",
+          "version": "repo-lines-v1:sha256:0231107a7b10fcdf5738ffc19e9482a106f80a433b2d8633042f0d0222144061:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNWM2ZmNmYTA5M2EyNDRkMjUwMDg4ZTk2MGJjZjZmMWZmYjY2ZWNjNDg5ZjUxZjAxMzc3ZWY4NjgxNDc4OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU1MmU2NTQ5OGQwNzgwYTllYjRhYjg4ODE1YzgwMmM4YWU5NjBjNzVhMTQwYjk3MDdmODc3YzU2OGFmNzQ4OGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFhMzFlYmRmYmU5NWIwNjNhMDc4ODQ4MzY1MTQ0Y2U3Mzk2OWYwNTgzYzVjN2I2NjBjMDA4MTExYmUxYTQ0NjkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5d522c8cfd0b4fd49d6d41de247e3fd8",
+      "statement": "ruff.toml uses a deliberately conservative rule set (E4, E7, E9, F; line length 100; Python 3.12) with extra ignores in tests so auto-fix cannot rewrite test intent.",
+      "evidence": [
+        {
+          "resource": "repo://ruff.toml#L1-L14",
+          "version": "repo-lines-v1:sha256:743262376e8aea0516abbbd32ba4f09885dfac2592a2f273b494dc53b715f648:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI0ZjliNDc0YjRjN2VmYzFhZTFhMDRmNzliNDUyMDhkNTE1YTc2MWJhZmE2MDVlN2UzODAyYTk0ZmVmYTM1ZWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwYTY0NWYxMDMzMzE1YTExOTExMzkyYzkxOTJhY2QzYTAyZDRiNGE3YmMyZWQ0OTc1YzFhY2Y4N2Y4MWFjOWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9d33f4e337324cce8d728f0c8a719a81",
+      "statement": "test_source_defaults.py keeps credentials and forced expert routing out of source config.yaml by parsing its options and schema blocks and rejecting token-looking values.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/tests/test_source_defaults.py#L2-L10",
+          "version": "repo-lines-v1:sha256:ee4a621b183be1718e1a5b2d4ff8a837d98b4f79d580207c94f244085d1a4aaf:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWUxZWM3NWQ3ZmY1MTQwNmIwZmM3NGFkOGM3NzIyOWEyNjg1MDUwNWZmMDhlNTgyYTVhYjk5OTU4NmMyMzVlYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWFmMDQzZTRhZDNlMTEwZWQ1Y2Y4OTA2MzRlYzUwZjVlMmYyZDM0YTczMjJkMDAwNjU1YjdjMGU4NjU3MGEwYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjEsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDY4MmNiZGI0YzhiMDc1MThiZjQ4NmM1ODk5MGZjMzkxNzgzYWEyMGE5MTZiZmIyN2FkMjExZWIxZDVjMzY0MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGFjYjdiOGY3OGI4NGU4MDk1ZDg5ZDY0ODUwODQwZWI3YTg5ZGM5YjkyNWJiMzU5ZDhhNDcxYzFhZWU0OTM3YiJ9"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_source_defaults.py#L40-L70",
+          "version": "repo-lines-v1:sha256:161bb5c5d78682133e41596a7eea0ba1828cae929dee4c4e30ba4fae230385c7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5NGU4Y2IwNTUyNmY0MWNhODM4Y2EyOWQ1YTJjOTEyNzY0NmFmZTJlZDc3ODFhYWY4Y2MwY2ZlYjg0YWNkZDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MWMzMGE3N2Q2NmZiZTMwNjMxZGU0YzJkYTQ0ODI4MWVmMjNhM2ZkZmVkY2Y1ZmZiZDE3ZmJkZmNjMTJiZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1YzI4ZmY1ODU2MDE3YWNmZDBhMTg4YWM4M2JhMjI0MDZlZDEyYmIzMDYzZDlkOWNjNzkwNzQ1MTc4MGFlNGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjODY5M2E2YTAzYWRiODY0NjhjMzViZDYyYTlmMzA3Y2FiYzY5NGZmNDZjNjU5Y2MyM2YwNmY4Y2ZlYjJmN2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3bce74e6f8d243d19601125ead7e9d7a",
+      "statement": "test_ingress_rewrite.py applies the actual nginx sub_filter rules to fixtures to prevent ingress prefixes on API suffixes and loss of the bank-selector regex allowance.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/tests/test_ingress_rewrite.py#L1-L13",
+          "version": "repo-lines-v1:sha256:f2f8aa45fbb8d727b80389afea48acf76423c8d25de552cb4e90d44bf57672b7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2ODJjYmRiNGM4YjA3NTE4YmY0ODZjNTg5OTBmYzM5MTc4M2FhMjBhOTE2YmZiMjdhZDIxMWViMWQ1YzM2NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4MmYxY2I2YmIwYjQyZTU1NWVkMjA2ODY0MGY3OWRiNDE5N2UzMzVlZDJmOGZhMjI2M2RiNGM3MGU5MzIzY2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkMDYzMjllZGYwNTQ0YjU1ODVkMDNiYjJmMGIzZDFhYTk0MTRkZDMyOTZhMTQ2ODdhYjUwZWVmMGIwYTdmODUifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_ingress_rewrite.py#L86-L140",
+          "version": "repo-lines-v1:sha256:c874660b700518ff3e6e22665866c8ee50be2d2ce324b4892d903e674c1ea683:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE1NzNiNmY1ZTIwODRmM2I4MjE2MWI5OTM4MmIyODE5ODQ4MDc3NWU2NGMyYjI2OGMxODljMzkyY2JlODFkOGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlOGNlZWU2NDFlNjU4ZDRkODEzN2MyZTRmZDkwN2VlZjg0NjQ4MjJiY2ZlYjc1ODhiMWM5YWI0NzgzMzA5MmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM2ZDVhYjhjMzQ0ZThmNjc4YTYwNTg3ZjYyNjM2YzY5MDliOTRmZjBkNjhjZGQzYTA4OTc5NGFhMzYwYTRlMTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkZTVkNmRmMGI3MjkzNDg1NmU3ODlmZmQ4ZDBmYTVlNzUzYjRiMzJlNTk5ZTg0NDdjZmI3ZGUxMGYyYmJmYmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1b57510274eb4a43a95a3573d0f0146c",
+      "statement": "test_prepush_pipeline.py uses fake git and hermes commands to verify gate wiring, key derivation from multi-line commit bodies, board-status handling, fail-closed behavior and CI parity.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/tests/test_prepush_pipeline.py#L1-L12",
+          "version": "repo-lines-v1:sha256:b39507002373c0a944d9196392284f25cf5d7078d8473e40eb20e5c7bb8eb3ec:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2ODJjYmRiNGM4YjA3NTE4YmY0ODZjNTg5OTBmYzM5MTc4M2FhMjBhOTE2YmZiMjdhZDIxMWViMWQ1YzM2NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZjNDc1ODQyNzM3NTJmNDBiMDkxYmUwYzMwYWM0ZjU3N2U2ZWFjZDczYzk3YmM3MTA4MzMxNjIxOWEzYjcxNzUifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_prepush_pipeline.py#L251-L333",
+          "version": "repo-lines-v1:sha256:792fbf29961b0d5759abed8b779e15ed7876428d5a8af63ea883019d5a77ec49:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkOTY2OTk1NmU1ODhkOGQ5NDI2NTU0MGZkOGJmMmE0M2I3MTA1YjNmMDUxNTg5YTYzOTM5OTJiMDU4ODMxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2ZGIzOGZhNWU3YTY5MmY3ODI0NDc5OWM5MDgzOTYwMTdjOTI1Yjg1MDJlOTE3OTQ0YjY0NTBjNGViNDUwMDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ5NzIwMjA5MTc3NWFjNTM3MWVmNTgzYTIyZjRlODRkMzgyMzcwYzU3YzI3ZDZjNTI1NDI3MDhhNmI1OGNjMDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwMTRhY2YxMWMzNjRiZTI2MjA0MWRkYjVmNjI3MWNlOTY3OGJhOTM2NGM4M2EzYjNiNTNhYTk5ODEwZTE5YmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4dd6cb4ee7594b0d9644d0e4b02f1dae",
+      "statement": "test_version_watch.py checks API and control-plane drift, numeric version comparison, build-metadata suffixes, exit codes and the version-derived idempotency key entirely offline by stubbing network fetches and subprocess.run.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/tests/test_version_watch.py#L149-L183",
+          "version": "repo-lines-v1:sha256:9baecccd6e910cb9dacca9553b2e60df3ecf0ef24c97be39a386347270353d4f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyOTZlZDEzZWZhODJjNDE5MmExOWQ1YjAxMjQ2MjkzMGM5NjUyNjI1NTM4MDI5OTM2YWY2MGM4NzA2OTk2OGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0NTdlYWY3YmQ4Yjc0NDFiYjljNjIyODNjODliNDhiYzdmMGIyMTUzZjRmMzhjMGI4YTk2MzNiODQzODQ2YmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdiNzVkY2NmYjAwNzM5MTE0ZjU3M2E1NzI2OTBmMDczNTcxM2VmZjZjOGFhZTM1NmYwYjY1NTNkOWRjM2YxNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5ODllNDVjZGJiYjgzOWI3MmNjYWY3MzdiZTg1MzE1N2YyZWQxOTIyMGI0YTFhNTAyZmU0NzNlNzFmMWQ3MmEifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_version_watch.py#L56-L103",
+          "version": "repo-lines-v1:sha256:384665d27440c31446ace884748a8047ac31f6ec8e87be30962f9bfdefd16c04:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyZTMxMjU3ZGMwYWUxZDU5MzAzN2MyODBjOWFkNTA4MTliOGE2YzhjZjcyOGJlMDcxNmQwMGEzZWVjYzA0YmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA4ODMxNDhiYmMxZjQ5ZTQ0MzI4YjdmMTA1ZWViYjA4ODczNGE5M2U3ZWFhNzE0Y2YzOTcxNDBmYjkzNDZjNDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg2MTgyMzg0ZWM3MzMwZGU0OWQxNTk4YmQ1YzYzMDk0NWNlOTIwNmE0ZjUzY2NiODRmY2NmYmNjN2VlZjkwODEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d78d5811134c42feb4cc9688a3c149b3",
+      "statement": "test_continit_providers.py executes the real 30-config.sh with a stubbed bashio in temp directories to guard the custom-to-openai mapping, placeholder key, simple-mode override, key guards and env_vars override warning.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/tests/test_continit_providers.py#L1-L18",
+          "version": "repo-lines-v1:sha256:893ed6ae9b76866e8b3afaa0b1bd377a582162c05fdcaf7b95ee95ee32cff7a6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2ODJjYmRiNGM4YjA3NTE4YmY0ODZjNTg5OTBmYzM5MTc4M2FhMjBhOTE2YmZiMjdhZDIxMWViMWQ1YzM2NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjMThlY2RmYTUzMzg2NTM4ODc1ODRkOGEzODA4MGQ2YzIyYzJiMzkwZjA1MWNiYmQwYmU3OTIzMDU5MGU3NWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE2ZmYxZTI3ODJlM2MxY2M4ODU1MjA3Mjg3MjNhNTBjOTY3MTgxOWE4Nzc5NjRlZGQ3YjAwOGEwZGQzZDFmMTYifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_continit_providers.py#L92-L225",
+          "version": "repo-lines-v1:sha256:ed26906754254a74d7efd8537bf5b9f87cb37af2f13bbaf3741cf16ceb03bcb9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjMmUzMTI1N2RjMGFlMWQ1OTMwMzdjMjgwYzlhZDUwODE5YjhhNmM4Y2Y3MjhiZTA3MTZkMDBhM2VlY2MwNGJiIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmZjViMjlkYTY2YjgxZDllM2I4MzMyMGVjNzQ4ODJiOTVhMzMyMzJkYjk1N2I2Y2Q5NDVmYjQ4ODUzYTNmZTRiIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjMGUwZjQxOThmY2UzOTU4Y2U1NjdjMWNmNWU0ZTlhODY3YzVlNmE0ZmVmMDc0Y2FjMDM4Y2M3M2Q0ODFkMTQxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzZDQxMzQwY2MyMzlhMTU5Y2U5YjYwMjJlOWY2MzIyODMyZTJlYWQ3NmNhZTllNDc1NGQyMTBlYjhmYjZkNWU4In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_5bde9d4100e3467bb5d751a9fbd50745",
+      "statement": "The same five suites are required by precommit, by the pre-push gate after assessment and by the GitHub regression workflow on Python 3.12, and a test asserts that parity so no suite disappears from a gate.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/regression-tests.yml#L1-L27",
+          "version": "repo-lines-v1:sha256:974970d4baef890c3b39f25a38ae593d3f04769eab74a86825622769ed811094:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiNjY0MWZjOGUwMTk5ZTc2YjJhZjEzNTcwZDM2ZDYwNTVmMTEyMjBkNjNlY2Y5NzVmNjIxODYzNWYwNWQzMGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5ZWExMmE3Nzg3Mzc2ZjBhZDM2NGUyMTAyMmY4Y2FkYzFhODU4OTExN2YxZjQ5Y2MyZjZiZDQ1N2JjZjhjNmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://.zerofactory/precommit.sh#L33-L39",
+          "version": "repo-lines-v1:sha256:aaa3f7c1c58b0318d3c9e79c30a6675cd0806b62526287ce38f1a5df0d5deea2:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWRkYmUzNDc0NDc3NjJlNTZkYTQ4ZTI0OWZiMDljOGQwZjUxMTY3NjA3YzRjNDAwYWI1ZjRhODA5MjA5ZjIyOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzA0ZjczNTcyNzNhMDdhOTFjM2IwZWY1NTlmNGJlNmUzMWZhY2I5MmVkYWZiOGRhZTQzMGVmOWU4NmJiOTIyNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmIxNTlhMTkzZWVjMDUxZTBlYzE3MjRlYTZhZDFmYjAwODUyMGZjYjcwY2NjOGI1Njc3YmZhMzlmZjk2OWRkYyJ9"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_prepush_pipeline.py#L9-L12",
+          "version": "repo-lines-v1:sha256:e4a9bb84faf6975eb9e25bc3cd703998dd07a81033626345952e9aa6eff5b84d:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmQ4NmExNzEzMDhlNmI5N2JkNDRiY2Q5NDMwM2ViZTA0ZGNkOWFlYjA4ZDU0Y2RiY2VhZDUyNmY1ZjUwOWQ0NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTBkYTM1YmJjYzg3YmNkYTRmMjQxYjM4MTBhMDUxMDljNWFiYjE4YzlkZGYzMDMzNDQyZjYwZGQyYzI0OTYyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmM0NzU4NDI3Mzc1MmY0MGIwOTFiZTBjMzBhYzRmNTc3ZTZlYWNkNzNjOTdiYzcxMDgzMzE2MjE5YTNiNzE3NSJ9"
+        },
+        {
+          "resource": "repo://scripts/pre-push-pipeline.sh#L61-L70",
+          "version": "repo-lines-v1:sha256:fadce2d5b3d4d9c0e03edcc50906e187ecd06a4e19d62030bcdf010c1d9818ee:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzMDJiYjE5MTEwOTBmYzNjMTA1YzU4YWZlN2MyNTE4OWQ4M2YxMDBkNDQxOWJhMDBiMjcwZDk3Mjk1ZDAzMTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3ZTAwYWFlODYwMzEwZTg0OWY5M2Q0ZGE3ZWMwYTM1NmU1OGRjMWUwZTA4MTA0ZGFmMjgyYzYyZWY0OWI2ZTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxOThjNWJhZjM5ZTJlMTgzZjNiNWZjOWQ5MWI2YmE2MDc3YzM1Mzg1MTE2ZjM0OWM4NzlkODk3ZjY1ZmE3MWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwNjA0NDZlNWYwMWZhNWMyMGM0MDVlZTlkNDQ4ZDdhNzVhMTdjYzQxZTVlNzBlYTkxNTlmNzZiOGMyY2ZkNTQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-25T23:47:00.311Z"
+  }
+}

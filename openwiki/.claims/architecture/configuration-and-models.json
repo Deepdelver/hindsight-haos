@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:a5e5f7f135c15198401d6c67e10aedb2bae30807d604e44054cb016536d5aa20",
+  "claims": [
+    {
+      "id": "claim_fd6b8c922c064e3984a65ae8cef9bac2",
+      "statement": "Simple mode (any mode other than expert) replaces all LLM, embeddings and reranker provider/model choices with the local llamacpp/onnx stack, so a stored openai choice still boots without an API key.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L36-L51",
+          "version": "repo-lines-v1:sha256:65d2bbf061147b8c112d5fa1376fbf769a21c7eee0440380d49518667df2acf3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlZTYzOWQ4MzAyOWRhOWY4OTkwMmJlY2NkZGI4NzlmMjhiNjVlNTM0NzUxZmFlOTM5NWRkMWY3NDMyNmZlOGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3NjlkMjM3Y2Q0MjBiOWQzOGI5ODFhMGE0ZjY3NzAxOTBhNGE4M2RjYTFmZTU2YzRmNWJhMWUyY2JjMGVmNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk1N2UxZTRiZjI3MDg4MmYyZTdlOTI4ZTIwNDQ2ZTZiN2JhMzgwNjc1N2IxZmY1ZjY0YmYwNTQ4YjhkNDc3YjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU1ZDM2NWJjYzAxODI5ZWExYTMzYzZjNjIxYmExNGU4MTZkOTYxODljMWNlMzdiN2JlZWYwYzk5OTRlZDI0NWMifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_continit_providers.py#L214-L222",
+          "version": "repo-lines-v1:sha256:7b544ec6066ed65c98ca43348b3c4fdf242d3d19bbfea3ba66a541c26b3dd3bb:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTVlMDcyMjEwOTQ2N2IyMTgxNjE4ZDA0NjhmNjY1MTRiOGJjY2MyMGI2NDJhMWI1ZjQzODM4MGExMjJmNDkzZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzBjMWYxODhmMTQyZWQ3YTgyNDY4MGIyMDcxNzJjNTUxOWJjNjE0YTQ4ZmRhN2NmMTY3ZWRiOGRkZjc5OTU2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTdmMDQ3NWRiNDc2MjdjY2MxMzJmODFhNTg2ODIxMWU3M2MwNzJiZTdmOGRkOGFlODlkYWMwZGUxNjgzMmQ2MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWRlNWQ2ZGYwYjcyOTM0ODU2ZTc4OWZmZDhkMGZhNWU3NTNiNGIzMmU1OTllODQ0N2NmYjdkZTEwZjJiYmZiZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_596a30caf26f4f57aa68972375dac2ec",
+      "statement": "The legacy 'custom' provider is mapped to 'openai' only after the simple-mode override; expert custom requires llm_base_url, and a keyless gateway gets the fixed placeholder API key 'local' because the API rejects 'custom' and an empty key for openai.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/config.yaml#L51-L53",
+          "version": "repo-lines-v1:sha256:5d52edd8332e5d3438ddb01623a5ee1b57349a34d24db2368666248d40f978b9:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2I5ZTlkNGZiN2Q4NmEyMDgxZTg5Yzk5NjdjNDdmNDNkMGUzM2MyZjg5MjM5ODY5MzZjOTUzYjM0YTczZWMyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjIxMGM1NDk3OTdjOTE4ODU2YWVhODdkNjgzNjdhOGI0OGQwZDM1YzUyMTA3N2RiMGQ3YTUyNDk4YTU3ODA0OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmViZTYxMTA2MDhlMDExMmI5ODVjMzg1MzAwYjc0MDJiMDEyZWZkZDMxNDY0MWQ3NjkyMzMyYTdkNTExOGZkMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzQ1NmZjYTc4NWVmYWZlZWQ4NzYxODE2NjY2NWU5YzJkNzgzYWE4NzI1YjljZWJlNWNmMDJkMjBhNGU3OTcxZiJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L53-L63",
+          "version": "repo-lines-v1:sha256:9f2a97a0fbf90b3abac5935301a29c948c186ca3df6b82af7efa8a2c3e5025c3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiNGJhOGQ1MjNlMTdhMTI4NWU2YjJkMWE3YTA3ZjMzNTJmOTMwNTM4ZjA0N2VkMjEzZTE3MzQzM2FiOWU3NmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3NjlkMjM3Y2Q0MjBiOWQzOGI5ODFhMGE0ZjY3NzAxOTBhNGE4M2RjYTFmZTU2YzRmNWJhMWUyY2JjMGVmNzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiMmFjYTk1YWZiYTM1MGNjMzIyMzBmNTZlYTYyNzBkOTU2Njg2MzRkZTk1MzFiYjJkMmRlMjc1Y2UxMWFiYTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2NWM1ZjE5NWM4NTFkN2Q0YmUzMzQ0MDNlYjI3MDFiYzAxZDIwYmMyNzIwMjBjODljMWNlZjZjMWVjYzM3NTYifQ"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L98-L105",
+          "version": "repo-lines-v1:sha256:ca7d188f75e48bc74830c82ab130359801c9cf1811d89334fc24573bb2c2226c:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOGUwOTRkMTljZDZhOWFkMGYzMjgyYWY3OTdjYTUxMDMxOWQ4NzFlODBiMjA1MWVmYmM4MzllZjYzMGEzMjVjNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODRlNzYwNDI2YThlM2E4NjBkZDE1MGU2YzExNzhiYWE2YmYxODI0YzU3ZmU4MjczYjAyYjRhNWNlNDUzYWE3MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2NhOTdlOTcxYWZlYzQ5N2VkNDc5MzQ1NWQ3NmM2ZTBmMjI5NTc5NzcxNWJhOTdjYzU4MzgzMjQ1ZTc5ZjVhZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjE4ZDU5ZTNlNjU2MjBkMjVlZGNlODJlMjJkZjc1NWU1NzZhNDAwOTA1OTc0YjRiZTUwYzE1NGM1Yjg5MGI1NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3a5f77033c5345a58025c50860a314fc",
+      "statement": "Only HINDSIGHT_API_* keys from env_vars are emitted, and any override of HINDSIGHT_API_LLM_PROVIDER is ignored with a warning on stderr so 'custom' cannot be reintroduced after the guards.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L159-L185",
+          "version": "repo-lines-v1:sha256:78122716c7b8e0fcfe8a7606da222b577f5a53fcbb5d4101debc3b5a5a5e9756:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4YTg3MmMzNjY5NmQ4YzBkNTFiMTliMGU0ODA2NzNkMDBlYzY4ZjU4NTgxNTNjNjE5MzgwNjY4YmFkNzc3ZjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwY2U3ZmMxMjdmNmNjNGJkOTA0NDExYmQxZDQyNzliY2YwYjgzNzNiODVjMjJiYTQzYzIxMjRhZTk2NmQ0ZGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImExMjE5YjViOGI5ZGQyZTk3ZDJhYzMzYmQ4YmE0MzMyZjlkODk1NDg5OTAyMzQ0NDQ1NjQxODZmODRmMTg0NzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0ZmFjNzg4YzFmZmRhZTBjOTc3YTljY2NlOTdhODAyMmFkM2RmMGEzMGJlNmI2N2ZiZjM1Y2YwODhlMDIyNjMifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_continit_providers.py#L182-L207",
+          "version": "repo-lines-v1:sha256:8f3078db3683391691dbb4a40a24aaaa72a6f4ae2a3f5df3a36935fd5093b75e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyMzE5YzhkYjU5YWVkZTQwM2U0MWUxYmY0NGY4YTY4ODVjZjMzM2E5MDVhMzAyZWNhYjgyNWE2ZTQ4NmJmMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzOGY4MTFjYTI0NzEyZDY1YWFjMDZmNDUwYzFlYzA0NDUyNzU3OTNjOTU4MWU0MWRmOGIyMWJlZjM0MGZiN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzZTliMjE1YjlhYzkxZjEwNzZiNTc1Mzg4MmZkZjk4MzVmNDEzMzQyMzE1MDlkYjU5MTQzYmJjN2EyNDhlYmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8db77cc2abda47d4bb576b07697c0bb8",
+      "statement": "Embeddings and reranker model ids left as 'auto' emit no provider-specific model variable, letting Hindsight use its own provider defaults and pick up upstream model changes without an add-on release.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/DOCS.md#L77-L83",
+          "version": "repo-lines-v1:sha256:fa9957ccc2aafdc51decb3fa97b24ad634258f260f5a2abbde0c050ab227328d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2NmNGI4MTMzYjdhYjQ5NjBlNjFhMGUxYTE3MjI5MDVhYjhiYjkwZTJhYzBlNjhmMDQyNDc0YTNjNTI1YzY4MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjU5NTZjMTdjZTY5NTg0ZjVmODk2YzUyYTRlZjJkZjgwNzBlZWYzZWMxOGYzMWRkOGUwMzJmMjdlZGY4YjcwYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDRmYmJmNDhiYWNhYjVjM2YwZDc0YzJiMDQzOTU3NTllZGZiMjIzMDMyNDcwMzRjYWVhM2UxNzg0Mjg4ZGVlZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzMyNmQ0Mjg5NGMyYzlmOTI1MTVkNDZhNDY3MDYxNDAxOGU4OTkzODJmZDhiMTBjOTM5ZjU2NTgxNGYyY2FiYiJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L113-L146",
+          "version": "repo-lines-v1:sha256:af3dcf593ba1d1d9bf1a78210066238cadeda602df8f30f956e366cd60f010bd:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYzU5NGJmM2UxMzVjYmFlNjc2MmJlMzM2MTMzOTljY2QwMjQ1MjBlMmFhMTRhOTdjNmIzMzBkNTgxMDBhMDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyZDVkZTI3MWU1ODNjNjVkNzcxYzk3MTZkYjJjOWY2YjdjNmY5NjNhMDU0MTQwOGRmMjJjMTQ1Y2Q5ODA2ZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1M2RhOTJkN2EyZGM3Y2UyZDQ3ZTE3MjdhMzI5MTk3MTc5NGVjMmU2ZWJjYjc2ZTY4YmE0ZDMyNmQyZmZjNDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0N2M0MTVmOTVjNGZmZGRmM2E2OTZjYTNkNWJiYTE4NzcwNjBkOTg5ZDMxMzRiODU0MGE3MDgzYzJiZWJjMzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_169871cdfe944127a56f45aac923cc9f",
+      "statement": "Source config.yaml keeps API keys and base URLs empty in options and declares credentials with password schema entries; test_source_defaults.py rejects any checked-in credential-looking token or forced expert routing.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/config.yaml#L20-L36",
+          "version": "repo-lines-v1:sha256:6627357289c03d623b0aff0f1a02a3a8154d49f0627ca4aee1456c2afe7d67c0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjOTUwMmFkMzJjZTk0N2U4MGVkMTcyYTMzZWU4YmYyM2VmNDkzOGEyOTMzNTFmYTZiNGJhMWUxZTIyOTQ3ZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ5Mjc3Nzk1YzExYTllMjUzYWEyMDM1ZTJkYzVlZDAxMzM5ZWQ5NDJlYTFmZmExZDFlYzE3NTNmZjQ5ODk4YzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkODJiZGU4YmE0NjAwYWE1YzNkNDNkZGMzYzU5ZjJiZmI0M2ZmNjA4ODQzYjY1MjkzMzAzOTllMTMyYzJlZDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2Y2M3OGU2YmIzMzdmY2IxODFjOTE3MGQzNWQwMDE3MGZlNTRlZmJiM2IyNmNmMzU1Y2UwMmJiYjc5ZWMyMzIifQ"
+        },
+        {
+          "resource": "repo://hindsight/config.yaml#L46-L71",
+          "version": "repo-lines-v1:sha256:d6bcacd4b0aa0cc5027810da6ebff2123757371e319da4c04855ade180810300:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmZjI0NjgwZDg2NmIyODJlNDM4OWZmZmZjMTEwMDhiNzliMmIwMGE3MDJmOWUyMTI1YTRkNjVhNTVkZDdiMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5MGZlNzA0NjU4Nzc4Mjc1YTQ5YzI1NTg2MWZkY2IyYWQ3ZDg2ZGIxOWRmYTIyY2M5MzA4NmUyNDY2NzE4N2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdlZWEzZmM3ZjhlMTkwZGI5MGZhZWZhMTU1NWExYmMwYmQ0ZDE1N2JmNGJiZmZlNWEyMzRmNDcxNzI1ZTM2NzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU0ZWI3ODU3NWY0Y2JjYTZhMjRhOTIxMGU2YzAwZGFiMjZlMDc2NmVjNjIxZTEzYjg0MTEyM2Q1MGUwN2M4MmQifQ"
+        },
+        {
+          "resource": "repo://hindsight/tests/test_source_defaults.py#L40-L70",
+          "version": "repo-lines-v1:sha256:161bb5c5d78682133e41596a7eea0ba1828cae929dee4c4e30ba4fae230385c7:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5NGU4Y2IwNTUyNmY0MWNhODM4Y2EyOWQ1YTJjOTEyNzY0NmFmZTJlZDc3ODFhYWY4Y2MwY2ZlYjg0YWNkZDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0MWMzMGE3N2Q2NmZiZTMwNjMxZGU0YzJkYTQ0ODI4MWVmMjNhM2ZkZmVkY2Y1ZmZiZDE3ZmJkZmNjMTJiZTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1YzI4ZmY1ODU2MDE3YWNmZDBhMTg4YWM4M2JhMjI0MDZlZDEyYmIzMDYzZDlkOWNjNzkwNzQ1MTc4MGFlNGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjODY5M2E2YTAzYWRiODY0NjhjMzViZDYyYTlmMzA3Y2FiYzY5NGZmNDZjNjU5Y2MyM2YwNmY4Y2ZlYjJmN2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bf7e40b0962245b2984087a502ab969e",
+      "statement": "cont-init writes the generated env file under /data/hindsight with mode 600, and the API service sources that file with export enabled so the variables apply at startup.",
+      "evidence": [
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L185-L187",
+          "version": "repo-lines-v1:sha256:3623ad87b0a550a4e1f35db3788340e9fbb3bdff4a13f1031d0eebe842f0f7d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzBjZTdmYzEyN2Y2Y2M0YmQ5MDQ0MTFiZDFkNDI3OWJjZjBiODM3M2I4NWMyMmJhNDNjMjEyNGFlOTY2ZDRkZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWEwMWQ3MmFlOTIyMWQ1MzRjODY1MmYxNWY3ODM3ZDA2NDRhNGZhYjQ5ZTE2ZjViMmVkZmFiY2VhNDY2MDU3NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTUxZGE2YTUyNTQ0NWYyMjg5NTc2MTI1MGMyNDc0ZWM3YjQ4OWRhNjBkYWM5MGFjZDJlNjIyZWRiMGU0OTc5MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjM5YjNmODRmMGU0MGM4ZjY1MjU3NGY1NzdiNTAwOGU3Y2I5M2VjNzQ1OGM2NWNmMjEwNjgwZTRhMGEyM2IxMSJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/cont-init.d/30-config.sh#L82-L85",
+          "version": "repo-lines-v1:sha256:f47bbab6c2bcff2edf0e2feb37d026d96101c30d3015f734175f8df3b105de05:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODNlMzYyYjA4NDRlZTE2Y2I3NzQ1MmQyMTRkZGQyYTllOTg4ZGY1MGRiOWI0ZDQ3NTgzYTVhZGFlMzhmNWE3YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFiYTQ3MTljODBiNmZlOTExYjA5MWE3YzA1MTI0YjY0ZWVlY2U5NjRlMDljMDU4ZWY4Zjk4MDVkYWNhNTQ2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWQ4MWMyMmM5NTA2Y2JjYjFmOGExODk1NDIyNzUzODg5MjM4MDJlZmQ1ZmQ0NGU1MmQzNzNhYjliMzk0MjgyYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTk1MzcyN2VhZDQ1NDlhMzk3NDU4NWRiMTM3ZDVlZTcyMjM1ZWRiYjU0YmJiMzk2ZWRkZDc0MDE4MDI3ODkxOSJ9"
+        },
+        {
+          "resource": "repo://hindsight/rootfs/etc/services.d/hindsight/run#L17-L21",
+          "version": "repo-lines-v1:sha256:77923c7c00019c2ef1008827282ea60e235a322faf637c254c9a2b1d4b622ed6:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjUzZGM4N2NkZGZkYmJkYzRiN2U1YzdjYjY5NGI5NDA5MzQwOGFhODBkN2UwOWNjOGI3MjlkNTQ4ZGZlOGE3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI5YmM3NmJkNTgyMzQzODFiOTQwMDY2NWM4MjFhZjhhY2Y5YjUwZDMzNmEyYmRhY2QwNDA0NGQ3YTg2ZTFkNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjYyNGIyNTYzNDY5YWViMzE5MDJjYTIwMTUxODIyZDFiZGUxYWE1ZjY0OTZkOWU0YmJjYWNmZjlhYzU1N2ZjNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTA4MzRiNjJmY2MzODNmZTkzMzhkMTEwZjAwNzA4MjA1ODhhMjY3YWVjZDc5YTNlYTY3ZGIwODA4YTlmN2MxMyJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-25T23:47:00.311Z"
+  }
+}
