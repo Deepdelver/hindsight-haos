@@ -74,6 +74,27 @@ def main() -> int:
     if url_type != "str":
         errors.append(f"llm_base_url schema must be 'str' (it has a default), got {url_type!r}")
 
+    # Dedicated consolidation-LLM route (1.2.26): four expert-mode options with
+    # EMPTY defaults. Unset means "reuse the normal LLM settings", so the source
+    # config must carry no credential and no forced consolidation route. The
+    # schema types mirror the main LLM options: str for free-text values and
+    # password for the key (both non-optional because they have a "" default).
+    consolidation_schema = {
+        "consolidation_llm_provider": "str",
+        "consolidation_llm_model": "str",
+        "consolidation_llm_base_url": "str",
+        "consolidation_llm_api_key": "password",
+    }
+    for name, expected_type in consolidation_schema.items():
+        value = opt(name)
+        if value is None:
+            errors.append(f"{name} must be present in options so it appears in the UI")
+        elif value != "":
+            errors.append(f"{name} default must be empty in source config, got {value[:40]!r}")
+        actual_type = schema_type(name)
+        if actual_type != expected_type:
+            errors.append(f"{name} schema must be '{expected_type}', got {actual_type!r}")
+
     # No credential-looking token anywhere in the source config.
     if "sk-" in text:
         errors.append("source config contains an 'sk-' token (possible credential leak)")
@@ -138,7 +159,7 @@ def main() -> int:
     if "postgresql-15" not in docker:
         errors.append("Dockerfile must keep installing PostgreSQL 15")
 
-    # Release metadata: add-on 1.2.25 ships upstream 1.3.0 in both components.
+    # Release metadata: add-on 1.2.26 ships upstream 1.3.0 in both components.
     try:
         versions = json.loads(VERSIONS.read_text())
     except (OSError, ValueError) as exc:
@@ -158,8 +179,8 @@ def main() -> int:
         errors.append(
             f"Dockerfile control-plane pin must be 1.3.0, got {cp_pin.group(1) if cp_pin else None!r}"
         )
-    if top_level.get("version") != '"1.2.25"':
-        errors.append(f"add-on version must be 1.2.25, got {top_level.get('version')!r}")
+    if top_level.get("version") != '"1.2.26"':
+        errors.append(f"add-on version must be 1.2.26, got {top_level.get('version')!r}")
 
     # The consolidation backlog is handled at runtime, so the operational
     # guidance must ship in both docs with the real diagnostic endpoints.
@@ -183,8 +204,9 @@ def main() -> int:
         return 1
     print(
         "source defaults OK: simple/llamacpp, empty api key and base URL, "
-        "str base-URL schema, quoted version, no token, no dead installer/"
-        "ingress option/embedded-db extra"
+        "str base-URL schema, four empty consolidation options with matching "
+        "schema, quoted version, no token, no dead installer/ingress option/"
+        "embedded-db extra"
     )
     return 0
 
