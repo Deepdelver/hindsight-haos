@@ -14,10 +14,15 @@ standalone shim. The checks fail if any of them returns, and also verify the
 behaviour that replaced them (top-level ingress, the local-llm/local-onnx
 extras and the shebang probe) stays intact.
 
+It also guards the release metadata: versions.json, both pins in the
+Dockerfile, the add-on version and the consolidation-incident troubleshooting
+sections in README/DOCS must agree.
+
 No third-party deps: parses the small options/schema blocks with string checks
 and exercises the shim with stdlib subprocesses.
 """
 
+import json
 import os
 import re
 import subprocess
@@ -242,6 +247,11 @@ def check_bashio_shim(errors):
             )
 
 
+VERSIONS = REPO / "hindsight" / "versions.json"
+README = REPO / "README.md"
+DOCS = REPO / "hindsight" / "DOCS.md"
+
+
 def main() -> int:
     errors = []
     text = CFG.read_text()
@@ -347,6 +357,44 @@ def main() -> int:
         errors.append("Dockerfile must keep installing PostgreSQL 15")
 
     check_bashio_shim(errors)
+    # Release metadata: add-on 1.2.25 ships upstream 1.3.0 in both components.
+    try:
+        versions = json.loads(VERSIONS.read_text())
+    except (OSError, ValueError) as exc:
+        errors.append(f"hindsight/versions.json is not valid JSON: {exc}")
+        versions = {}
+    for component in ("hindsight_api", "control_plane"):
+        value = versions.get(component)
+        if value != "1.3.0":
+            errors.append(f"versions.json {component} must be 1.3.0, got {value!r}")
+    api_pin = re.search(r"hindsight-api-slim\[[^\]]+\]==([0-9.]+)", docker)
+    cp_pin = re.search(r"hindsight-control-plane@([0-9.]+)", docker)
+    if not api_pin or api_pin.group(1) != "1.3.0":
+        errors.append(
+            f"Dockerfile API pin must be 1.3.0, got {api_pin.group(1) if api_pin else None!r}"
+        )
+    if not cp_pin or cp_pin.group(1) != "1.3.0":
+        errors.append(
+            f"Dockerfile control-plane pin must be 1.3.0, got {cp_pin.group(1) if cp_pin else None!r}"
+        )
+    if top_level.get("version") != '"1.2.25"':
+        errors.append(f"add-on version must be 1.2.25, got {top_level.get('version')!r}")
+
+    # The consolidation backlog is handled at runtime, so the operational
+    # guidance must ship in both docs with the real diagnostic endpoints.
+    for name, doc in (("README.md", README), ("hindsight/DOCS.md", DOCS)):
+        dtext = doc.read_text() if doc.is_file() else ""
+        for token in (
+            "consolidation_state=pending",
+            "operations?type=consolidation",
+            "llm-requests",
+            "HINDSIGHT_API_LLM_MODEL",
+            '{"updates":{',
+        ):
+            if token not in dtext:
+                errors.append(f"{name} missing consolidation troubleshooting token {token!r}")
+        if not re.search(r"(?is)\*\*(?:do not|never)\s+delete\s+pending\s+memories", dtext):
+            errors.append(f"{name} must warn against deleting pending memories")
 
     if errors:
         for e in errors:
