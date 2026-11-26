@@ -21,6 +21,10 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
    - **llm_api_key** — API key for the chosen provider (not needed for `ollama`, or for `custom` pointing at a keyless gateway)
    - **llm_model** — Model name (default `gemma-4-e2b-it`)
    - **llm_base_url** — Custom endpoint for Ollama or an OpenAI-compatible proxy (default empty; set it in the Configuration tab; expert mode only)
+   - **consolidation_llm_provider** — Expert only: separate provider for observation consolidation (default empty = reuse `llm_provider`)
+   - **consolidation_llm_model** — Expert only: separate consolidation model (default empty = reuse `llm_model`)
+   - **consolidation_llm_base_url** — Expert only: separate consolidation endpoint (default empty = reuse `llm_base_url`)
+   - **consolidation_llm_api_key** — Expert only: key for the consolidation provider (default empty = reuse `llm_api_key`)
    - **embeddings_provider** — `onnx` (local, no key), or `local`, `openai`, `cohere`, `tei`, ...
    - **embeddings_model** — `auto` (default: let Hindsight choose and download its model), or an explicit model id
    - **embeddings_api_key** — Separate key for embeddings (falls back to `llm_api_key`)
@@ -58,6 +62,10 @@ lets you set any additional variable directly:
 | `llm_api_key` | `HINDSIGHT_API_LLM_API_KEY` |
 | `llm_model` | `HINDSIGHT_API_LLM_MODEL` |
 | `llm_base_url` | `HINDSIGHT_API_LLM_BASE_URL` |
+| `consolidation_llm_provider` | `HINDSIGHT_API_CONSOLIDATION_LLM_PROVIDER` |
+| `consolidation_llm_model` | `HINDSIGHT_API_CONSOLIDATION_LLM_MODEL` |
+| `consolidation_llm_base_url` | `HINDSIGHT_API_CONSOLIDATION_LLM_BASE_URL` |
+| `consolidation_llm_api_key` | `HINDSIGHT_API_CONSOLIDATION_LLM_API_KEY` |
 | `embeddings_provider` | `HINDSIGHT_API_EMBEDDINGS_PROVIDER` |
 | `embeddings_model` | `HINDSIGHT_API_EMBEDDINGS_<PROVIDER>_MODEL*` |
 | `embeddings_api_key` | `HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY` (for `openai`) |
@@ -86,6 +94,34 @@ needed. It is the recommended setting for a fresh install.
 embeddings provider/model/key, reranker provider/model, and the llama.cpp path,
 context size and GPU layers. Use it for subscriptions (OpenAI, Anthropic, OpenRouter,
 ...), Ollama on your LAN, or self-hosted models. `env_vars` still works in both modes.
+
+### Dedicated consolidation LLM (since 1.2.26)
+
+Hindsight 1.3.0 can route observation consolidation separately from retain. The
+add-on exposes that through four expert-mode options:
+
+| Option | Upstream variable | Fallback when empty |
+| --- | --- | --- |
+| `consolidation_llm_provider` | `HINDSIGHT_API_CONSOLIDATION_LLM_PROVIDER` | `HINDSIGHT_API_LLM_PROVIDER` |
+| `consolidation_llm_model` | `HINDSIGHT_API_CONSOLIDATION_LLM_MODEL` | `HINDSIGHT_API_LLM_MODEL` |
+| `consolidation_llm_base_url` | `HINDSIGHT_API_CONSOLIDATION_LLM_BASE_URL` | `HINDSIGHT_API_LLM_BASE_URL` |
+| `consolidation_llm_api_key` | `HINDSIGHT_API_CONSOLIDATION_LLM_API_KEY` | `HINDSIGHT_API_LLM_API_KEY` |
+
+`30-config.sh` emits a variable only when its option is non-empty, so a partial
+override is fine: set just `consolidation_llm_model` and the provider, key and base
+URL stay on the normal LLM route. All four defaults in `config.yaml` are `""`, so
+an upgrade writes no new variable and behaviour is unchanged. In `simple` mode all
+four are reset to empty before the env file is written, so a value left over from
+an expert setup cannot turn a local-only install into a remote caller. For a
+gateway use `openai` (not `custom`) plus `consolidation_llm_base_url`.
+
+This is an operational **throughput** fix for the consolidation backlog. It does
+not change recall quality, fix a failing retain, or remove pending memories. The
+measured prompts on this host were large enough (52,758 characters, ~14k–16k input
+tokens) that `combo` and `grok-4.7` both exceeded 240 s and `auto/best-free` timed
+out at 150 s during extraction; `google/gemini-2.5-flash-lite` returned 401 because
+no key was configured. Measure any candidate against the real prompt before
+committing it, and bound the prompt with the per-bank limits below.
 
 ### Automatic model selection
 
@@ -291,7 +327,9 @@ means the LLM extractor cannot keep up, not that the add-on is broken. In the
 alias on OmniRoute failed over through dead providers (502/404/400, 60–115 s per
 call) and consolidation on 14k-token prompts took 110–327 s. The runtime fix was a
 working `combo` extraction route plus tighter per-bank consolidation limits; no
-source change was needed.
+source change was needed. Since 1.2.26, expert installs can additionally separate
+the consolidation route with the four `consolidation_llm_*` options above; they
+are empty by default and are a throughput lever, not a recall fix.
 
 Diagnose before changing anything:
 
