@@ -14,6 +14,10 @@ d. custom with a real key            -> key passed through unchanged.
 e. env_vars HINDSIGHT_API_LLM_PROVIDER override -> ignored, no 'custom' leaks.
 f. expert + openai without key       -> still blocked.
 g. simple + openai without key       -> still keyless llamacpp (no regression).
+h. expert + all four consolidation options -> exact HINDSIGHT_API_CONSOLIDATION_LLM_* mapping.
+i. expert + only consolidation model -> only that one var emitted (others fall back upstream).
+j. consolidation options absent      -> no consolidation var (today's behaviour).
+k. simple + stored consolidation options -> ignored, no consolidation var.
 
 No third-party deps. Run: python3 hindsight/tests/test_continit_providers.py
 """
@@ -87,6 +91,10 @@ def env_dict(lines):
 
 def provider_lines(lines):
     return [l for l in lines if l.startswith("HINDSIGHT_API_LLM_PROVIDER=")]
+
+
+def consolidation_lines(lines):
+    return [l for l in lines if l.startswith("HINDSIGHT_API_CONSOLIDATION_LLM_")]
 
 
 def main():
@@ -217,6 +225,105 @@ def main():
     ok &= check("g: simple+openai without key exits 0", rc == 0, f"rc={rc} out={out!r}")
     ok &= check(
         "g: provider forced to llamacpp",
+        env.get("HINDSIGHT_API_LLM_PROVIDER") == "llamacpp",
+        f"env={env}",
+    )
+
+    # --- Dedicated consolidation-LLM route (1.2.26) -------------------------
+    cprovider = "openai"
+    cmodel = "gpt-4o-mini"
+    cbase = "http://gw:20128/api/v1"
+    ckey = "consolidation-only-secret"
+
+    # (h) expert + all four set -> exact consolidation mapping, main LLM intact.
+    rc, lines, out = run_continit(
+        {
+            "mode": "expert",
+            "llm_provider": "llamacpp",
+            "llm_model": "gemma-4-e2b-it",
+            "consolidation_llm_provider": cprovider,
+            "consolidation_llm_model": cmodel,
+            "consolidation_llm_base_url": cbase,
+            "consolidation_llm_api_key": ckey,
+        }
+    )
+    env = env_dict(lines)
+    ok &= check("h: expert consolidation exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "h: all four consolidation vars emitted",
+        len(consolidation_lines(lines)) == 4,
+        f"lines={consolidation_lines(lines)}",
+    )
+    ok &= check(
+        "h: provider mapped to HINDSIGHT_API_CONSOLIDATION_LLM_PROVIDER",
+        env.get("HINDSIGHT_API_CONSOLIDATION_LLM_PROVIDER") == cprovider,
+        f"env={env}",
+    )
+    ok &= check(
+        "h: model mapped to HINDSIGHT_API_CONSOLIDATION_LLM_MODEL",
+        env.get("HINDSIGHT_API_CONSOLIDATION_LLM_MODEL") == cmodel,
+        f"env={env}",
+    )
+    ok &= check(
+        "h: base URL mapped to HINDSIGHT_API_CONSOLIDATION_LLM_BASE_URL",
+        env.get("HINDSIGHT_API_CONSOLIDATION_LLM_BASE_URL") == cbase,
+        f"env={env}",
+    )
+    ok &= check(
+        "h: key mapped verbatim to HINDSIGHT_API_CONSOLIDATION_LLM_API_KEY",
+        env.get("HINDSIGHT_API_CONSOLIDATION_LLM_API_KEY") == ckey,
+        f"env={env}",
+    )
+    ok &= check(
+        "h: main LLM config untouched",
+        env.get("HINDSIGHT_API_LLM_PROVIDER") == "llamacpp"
+        and env.get("HINDSIGHT_API_LLM_MODEL") == "gemma-4-e2b-it"
+        and "HINDSIGHT_API_LLM_API_KEY" not in env
+        and "HINDSIGHT_API_LLM_BASE_URL" not in env,
+        f"env={env}",
+    )
+
+    # (i) partial override -> only the set var is emitted; upstream falls back
+    # to the main LLM setting for the rest.
+    rc, lines, out = run_continit(
+        {"mode": "expert", "llm_provider": "llamacpp", "consolidation_llm_model": cmodel}
+    )
+    env = env_dict(lines)
+    ok &= check("i: partial consolidation exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "i: only the model override is emitted",
+        consolidation_lines(lines) == [f"HINDSIGHT_API_CONSOLIDATION_LLM_MODEL={cmodel}"],
+        f"lines={consolidation_lines(lines)}",
+    )
+
+    # (j) absent -> no consolidation line at all (current behaviour preserved).
+    rc, lines, out = run_continit({"mode": "expert", "llm_provider": "llamacpp"})
+    ok &= check("j: absent consolidation exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "j: no consolidation vars when unset",
+        not consolidation_lines(lines),
+        f"lines={consolidation_lines(lines)}",
+    )
+
+    # (k) simple mode ignores stored consolidation options entirely.
+    rc, lines, out = run_continit(
+        {
+            "mode": "simple",
+            "consolidation_llm_provider": cprovider,
+            "consolidation_llm_model": cmodel,
+            "consolidation_llm_base_url": cbase,
+            "consolidation_llm_api_key": ckey,
+        }
+    )
+    env = env_dict(lines)
+    ok &= check("k: simple consolidation exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "k: simple mode emits no consolidation vars",
+        not consolidation_lines(lines),
+        f"lines={consolidation_lines(lines)}",
+    )
+    ok &= check(
+        "k: simple mode still forces llamacpp",
         env.get("HINDSIGHT_API_LLM_PROVIDER") == "llamacpp",
         f"env={env}",
     )

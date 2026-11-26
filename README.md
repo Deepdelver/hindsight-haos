@@ -57,6 +57,10 @@ Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_i
 | `llm_api_key` | — | Needed only for hosted providers |
 | `llm_model` | `gemma-4-e2b-it` | Model name for the selected provider |
 | `llm_base_url` | `""` (empty) | Custom endpoint for Ollama / an OpenAI-compatible proxy; expert mode only (empty = provider default) |
+| `consolidation_llm_provider` | `""` (empty) | Expert only: separate provider for observation consolidation; empty = reuse `llm_provider` |
+| `consolidation_llm_model` | `""` (empty) | Expert only: separate model for consolidation; empty = reuse `llm_model` |
+| `consolidation_llm_base_url` | `""` (empty) | Expert only: separate endpoint for consolidation; empty = reuse `llm_base_url` |
+| `consolidation_llm_api_key` | `""` (empty) | Expert only: API key for the consolidation provider; empty = reuse `llm_api_key` |
 | `embeddings_provider` | `onnx` | Local ONNX embeddings by default |
 | `embeddings_model` | `auto` | Let Hindsight pick and download its default; set an id to pin |
 | `reranker_provider` | `onnx` | Local ONNX reranker; `rrf` needs no model |
@@ -72,6 +76,47 @@ Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_i
 | `env_vars` | `[]` | Any extra `HINDSIGHT_API_*` variable as `{name, value}` |
 
 In `simple` mode the provider, model and base-URL fields are ignored; the local stack is always used. In `expert` mode they are passed through. `env_vars` works in both modes. A full option-to-environment-variable map and provider-specific notes are in [hindsight/DOCS.md](hindsight/DOCS.md).
+
+### Dedicated consolidation LLM (expert mode, since 1.2.26)
+
+Consolidation — turning retained facts into Observations — uses the retain LLM by
+default. That coupling hurts when the backlog grows: retain wants strong
+structured output, while consolidation gets a much larger prompt and mostly wants
+a fast, cheap route. In `expert` mode you can override any of the four
+`consolidation_llm_*` options above to route only that work elsewhere. They map to
+`HINDSIGHT_API_CONSOLIDATION_LLM_PROVIDER`, `..._MODEL`, `..._BASE_URL` and
+`..._API_KEY`. **Every option you leave empty falls back to the corresponding
+normal LLM setting**, so partial overrides are valid.
+
+Example — keep extraction on a quality alias, send consolidation through a
+separate gateway route:
+
+```yaml
+mode: expert
+llm_provider: openai
+llm_base_url: http://<host>:20128/api/v1
+llm_api_key: <gateway-key>
+llm_model: combo
+consolidation_llm_provider: openai
+consolidation_llm_base_url: http://<host>:20128/api/v1
+consolidation_llm_api_key: <gateway-key>
+consolidation_llm_model: <consolidation-model>
+```
+
+All four defaults are empty in the shipped config, so nothing new is written to
+the runtime env file and today's behaviour is unchanged. `simple` mode ignores
+these options even if a value was stored during an earlier expert setup; a
+local-only install cannot start calling out by accident.
+
+This is an operational **throughput** fix for the pending-consolidation backlog.
+It does not improve recall, repair a failed retain, or delete the backlog. Those
+still require a healthy extraction route and, where needed, a retry of failed
+operations. Measure a candidate on the real consolidation prompt before
+switching: on this host `combo` and `grok-4.7` both exceeded 240 s on the 52,758
+character prompt, `auto/best-free` timed out at 150 s during extraction, and
+`google/gemini-2.5-flash-lite` returned 401 because no credentials were
+configured — so no measured model can honestly be called fast for consolidation
+yet. Bound the prompt with the per-bank limits below first.
 
 ## Connecting agents
 
@@ -126,8 +171,9 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
   `@vectorize-io/hindsight-control-plane` from npm. Both 1.3.0 packages were
   published on 2026-11-24 from the same upstream `Release v1.3.0` commit; the
   pair is recorded in `hindsight/versions.json`. API and UI versions must match;
-  a mismatch produces UI 404s and empty memory tabs. Both are bumped together in
-  one release (add-on 1.2.25). No config key was removed or renamed in 1.3.0,
+  a mismatch produces UI 404s and empty memory tabs. Both were bumped together in
+  add-on release 1.2.25 and remain pinned at 1.3.0 in 1.2.26. No config key was
+  removed or renamed in 1.3.0,
   but the API ships migration work and enables knowledge banks by default: wait
   for `/health` on the first start after upgrading.
 - **Automatic version watch.** A daily cron job runs
@@ -226,6 +272,13 @@ almost always a routing problem, not an add-on bug. On 2026-11-26 bank `hermes`
 reached 1566 pending memories: the `auto/best-fast` alias on OmniRoute failed over
 through dead providers (502/404/400, 60–115 s per call) and consolidation on
 14k-token prompts took 110–327 s, so the worker could not drain the queue.
+
+Since 1.2.26, expert installs can send just the consolidation calls to a
+separate route with the four `consolidation_llm_*` options described in
+[Dedicated consolidation LLM](#dedicated-consolidation-llm-expert-mode-since-1226).
+They are empty by default, so the upgrade itself changes no routing. This is a
+throughput lever, not a recall fix: always confirm the extraction route is
+healthy first.
 
 Diagnose in this order (replace `<bank>` with the bank id, e.g. `hermes`):
 
