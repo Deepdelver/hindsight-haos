@@ -41,6 +41,13 @@ def pinned_control_plane():
     return match.group(1) if match else None
 
 
+def pinned_api():
+    match = re.search(
+        r"hindsight-api-slim\[[^\]]*\]==([0-9][0-9A-Za-z.\-]*)", DOCKERFILE.read_text()
+    )
+    return match.group(1) if match else None
+
+
 def recorded_versions():
     data = json.loads(VERSIONS.read_text())
     return data.get("hindsight_api"), data.get("control_plane")
@@ -49,15 +56,18 @@ def recorded_versions():
 def assess(api_latest, cp_latest):
     api_recorded, cp_recorded = recorded_versions()
     cp_pinned = pinned_control_plane()
+    api_pinned = pinned_api()
     drift = {
         "api": bool(vtuple(api_latest) > vtuple(api_recorded)),
         "control_plane": bool(vtuple(cp_latest) > vtuple(cp_recorded)),
         "pin": bool(cp_pinned and vtuple(cp_latest) > vtuple(cp_pinned)),
+        "api_pin": bool(api_pinned and vtuple(api_pinned) != vtuple(api_recorded)),
     }
     return {
         "recorded_api": api_recorded,
         "recorded_control_plane": cp_recorded,
         "pinned_control_plane": cp_pinned,
+        "pinned_api": api_pinned,
         "latest_api": api_latest,
         "latest_control_plane": cp_latest,
         "drift": drift,
@@ -71,10 +81,11 @@ def create_task(report):
         "Upstream Hindsight version drift detected by the daily version watch.\n\n"
         f"Recorded API: {report['recorded_api']} -> latest {report['latest_api']}\n"
         f"Recorded control plane: {report['recorded_control_plane']} -> latest {report['latest_control_plane']}\n"
-        f"Dockerfile pin: {report['pinned_control_plane']}\n\n"
+        f"Dockerfile API pin: {report['pinned_api']}\n"
+        f"Dockerfile control-plane pin: {report['pinned_control_plane']}\n\n"
         "Do this:\n"
         "1. Verify the releases and compatibility (API and control plane must match).\n"
-        "2. Update hindsight/versions.json and the control-plane pin in the Dockerfile.\n"
+        "2. Update hindsight/versions.json and both Dockerfile pins so the API pin matches recorded_api.\n"
         "3. Update README.md / hindsight/DOCS.md and CHANGELOG.md; bump config.yaml version.\n"
         "4. Run all four regression suites in hindsight/tests/: test_source_defaults.py,\n"
         "   test_ingress_rewrite.py, test_prepush_pipeline.py and test_version_watch.py.\n"
