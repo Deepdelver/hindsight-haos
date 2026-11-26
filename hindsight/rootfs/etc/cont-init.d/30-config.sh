@@ -23,6 +23,7 @@ CONSOLIDATION_LLM_PROVIDER="${consolidation_llm_provider:-}"
 CONSOLIDATION_LLM_MODEL="${consolidation_llm_model:-}"
 CONSOLIDATION_LLM_BASE_URL="${consolidation_llm_base_url:-}"
 CONSOLIDATION_LLM_API_KEY="${consolidation_llm_api_key:-}"
+CONSOLIDATION_MAX_COMPLETION_TOKENS="${consolidation_max_completion_tokens:-}"
 EMBEDDINGS_PROVIDER="${embeddings_provider:-onnx}"
 EMBEDDINGS_API_KEY="${embeddings_api_key:-}"
 # "auto" (the default) means: do not pin a model id, let Hindsight use its own
@@ -53,6 +54,7 @@ if [[ "$MODE" != "expert" ]]; then
     CONSOLIDATION_LLM_MODEL=""
     CONSOLIDATION_LLM_BASE_URL=""
     CONSOLIDATION_LLM_API_KEY=""
+    CONSOLIDATION_MAX_COMPLETION_TOKENS=""
     EMBEDDINGS_PROVIDER="onnx"
     EMBEDDINGS_MODEL="auto"
     RERANKER_PROVIDER="onnx"
@@ -135,6 +137,16 @@ ENV_FILE="${HINDSIGHT_ENV_FILE:-$DATA_DIR/env}"
     fi
     if [[ -n "$MCP_AUTH_TOKEN" ]]; then
         printf 'HINDSIGHT_API_MCP_AUTH_TOKEN=%s\n' "$MCP_AUTH_TOKEN"
+    fi
+
+    # Emit consolidation max completion tokens when a consolidation LLM is configured.
+    # Default to 8192 (same as llamacpp local mode) to avoid OutputTooLongError.
+    if [[ -n "$CONSOLIDATION_LLM_PROVIDER" || -n "$CONSOLIDATION_LLM_MODEL" ]]; then
+        if [[ -n "$CONSOLIDATION_MAX_COMPLETION_TOKENS" ]]; then
+            printf 'HINDSIGHT_API_CONSOLIDATION_MAX_COMPLETION_TOKENS=%s\n' "$CONSOLIDATION_MAX_COMPLETION_TOKENS"
+        else
+            printf 'HINDSIGHT_API_CONSOLIDATION_MAX_COMPLETION_TOKENS=%s\n' "8192"
+        fi
     fi
 
     # Only emit a model id when one was explicitly configured. With "auto" the
