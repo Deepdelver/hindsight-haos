@@ -123,6 +123,11 @@ def main():
             report["drift"].get("api_pin") is False and not report["update_available"],
             str(report),
         )
+        ok &= check(
+            "report exposes the Dockerfile API pin",
+            report.get("pinned_api") == "1.2.3",
+            str(report),
+        )
 
         mod.VERSIONS.write_text(json.dumps({"hindsight_api": "1.2.4", "control_plane": "1.2.3"}))
         report = mod.assess("1.2.3", "1.2.3")
@@ -178,6 +183,12 @@ def main():
             and "--assignee" in calls[0]
             and "--project" in calls[0],
             str(calls),
+        )
+        body = calls[0][calls[0].index("--body") + 1]
+        ok &= check(
+            "task body reports both Dockerfile pins",
+            "Dockerfile API pin: 1.2.3" in body and "Dockerfile control-plane pin: 1.2.3" in body,
+            body,
         )
 
     # main() exit codes: 0 up to date, 2 drift (report only), 3 fetch failure,
