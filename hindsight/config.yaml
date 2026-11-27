@@ -40,6 +40,9 @@ options:
   log_level: info
   control_plane: true
   control_plane_port: 9999
+  consolidation_reserved_slots: 2
+  consolidation_llm_parallelism: 4
+  consolidation_max_memories_per_round: 200
 panel_admin: false
 panel_icon: mdi:brain
 panel_title: Hindsight
@@ -81,10 +84,13 @@ schema:
   log_level: list(debug|info|warning|error)
   control_plane: bool
   control_plane_port: port
+  consolidation_reserved_slots: int(1..8)?
+  consolidation_llm_parallelism: int(1..32)?
+  consolidation_max_memories_per_round: int(0..1000)?
 slug: hindsight
 startup: services
 udev: true
 url: https://github.com/Deepdelver/hindsight-haos
-version: "1.2.28"
+version: "1.2.29"
 watchdog: "http://[HOST]:[PORT:8888]/health"
 webui: "http://[HOST]:[PORT:9999]"
