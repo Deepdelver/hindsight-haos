@@ -299,9 +299,14 @@ For a local gateway that aggregates many model providers behind one endpoint:
 - **Addon does not appear in the store** — the Supervisor silently drops apps whose
   `config.yaml` fails validation. Check **Settings > System > Logs > Supervisor**
   for a line starting `Can't read .../config.yaml`.
-- **Container exits at start** — check the addon log. Common causes: an empty
+- **Container exits at start** — check the add-on log. Common causes: an empty
   `llm_api_key` with a provider that requires one, or `llm_provider: custom`
   without `llm_base_url` (the log says exactly which option is missing).
+- **A startup script runs again after a restart** — expected. The entrypoint no
+  longer appends `exit 0` to cont-init scripts, so they do their real work on
+  every add-on start and in-place service restart, in both exec and source mode.
+  Keep custom startup scripts safe to run more than once;
+  `python3 hindsight/tests/test_source_defaults.py` guards this behaviour.
 - **Add-on crash-loops with `ValueError: Invalid LLM provider: custom`** —
   fixed in 1.2.24: `custom` is now mapped to `openai` (requires `llm_base_url`).
   Update the add-on; on older versions select `openai` and set `llm_base_url`

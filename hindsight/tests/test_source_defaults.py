@@ -12,7 +12,9 @@ Finally it guards the Ponytail rung-1 removals: the dead remote-code installer
 the unused `embedded-db` pip extra, and the dead `bashio::*` functions in the
 standalone shim. The checks fail if any of them returns, and also verify the
 behaviour that replaced them (top-level ingress, the local-llm/local-onnx
-extras and the shebang probe) stays intact.
+extras and the shebang probe) stays intact. It also runs the real entrypoint
+twice over one cont-init script (exec and source mode), so a script cannot be
+neutered between starts by an injected `exit 0`.
 
 It also guards the release metadata: versions.json, both pins in the
 Dockerfile, the add-on version and the consolidation-incident troubleshooting
@@ -250,6 +252,109 @@ def check_bashio_shim(errors):
 VERSIONS = REPO / "hindsight" / "versions.json"
 README = REPO / "README.md"
 DOCS = REPO / "hindsight" / "DOCS.md"
+
+# A cont-init script that does observable work on every invocation. The entrypoint
+# must not be able to turn this into a no-op between starts.
+WORK_SCRIPT = """\
+#!/bin/bash
+printf 'work\\n' >> "$WORK_LOG"
+"""
+
+
+def run_entrypoint_twice(workdir, source_mode):
+    """Run a copy of the real entrypoint twice over the same cont-init script.
+
+    Only the absolute script directories and the shebang candidate list are
+    redirected inside ``workdir``: the copy keeps the real run_one_script body,
+    chown/chmod, shebang rewrite, supervisor wait and source/exec fallback. The
+    candidate list is narrowed to /bin/bash so the probe does not depend on
+    which bashio shims happen to exist on the machine running the test.
+    """
+    init_dir = workdir / "cont-init.d"
+    init_dir.mkdir(parents=True, exist_ok=True)
+    (workdir / "services.d").mkdir(exist_ok=True)
+    (workdir / "s6-rc.d").mkdir(exist_ok=True)
+
+    text = ENTRYPOINT.read_text()
+    for original, replacement in (
+        ("/etc/cont-init.d", str(init_dir)),
+        ("/etc/services.d", str(workdir / "services.d")),
+        ("/etc/s6-overlay/s6-rc.d", str(workdir / "s6-rc.d")),
+    ):
+        text = text.replace(original, replacement)
+    text, count = re.subn(
+        r"candidate_shebangs=\([^)]*\)",
+        'candidate_shebangs=(\n  "/bin/bash"\n)',
+        text,
+        count=1,
+    )
+    if count != 1:
+        raise AssertionError("entrypoint candidate_shebangs array not found")
+
+    entry = workdir / "ha_entrypoint.sh"
+    entry.write_text(text)
+    entry.chmod(0o700)
+
+    script = init_dir / "10-work.sh"
+    script.write_text(WORK_SCRIPT)
+    script.chmod(0o700)
+
+    work_log = workdir / "work.log"
+    env = {
+        "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+        "WORK_LOG": str(work_log),
+        "HA_SUPERVISOR_WAIT": "0",
+    }
+    if source_mode:
+        env["ha_entry_source"] = "true"
+
+    runs = []
+    for _ in range(2):
+        runs.append(
+            subprocess.run(
+                ["bash", str(entry)],
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=str(workdir),
+                timeout=60,
+            )
+        )
+    lines = work_log.read_text().splitlines() if work_log.exists() else []
+    body = script.read_text().splitlines()
+    injected = [line for line in body if line.strip() == "exit 0"]
+    return runs, lines, injected
+
+
+def check_entrypoint_idempotence():
+    """Ponytail rung 1 / F3: no injected `exit 0`, real work on every start."""
+    errors = []
+    if not ENTRYPOINT.is_file():
+        return ["hindsight/ha_entrypoint.sh is missing"]
+
+    source = ENTRYPOINT.read_text()
+    if "sed -i '1a exit 0'" in source:
+        errors.append("entrypoint still writes 'exit 0' into cont-init scripts")
+
+    with tempfile.TemporaryDirectory() as td_raw:
+        td = Path(td_raw)
+        for source_mode in (False, True):
+            label = "source" if source_mode else "exec"
+            case_dir = td / label
+            case_dir.mkdir()
+            runs, lines, injected = run_entrypoint_twice(case_dir, source_mode)
+            rcs = [run.returncode for run in runs]
+            if any(rc != 0 for rc in rcs):
+                detail = " | ".join((run.stdout + run.stderr).strip()[-400:] for run in runs)
+                errors.append(f"entrypoint {label} run failed: rc={rcs}: {detail}")
+            if len(lines) != 2:
+                errors.append(
+                    f"entrypoint {label}: second run skipped the real work "
+                    f"(expected 2 work lines, got {lines!r})"
+                )
+            if injected:
+                errors.append(f"entrypoint {label}: script got an injected exit 0: {injected}")
+    return errors
 
 
 def release_metadata_errors(versions_text, docker_text, config_text):
@@ -548,6 +653,12 @@ def main() -> int:
         if "bashio-standalone.sh" not in dtext or "config.array" not in dtext:
             errors.append(f"{name} does not document the standalone bashio scope")
 
+    # Ponytail rung 1 / F3: a start script must still do its real work on the
+    # next start, in both exec and source mode.
+    errors.extend(check_entrypoint_idempotence())
+
+    # Release-metadata self-test: a consistent bump must never make this guard
+    # fail on hardcoded expectations again (Ponytail rung 2/3).
     if not self_test_consistent_bump():
         errors.append("release bump self-test failed")
 
