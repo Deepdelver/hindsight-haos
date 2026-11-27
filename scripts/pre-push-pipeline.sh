@@ -67,6 +67,7 @@ case "$STATUS" in
     python3 hindsight/tests/test_prepush_pipeline.py
     python3 hindsight/tests/test_version_watch.py
     python3 hindsight/tests/test_continit_providers.py
+    python3 hindsight/tests/test_setup_gh_issues.py
     echo "Push allowed."
     exit 0
     ;;
@@ -92,6 +93,7 @@ Assess the changes in this repository ($REPO) and finish these items before any 
    python3 hindsight/tests/test_prepush_pipeline.py
    python3 hindsight/tests/test_version_watch.py
    python3 hindsight/tests/test_continit_providers.py
+   python3 hindsight/tests/test_setup_gh_issues.py
 4. Report: list files changed, the exact test commands and their results, and any residual risk.
 
 Do NOT commit and do NOT push. Leave any README/DOCS/test edits uncommitted in

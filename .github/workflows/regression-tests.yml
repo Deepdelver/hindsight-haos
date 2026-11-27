@@ -25,3 +25,5 @@ jobs:
         run: python3 hindsight/tests/test_version_watch.py
       - name: Cont-init provider mapping tests
         run: python3 hindsight/tests/test_continit_providers.py
+      - name: GitHub issue setup tests
+        run: python3 hindsight/tests/test_setup_gh_issues.py
