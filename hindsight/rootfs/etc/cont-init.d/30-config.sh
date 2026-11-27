@@ -195,6 +195,15 @@ ENV_FILE="${HINDSIGHT_ENV_FILE:-$DATA_DIR/env}"
         echo "HINDSIGHT_API_LLM_MAX_CONCURRENT=2"
     fi
 
+    # Throughput tuning: more consolidation worker slots + parallel LLM calls,
+    # and a shorter per-round hold so the reserved slots rotate faster.
+    CONSOLIDATION_RESERVED_SLOTS="${consolidation_reserved_slots:-}"
+    CONSOLIDATION_LLM_PARALLELISM="${consolidation_llm_parallelism:-}"
+    CONSOLIDATION_MAX_MEMORIES_PER_ROUND="${consolidation_max_memories_per_round:-}"
+    [[ -n "$CONSOLIDATION_RESERVED_SLOTS" ]] && printf 'HINDSIGHT_API_WORKER_CONSOLIDATION_RESERVED_SLOTS=%s\n' "$CONSOLIDATION_RESERVED_SLOTS"
+    [[ -n "$CONSOLIDATION_LLM_PARALLELISM" ]] && printf 'HINDSIGHT_API_CONSOLIDATION_LLM_PARALLELISM=%s\n' "$CONSOLIDATION_LLM_PARALLELISM"
+    [[ -n "$CONSOLIDATION_MAX_MEMORIES_PER_ROUND" ]] && printf 'HINDSIGHT_API_CONSOLIDATION_MAX_MEMORIES_PER_ROUND=%s\n' "$CONSOLIDATION_MAX_MEMORIES_PER_ROUND"
+
     # Optional passthrough for any other HINDSIGHT_API_* setting.
     while IFS= read -r item; do
         [[ -z "$item" ]] && continue
@@ -220,7 +229,7 @@ ENV_FILE="${HINDSIGHT_ENV_FILE:-$DATA_DIR/env}"
             continue
         fi
         printf 'HINDSIGHT_API_%s=%s\n' "${key#HINDSIGHT_API_}" "$value"
-    done < <(bashio::config 'env_vars' | jq -c '.[]')
+    done < <(bashio::config 'env_vars' 2>/dev/null | jq -c '.[]' 2>/dev/null || true)
 } > "$ENV_FILE"
 
 chmod 600 "$ENV_FILE"
