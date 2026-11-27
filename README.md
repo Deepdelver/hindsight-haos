@@ -61,6 +61,7 @@ Home Assistant proxies the sidebar panel at `https://<your-ha-host>/api/hassio_i
 | `consolidation_llm_model` | `""` (empty) | Expert only: separate model for consolidation; empty = reuse `llm_model` |
 | `consolidation_llm_base_url` | `""` (empty) | Expert only: separate endpoint for consolidation; empty = reuse `llm_base_url` |
 | `consolidation_llm_api_key` | `""` (empty) | Expert only: API key for the consolidation provider; empty = reuse `llm_api_key` |
+| `consolidation_max_completion_tokens` | `8192` | Expert only: max output tokens per consolidation call; emitted only when a consolidation LLM is set (avoids `OutputTooLongError`) |
 | `embeddings_provider` | `onnx` | Local ONNX embeddings by default |
 | `embeddings_model` | `auto` | Let Hindsight pick and download its default; set an id to pin |
 | `reranker_provider` | `onnx` | Local ONNX reranker; `rrf` needs no model |
@@ -106,7 +107,13 @@ consolidation_llm_model: <consolidation-model>
 All four defaults are empty in the shipped config, so nothing new is written to
 the runtime env file and today's behaviour is unchanged. `simple` mode ignores
 these options even if a value was stored during an earlier expert setup; a
-local-only install cannot start calling out by accident.
+local-only install cannot start calling out by accident. When a consolidation LLM
+is configured, `30-config.sh` also emits
+`HINDSIGHT_API_CONSOLIDATION_MAX_COMPLETION_TOKENS` (option
+`consolidation_max_completion_tokens`, default `8192`) so a large consolidation
+prompt does not exceed the model's output limit and fail with
+`OutputTooLongError`; with no consolidation LLM configured the variable is not
+written and the upstream default applies.
 
 This is an operational **throughput** fix for the pending-consolidation backlog.
 It does not improve recall, repair a failed retain, or delete the backlog. Those
