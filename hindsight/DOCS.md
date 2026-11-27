@@ -308,14 +308,23 @@ For a local gateway that aggregates many model providers behind one endpoint:
   for local models or a provider key with a higher quota; the worker retries safely.
 - **Daily version-watch task keeps reopening** — `scripts/check_versions.py`
   compares `hindsight/versions.json` and the Dockerfile pin with npm/PyPI. When
-  upstream moves it opens one idempotent review task; it never changes the
-  running add-on. Run `python3 scripts/check_versions.py` for the current
-  comparison, then bump the API and UI pins together in a normal release.
+  upstream moves it opens one idempotent Zero Factory task on the
+  `deepdelver-hindsight-haos` board (dedup key `version-watch-<api>-<cp>`); it
+  never changes the running add-on. Run `python3 scripts/check_versions.py` for the
+  current comparison, then bump the API and UI pins together in a normal release.
+- **Custom cont-init script fails with `bashio::…: command not found` in a
+  standalone container** — the bundled `bashio-standalone.sh` implements only
+  the helpers used by this add-on and the four downloaded Home Assistant
+  templates: logging, `supervisor.ping`, `config`, `app.*`, `info.*`,
+  `var.true`, `exit.*` and `api.supervisor`. Helpers such as `config.array`,
+  `services.*`, `net.wait_for`, the cache and the jq wrapper are not provided in
+  standalone mode. Under Supervisor the full bashio library is installed; use
+  plain shell/`jq` for portable custom scripts.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
-  current change set (key printed by the hook) must be `done` and all five
+  current change set (key printed by the hook) must be `done` and all six
   regression suites in `hindsight/tests/` must pass (`test_source_defaults.py`,
   `test_ingress_rewrite.py`, `test_prepush_pipeline.py`, `test_version_watch.py`,
-  and `test_continit_providers.py`).
+  `test_continit_providers.py`, and `test_setup_gh_issues.py`).
   Run `scripts/setup-hooks.sh global` once per machine; see README → Development
   and testing for the full flow.
 

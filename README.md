@@ -178,9 +178,11 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
   for `/health` on the first start after upgrading.
 - **Automatic version watch.** A daily cron job runs
   `scripts/check_versions.py --create-task`. It compares the recorded/pinned
-  versions with npm and PyPI and, on drift, opens one idempotent Kanban task.
-  Nothing changes at runtime: the normal assessment, tests and release flow
-  decide whether to bump the pins and publish a new add-on version.
+  versions with npm and PyPI and, on drift, opens one idempotent Zero Factory
+  task on the `deepdelver-hindsight-haos` board (dedup key
+  `version-watch-<api>-<cp>`). Nothing changes at runtime: the normal
+  assessment, tests and release flow decide whether to bump the pins and publish
+  a new add-on version.
 - **Add-on auto-update.** Home Assistant updates the add-on automatically when
   a new version is published, without allowing unpinned upstream code into a
   running container.
@@ -270,6 +272,7 @@ label, and provisions the standard labels (`zerofactory`, `ai-investigate`,
 
 - **Add-on does not appear in the store** — Supervisor drops add-ons whose `config.yaml` fails validation. Check **Settings → System → Logs → Supervisor** for `Can't read .../config.yaml`.
 - **Container exits at start** — check the add-on log. A common cause is an empty `llm_api_key` with a provider that requires one.
+- **Custom cont-init script fails with `bashio::…: command not found` in a standalone container** — `bashio-standalone.sh` only implements the helpers this add-on and the four downloaded Home Assistant templates use (logging, `supervisor.ping`, `config`, `app.*`, `info.*`, `var.true`, `exit.*`, `api.supervisor`); helpers such as `config.array`, `services.*`, `net.wait_for`, the cache and the jq wrapper are not provided. Under Home Assistant Supervisor the full bashio library is available; in a standalone container rewrite custom helpers in plain shell/`jq` or run that script under Supervisor.
 - **Add-on crash-loops with `Invalid LLM provider: custom`** — fixed in 1.2.24: `custom` is mapped to `openai` (and requires `llm_base_url`). Update the add-on. On older versions, choose `openai` and set `llm_base_url` to your OpenAI-compatible gateway; keep `embeddings_provider: onnx`.
 - **`Client Error / HTTP 404` in the UI** — check that the Control Plane version matches the API version and that the ingress template passes the regression test; then do a hard refresh to discard cached assets.
 - **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.

@@ -525,6 +525,28 @@ def main() -> int:
                 errors.append(f"{name} missing consolidation troubleshooting token {token!r}")
         if not re.search(r"(?is)\*\*(?:do not|never)\s+delete\s+pending\s+memories", dtext):
             errors.append(f"{name} must warn against deleting pending memories")
+        # The pre-push gate runs six suites; both docs must list that same set.
+        if "all five" in dtext or "four suites" in dtext:
+            errors.append(f"{name} has a stale regression-suite count")
+        for suite in (
+            "test_source_defaults.py",
+            "test_ingress_rewrite.py",
+            "test_prepush_pipeline.py",
+            "test_version_watch.py",
+            "test_continit_providers.py",
+            "test_setup_gh_issues.py",
+        ):
+            if suite not in dtext:
+                errors.append(f"{name} missing regression suite {suite!r}")
+        # The shim trim and the version-watch backend are behaviour changes that
+        # users hit directly; both docs must describe the current state.
+        if (
+            not re.search(r"(?is)Zero\s+Factory\s+task", dtext)
+            or "version-watch-<api>-<cp>" not in dtext
+        ):
+            errors.append(f"{name} has stale version-watch task documentation")
+        if "bashio-standalone.sh" not in dtext or "config.array" not in dtext:
+            errors.append(f"{name} does not document the standalone bashio scope")
 
     if not self_test_consistent_bump():
         errors.append("release bump self-test failed")
