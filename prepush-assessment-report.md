@@ -1,59 +1,81 @@
-# Pre-push assessment — prepush-f9c3bd1afd00901c6e9188995fbf5db498fcd94c
+# Pre-push assessment — prepush-9a0965f8d42b4c657bb8855c378cedc3fd457514
+
 Worktree: /config/.zerofactory/workspaces/deepdelver-hindsight-haos/worktrees/zf-dhh-96833dcd/deepdelver-hindsight-haos
-HEAD: f9c3bd1afd00901c6e9188995fbf5db498fcd94c
-Status: DONE (no commit, no push — edits left uncommitted in the working tree)
+Task key (from task body): prepush-9a0965f8d42b4c657bb8855c378cedc3fd457514
+HEAD assessed: 8c5f9e1b4c7b0ce2f1cdfdecf3c496dec3ee2bfd (one commit after the key commit)
+Base: origin/main b104f8fc26082df8f6c70a56e3be0cb4828eeae5 (also the merge base)
+Status: DONE — no commit, no push; documentation and test edits left uncommitted in the working tree for the parent to commit.
 
-## Files changed (13)
-Added:
-  .github/ISSUE_TEMPLATE/bug_report.yml
-  .github/ISSUE_TEMPLATE/config.yml
-  .github/ISSUE_TEMPLATE/feature_request.yml
-  hindsight/tests/test_setup_gh_issues.py
-  scripts/setup_gh_issues.py
-Modified:
-  .github/workflows/regression-tests.yml
-  .zerofactory/precommit.sh
-  README.md
-  hindsight/tests/test_prepush_pipeline.py
-  hindsight/tests/test_source_defaults.py
-  hindsight/tests/test_version_watch.py
-  scripts/check_versions.py
-  scripts/pre-push-pipeline.sh
+## 1. Assessment
 
-## Assessment
-Change set adds a 6th regression suite (test_setup_gh_issues.py) covering the vendored
-GitHub issue-template + labels generator, and unifies pipeline references from "five" to
-"six".
+Unpushed commits: f9c3bd1 (drift guard), 1095992 (merge conflict resolution),
+9a0965f (merge of origin/main, change-set key), 8c5f9e1 (assessment report).
+
+Net diff `origin/main...HEAD`:
+
+- Modified: `hindsight/tests/test_prepush_pipeline.py` (+103) — adds a suite-list
+  drift guard across the five pipeline locations that spell out the regression
+  suites, with self-checks that reject a missing suite and a mistyped path.
+- Added: `prepush-assessment-report.md` (+59) — this report (rewritten here with
+  the current key, HEAD, docs status, test results and residual risks).
 
 Behaviour changes:
-- test_setup_gh_issues.py (new): issue templates carry the zerofactory label; blank issues
-  disabled; labels (zerofactory, bug, feature, p0-3) provisioned via gh. Run via
-  scripts/setup_gh_issues.py --path . --align.
-- scripts/setup_gh_issues.py (new): vendored generator, align/non-align semantics, repo-aware
-  config, git-remote detection.
-- test_source_defaults.py: added release_metadata_errors() — versions.json components must
-  agree, Dockerfile pins must match, config.yaml version must be a quoted string.
-- test_version_watch.py: zerofactory task-creation expectation updated to the new
-  hermes zerofactory create flag shape.
 
-No addon ports/options/config keys changed. Repo-level CI/pipeline config only.
+- No add-on runtime code changed. Ports (8888 API/MCP, 9999 direct UI, 9997
+  ingress), configuration options, defaults and config.yaml version (1.2.28)
+  are unchanged in this change set. Upstream pins remain 1.3.0/1.3.0.
+- The sixth suite (`test_setup_gh_issues.py`), its generator, issue templates and
+  the workflow are already on `origin/main` (b104f8f); this branch only aligns
+  the suite lists and guards them against future drift.
+- Working-tree edits left for the parent: `hindsight/DOCS.md` (stale "five
+  suites" corrected to six) and `hindsight/tests/test_prepush_pipeline.py`
+  (guard extended so README.md and DOCS.md must name all six suites). These were
+  made by a concurrent assessment worker in the shared worktree and left intact.
 
-## Docs
-- README.md — updated to "six regression suites" (3 places), test_setup_gh_issues.py added to
-  the test-command list, new "GitHub issues and Zero Factory triage" section. No stale "five".
-- hindsight/DOCS.md — addon doc; not touched by this change set; complete and current
-  (Setup, Configuration options, Ports 9999/9997, Data, Version compatibility, Troubleshooting).
+Risk/regression: low — test/CI plumbing and docs only, no production paths. The
+drift guard is self-checked, so it fails when a suite is dropped or mistyped.
 
-## Tests — all six suites PASS (exit 0)
-1. python3 hindsight/tests/test_source_defaults.py
-2. python3 hindsight/tests/test_ingress_rewrite.py
-3. python3 hindsight/tests/test_prepush_pipeline.py
-4. python3 hindsight/tests/test_version_watch.py
-5. python3 hindsight/tests/test_continit_providers.py
-6. python3 hindsight/tests/test_setup_gh_issues.py
+## 2. Docs
 
-## Residual risk
-- No functional risk. All six suites passed.
-- hindsight/tests/test_prepush_pipeline.py is unmerged in the index (UU, 3 stages) with the
-  docstring resolved to "six". Must be git add'd before the parent commit; intentionally not
-  committed here.
+- `README.md`: already current — six regression suites, six test commands,
+  GitHub issues / Zero Factory triage section, ports 8888/9999/9997, all config
+  options including `consolidation_max_completion_tokens` (default 8192). No edit needed.
+- `hindsight/DOCS.md`: was stale in the pre-push troubleshooting bullet ("all
+  five regression suites" and five names). Fixed in the working tree to six
+  names including `test_setup_gh_issues.py`; the rest of the file matches
+  `config.yaml` and the 1.3.0 pins.
+
+## 3. Tests — exact commands and results
+
+All commands were run from the worktree root; each exited 0.
+
+| Command | Exit | PASS checks |
+| --- | --- | --- |
+| `python3 hindsight/tests/test_source_defaults.py` | 0 | 2 |
+| `python3 hindsight/tests/test_ingress_rewrite.py` | 0 | 18 |
+| `python3 hindsight/tests/test_prepush_pipeline.py` | 0 | 82 |
+| `python3 hindsight/tests/test_version_watch.py` | 0 | 20 |
+| `python3 hindsight/tests/test_continit_providers.py` | 0 | 48 |
+| `python3 hindsight/tests/test_setup_gh_issues.py` | 0 | 51 |
+
+`test_source_defaults.py` prints a summary line instead of `RESULT: PASS`; all
+other suites ended with `RESULT: PASS`. No failures.
+
+## 4. Residual risk
+
+1. **Change-set key drift — parent action required.** The key derivation in
+   `scripts/pre-push-pipeline.sh` (newest unpushed commit without a
+   `Pipeline-Key:` trailer) currently resolves to
+   `prepush-8c5f9e1b4c7b0ce2f1cdfdecf3c496dec3ee2bfd`, not the task's
+   `prepush-9a0965f...`: commit 8c5f9e1 was created after the task and has no
+   trailer. Adding a trailer only to the parent's new commit will NOT fix this —
+   the derivation will still stop at 8c5f9e1. The parent must amend/rebase
+   8c5f9e1 so it carries `Pipeline-Key: 9a0965f8d42b4c657bb8855c378cedc3fd457514`,
+   or complete a separate assessment task keyed to 8c5f9e1. Otherwise the push
+   hook creates a new task and blocks the push again.
+2. **Concurrent edits in a shared `dir` worktree.** Sibling assessment workers
+   modified `hindsight/DOCS.md` and `hindsight/tests/test_prepush_pipeline.py`
+   while this assessment was running. Their edits were preserved, not
+   overwritten; serialize the workers (or use separate worktrees) before the
+   parent commit to avoid lost updates. Flagged on the board.
+3. No runtime/add-on behaviour risk identified in the net diff.

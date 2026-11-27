@@ -9,9 +9,9 @@ Covers:
 4. End-to-end with fake git/hermes: push allowed only when the task is done and
    all six regression suites exit 0.
 5. The GitHub regression workflow runs the same six suites as the push hook.
-6. Suite-list drift guard: the five places that spell out the regression suite
-   paths must describe the same set, with a self-check that proves the guard
-   fails on a missing suite or a mistyped path.
+6. Suite-list drift guard: the five places that spell out the six regression
+   suite paths must describe the same set, and README/DOCS must name all six.
+   A self-check proves the guard fails on a missing suite or a mistyped path.
 
 Run: python3 hindsight/tests/test_prepush_pipeline.py
 """
@@ -30,6 +30,8 @@ SETUP = ROOT / "scripts" / "setup-hooks.sh"
 WORKFLOW = ROOT / ".github" / "workflows" / "regression-tests.yml"
 PRECOMMIT = ROOT / ".zerofactory" / "precommit.sh"
 CHECK_VERSIONS = ROOT / "scripts" / "check_versions.py"
+README = ROOT / "README.md"
+DOCS = ROOT / "hindsight" / "DOCS.md"
 REGRESSIONS = [
     "python3 hindsight/tests/test_source_defaults.py",
     "python3 hindsight/tests/test_ingress_rewrite.py",
@@ -332,6 +334,17 @@ def guard_self_check(texts):
     }
 
 
+def docs_missing_suites(expected_paths):
+    """Suite names omitted from the user-facing docs, per document."""
+    names = {Path(path).name for path in expected_paths}
+    missing = {}
+    for label, path in (("README.md", README), ("hindsight/DOCS.md", DOCS)):
+        text = path.read_text() if path.is_file() else ""
+        mentioned = set(re.findall(r"\btest_[A-Za-z0-9_]+\.py\b", text))
+        missing[label] = sorted(names - mentioned)
+    return missing
+
+
 def main():
     ok = True
     script = SCRIPT.read_text() if SCRIPT.is_file() else ""
@@ -529,10 +542,16 @@ def main():
             f"got {sorted(paths)}",
         )
     ok &= check(
-        "suite guard: all five sources list the same five suites",
+        "suite guard: all five sources list the same six suites",
         parity_ok(sets),
         f"sets={ {label: len(paths) for label, paths in sets.items()} }",
     )
+    for label, missing in docs_missing_suites(expected).items():
+        ok &= check(
+            f"suite guard: {label} names all six suites",
+            not missing,
+            f"missing {missing}",
+        )
     for name, condition in guard_self_check(sources).items():
         ok &= check(name, condition, "")
 

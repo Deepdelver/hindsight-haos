@@ -324,10 +324,10 @@ For a local gateway that aggregates many model providers behind one endpoint:
   never changes the running add-on. Run `python3 scripts/check_versions.py` for the
   current comparison, then bump the API and UI pins together in a normal release.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
-  current change set (key printed by the hook) must be `done` and all five
+  current change set (key printed by the hook) must be `done` and all six
   regression suites in `hindsight/tests/` must pass (`test_source_defaults.py`,
   `test_ingress_rewrite.py`, `test_prepush_pipeline.py`, `test_version_watch.py`,
-  and `test_continit_providers.py`).
+  `test_continit_providers.py`, and `test_setup_gh_issues.py`).
   Run `scripts/setup-hooks.sh global` once per machine; see README → Development
   and testing for the full flow.
 
