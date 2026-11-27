@@ -93,18 +93,33 @@ def create_task(report):
         "5. Follow the Zero Factory flow: commit on a task branch, let the factory run precommit, open a PR, and let auto-merge + deployment handle the rest. Do not push directly to main.\n"
     )
     result = subprocess.run(
-        ["hermes", "zerofactory", "create",
-         "Assess Hindsight upstream version drift",
-         "--description", body,
-         "--board", "deepdelver-hindsight-haos",
-         "--repo", "deepdelver-hindsight-haos",
-         "--assignee", "zf-builder",
-         "--status", "todo",
-         "--priority", "P1",
-         "--category", "feature",
-         "--dedup-key", key,
-         "--actor", "watchdog"],
-        capture_output=True, text=True)
+        [
+            "hermes",
+            "zerofactory",
+            "create",
+            "Assess Hindsight upstream version drift",
+            "--description",
+            body,
+            "--board",
+            "deepdelver-hindsight-haos",
+            "--repo",
+            "deepdelver-hindsight-haos",
+            "--assignee",
+            "zf-builder",
+            "--status",
+            "todo",
+            "--priority",
+            "P1",
+            "--category",
+            "feature",
+            "--dedup-key",
+            key,
+            "--actor",
+            "watchdog",
+        ],
+        capture_output=True,
+        text=True,
+    )
     return key, result.returncode, (result.stdout + result.stderr).strip()
 
 
