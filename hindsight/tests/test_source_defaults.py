@@ -143,6 +143,128 @@ def check_entrypoint_idempotence():
     return errors
 
 
+def release_metadata_errors(versions_text, docker_text, config_text):
+    """Cross-check release metadata across versions.json, Dockerfile and config.yaml.
+
+    Expected values are derived from the sources themselves — no literal release
+    numbers live in this guard:
+
+      * versions.json records the upstream release; its two component entries
+        must be present and agree with each other;
+      * both Dockerfile pins must match the matching versions.json entry;
+      * config.yaml carries the add-on's own release number, read dynamically
+        (independent of the upstream version) and required to be a quoted
+        string.
+
+    Keeping the check in one pure function lets a consistent bump be verified
+    with synthetic sources (see self_test_consistent_bump) so a release bump
+    never makes this guard fail on hardcoded expectations again.
+    """
+    errors = []
+
+    try:
+        versions = json.loads(versions_text)
+    except (TypeError, ValueError) as exc:
+        errors.append(f"hindsight/versions.json is not valid JSON: {exc}")
+        versions = {}
+    if not isinstance(versions, dict):
+        errors.append(
+            f"hindsight/versions.json must be a JSON object, got {type(versions).__name__}"
+        )
+        versions = {}
+
+    api_recorded = versions.get("hindsight_api")
+    cp_recorded = versions.get("control_plane")
+    for component, value in (("hindsight_api", api_recorded), ("control_plane", cp_recorded)):
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"versions.json {component} must be a version string, got {value!r}")
+    if api_recorded != cp_recorded:
+        errors.append(
+            "versions.json components must agree: "
+            f"hindsight_api={api_recorded!r}, control_plane={cp_recorded!r}"
+        )
+
+    api_pin_match = re.search(r"hindsight-api-slim\[[^\]]+\]==([0-9][0-9A-Za-z.\-]*)", docker_text)
+    cp_pin_match = re.search(r"hindsight-control-plane@([0-9][0-9A-Za-z.\-]*)", docker_text)
+    api_pin = api_pin_match.group(1) if api_pin_match else None
+    cp_pin = cp_pin_match.group(1) if cp_pin_match else None
+    if api_pin != api_recorded:
+        errors.append(
+            f"Dockerfile API pin must match versions.json hindsight_api "
+            f"({api_recorded!r}), got {api_pin!r}"
+        )
+    if cp_pin != cp_recorded:
+        errors.append(
+            f"Dockerfile control-plane pin must match versions.json control_plane "
+            f"({cp_recorded!r}), got {cp_pin!r}"
+        )
+
+    addon_version = next(
+        (
+            line.split(":", 1)[1].strip()
+            for line in config_text.splitlines()
+            if line.startswith("version:")
+        ),
+        None,
+    )
+    if addon_version is None:
+        errors.append("config.yaml has no top-level version")
+    elif not (addon_version.startswith('"') and addon_version.endswith('"')):
+        errors.append(
+            f"add-on version in config.yaml must be a quoted string, got {addon_version!r}"
+        )
+
+    return errors
+
+
+def _synthetic_release_sources(upstream, addon):
+    """Build the three release sources with the given (bumped) versions."""
+    versions_text = json.dumps({"hindsight_api": upstream, "control_plane": upstream})
+    docker_text = (
+        f'RUN pip install "hindsight-api-slim[local-llm,local-onnx]=={upstream}"\n'
+        f"RUN npm install @vectorize-io/hindsight-control-plane@{upstream}\n"
+    )
+    config_text = (
+        "ingress: true\n"
+        "options:\n"
+        "  mode: simple\n"
+        "schema:\n"
+        "  mode: list(simple|expert)\n"
+        f'version: "{addon}"\n'
+    )
+    return versions_text, docker_text, config_text
+
+
+def self_test_consistent_bump():
+    """Prove a bump applied to all three sources keeps the guard green.
+
+    Deliberately different numbers (not the currently shipped ones) make this
+    test fail if any literal version expectation sneaks back into the guard.
+    """
+    ok = True
+    versions_text, docker_text, config_text = _synthetic_release_sources("9.8.7", "4.5.6")
+    problems = release_metadata_errors(versions_text, docker_text, config_text)
+    if problems:
+        print("FAIL  consistent release bump should pass:", "; ".join(problems))
+        ok = False
+    else:
+        print("PASS  consistent release bump across versions.json/Dockerfile/config.yaml")
+
+    # A partial bump (Dockerfile API pin lagging versions.json) must be caught,
+    # proving the cross-source consistency check is real, not a no-op.
+    lagging_docker = (
+        'RUN pip install "hindsight-api-slim[local-llm,local-onnx]==9.8.6"\n'
+        "RUN npm install @vectorize-io/hindsight-control-plane@9.8.7\n"
+    )
+    problems = release_metadata_errors(versions_text, lagging_docker, config_text)
+    if not any("API pin" in problem for problem in problems):
+        print("FAIL  partial release bump should be detected:", "; ".join(problems))
+        ok = False
+    else:
+        print("PASS  lagging Dockerfile pin is detected")
+    return ok
+
+
 def main() -> int:
     errors = []
     text = CFG.read_text()
@@ -268,28 +390,15 @@ def main() -> int:
     if "postgresql-15" not in docker:
         errors.append("Dockerfile must keep installing PostgreSQL 15")
 
-    # Release metadata: add-on 1.2.26 ships upstream 1.3.0 in both components.
+    # Release metadata: derive the expected values from the sources themselves
+    # (versions.json <-> both Dockerfile pins, plus the add-on version in
+    # config.yaml) so a consistent bump never trips a hardcoded expectation.
     try:
-        versions = json.loads(VERSIONS.read_text())
-    except (OSError, ValueError) as exc:
-        errors.append(f"hindsight/versions.json is not valid JSON: {exc}")
-        versions = {}
-    for component in ("hindsight_api", "control_plane"):
-        value = versions.get(component)
-        if value != "1.3.0":
-            errors.append(f"versions.json {component} must be 1.3.0, got {value!r}")
-    api_pin = re.search(r"hindsight-api-slim\[[^\]]+\]==([0-9.]+)", docker)
-    cp_pin = re.search(r"hindsight-control-plane@([0-9.]+)", docker)
-    if not api_pin or api_pin.group(1) != "1.3.0":
-        errors.append(
-            f"Dockerfile API pin must be 1.3.0, got {api_pin.group(1) if api_pin else None!r}"
-        )
-    if not cp_pin or cp_pin.group(1) != "1.3.0":
-        errors.append(
-            f"Dockerfile control-plane pin must be 1.3.0, got {cp_pin.group(1) if cp_pin else None!r}"
-        )
-    if top_level.get("version") != '"1.2.26"':
-        errors.append(f"add-on version must be 1.2.26, got {top_level.get('version')!r}")
+        versions_text = VERSIONS.read_text()
+    except OSError as exc:
+        errors.append(f"cannot read hindsight/versions.json: {exc}")
+        versions_text = ""
+    errors.extend(release_metadata_errors(versions_text, docker, text))
 
     # The consolidation backlog is handled at runtime, so the operational
     # guidance must ship in both docs with the real diagnostic endpoints.
@@ -311,6 +420,11 @@ def main() -> int:
     # next start, in both exec and source mode.
     errors.extend(check_entrypoint_idempotence())
 
+    # Release-metadata self-test: a consistent bump must never make this guard
+    # fail on hardcoded expectations again (Ponytail rung 2/3).
+    if not self_test_consistent_bump():
+        errors.append("release bump self-test failed")
+
     if errors:
         for e in errors:
             print("FAIL:", e)
@@ -319,7 +433,8 @@ def main() -> int:
         "source defaults OK: simple/llamacpp, empty api key and base URL, "
         "str base-URL schema, four empty consolidation options with matching "
         "schema, quoted version, no token, no dead installer/ingress option/"
-        "embedded-db extra"
+        "embedded-db extra, release versions consistent across "
+        "versions.json/Dockerfile/config.yaml"
     )
     return 0
 
