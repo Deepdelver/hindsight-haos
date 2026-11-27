@@ -195,6 +195,7 @@ This add-on is built to behave like a normal Home Assistant add-on: a pinned, re
   running container.
 - **Ingress-safe paths.** The UI receives its base path at runtime through `NEXT_PUBLIC_BASE_PATH`, so API calls are prefixed exactly once. Only the two genuine navigation URL builders are rewritten in JavaScript; API path suffixes are left alone and the bank-selector regex accepts the ingress prefix.
 - **Regression tests.** `python3 hindsight/tests/test_ingress_rewrite.py` checks the nginx template for all of the above. Run it before building or changing the template.
+- **Idempotent startup.** The entrypoint never writes a post-run `exit 0` into a cont-init script, so a restart (or an in-place service restart by Supervisor) runs the script fully again instead of turning it into a no-op. Source mode also no longer inherits an `exit` statement left by a previous run. Covered by `python3 hindsight/tests/test_source_defaults.py`.
 - **No stale assets.** The ingress server sends `Cache-Control: no-store` so an update cannot leave old UI assets in the browser.
 - **Watchdog.** `http://[HOST]:[PORT:8888]/health` restarts the add-on if the API stops answering.
 - **Backups.** PostgreSQL data lives in `/data` and is included in Home Assistant backups (`backup: cold` — the add-on is stopped during backup).
@@ -252,7 +253,11 @@ injected, if a navigation builder loses it, or if the bank-selector regex is no
 longer ingress-aware. Set `HINDSIGHT_NGINX_TEMPLATE` to test a different template
 revision. `test_source_defaults.py` keeps `config.yaml` credential-free and
 checks the local `simple` / `llamacpp` defaults, the empty `llm_base_url` and
-its non-optional `str` schema. `test_prepush_pipeline.py` checks the hook/script
+its non-optional `str` schema, the removed dead options/extras, and the release
+pins cross-checked across `versions.json`, the Dockerfile and `config.yaml`. It
+also runs the real entrypoint twice (exec and source mode) to prove cont-init
+scripts still do their work on every start.
+`test_prepush_pipeline.py` checks the hook/script
 wiring, that the GitHub workflow runs the same suites as the hook, and the
 gate's decision logic (done / none / running, test failure) with fake
 `git` and `hermes` binaries; it does not touch the real board.
@@ -279,6 +284,7 @@ label, and provisions the standard labels (`zerofactory`, `ai-investigate`,
 
 - **Add-on does not appear in the store** — Supervisor drops add-ons whose `config.yaml` fails validation. Check **Settings → System → Logs → Supervisor** for `Can't read .../config.yaml`.
 - **Container exits at start** — check the add-on log. A common cause is an empty `llm_api_key` with a provider that requires one.
+- **A startup script runs again after a restart** — expected. The entrypoint does not append `exit 0` to cont-init scripts, so they run fully on every add-on start and in-place service restart (in exec and source mode). Keep startup scripts safe to run more than once; `python3 hindsight/tests/test_source_defaults.py` guards the behaviour.
 - **Add-on crash-loops with `Invalid LLM provider: custom`** — fixed in 1.2.24: `custom` is mapped to `openai` (and requires `llm_base_url`). Update the add-on. On older versions, choose `openai` and set `llm_base_url` to your OpenAI-compatible gateway; keep `embeddings_provider: onnx`.
 - **`Client Error / HTTP 404` in the UI** — check that the Control Plane version matches the API version and that the ingress template passes the regression test; then do a hard refresh to discard cached assets.
 - **Cannot select a bank in the sidebar UI** — the bank-selector regex rewrite is missing from the nginx template; run the regression test.
