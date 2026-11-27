@@ -18,6 +18,9 @@ h. expert + all four consolidation options -> exact HINDSIGHT_API_CONSOLIDATION_
 i. expert + only consolidation model -> only that one var emitted (others fall back upstream).
 j. consolidation options absent      -> no consolidation var (today's behaviour).
 k. simple + stored consolidation options -> ignored, no consolidation var.
+l. expert + consolidation model, no cap -> max completion tokens defaults 8192.
+m. expert + consolidation_max_completion_tokens -> value passed through verbatim.
+n. expert without a consolidation LLM -> max completion tokens not emitted.
 
 No third-party deps. Run: python3 hindsight/tests/test_continit_providers.py
 """
@@ -325,6 +328,54 @@ def main():
     ok &= check(
         "k: simple mode still forces llamacpp",
         env.get("HINDSIGHT_API_LLM_PROVIDER") == "llamacpp",
+        f"env={env}",
+    )
+
+    # --- consolidation_max_completion_tokens (1.2.28) -----------------------
+    maxtok = "HINDSIGHT_API_CONSOLIDATION_MAX_COMPLETION_TOKENS"
+
+    # (l) consolidation LLM configured, no explicit token cap -> default 8192.
+    rc, lines, out = run_continit(
+        {"mode": "expert", "llm_provider": "llamacpp", "consolidation_llm_model": cmodel}
+    )
+    env = env_dict(lines)
+    ok &= check("l: consolidation token default exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "l: max completion tokens defaults to 8192",
+        env.get(maxtok) == "8192",
+        f"env={env}",
+    )
+
+    # (m) explicit consolidation_max_completion_tokens -> passed through verbatim.
+    rc, lines, out = run_continit(
+        {
+            "mode": "expert",
+            "llm_provider": "llamacpp",
+            "consolidation_llm_model": cmodel,
+            "consolidation_max_completion_tokens": "4096",
+        }
+    )
+    env = env_dict(lines)
+    ok &= check("m: explicit token cap exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "m: explicit max completion tokens honoured",
+        env.get(maxtok) == "4096",
+        f"env={env}",
+    )
+
+    # (n) no consolidation LLM configured -> token var not emitted at all.
+    rc, lines, out = run_continit(
+        {
+            "mode": "expert",
+            "llm_provider": "llamacpp",
+            "consolidation_max_completion_tokens": "4096",
+        }
+    )
+    env = env_dict(lines)
+    ok &= check("n: no consolidation LLM exits 0", rc == 0, f"rc={rc} out={out!r}")
+    ok &= check(
+        "n: max completion tokens not emitted without consolidation LLM",
+        maxtok not in env,
         f"env={env}",
     )
 
