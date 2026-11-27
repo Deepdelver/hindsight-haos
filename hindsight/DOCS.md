@@ -25,6 +25,7 @@ Addon created and maintained by [Deepdelver](https://github.com/Deepdelver). Hin
    - **consolidation_llm_model** — Expert only: separate consolidation model (default empty = reuse `llm_model`)
    - **consolidation_llm_base_url** — Expert only: separate consolidation endpoint (default empty = reuse `llm_base_url`)
    - **consolidation_llm_api_key** — Expert only: key for the consolidation provider (default empty = reuse `llm_api_key`)
+   - **consolidation_max_completion_tokens** — Expert only: max output tokens per consolidation call (default `8192`; emitted only when a consolidation LLM is configured, to avoid `OutputTooLongError`)
    - **embeddings_provider** — `onnx` (local, no key), or `local`, `openai`, `cohere`, `tei`, ...
    - **embeddings_model** — `auto` (default: let Hindsight choose and download its model), or an explicit model id
    - **embeddings_api_key** — Separate key for embeddings (falls back to `llm_api_key`)
@@ -66,6 +67,7 @@ lets you set any additional variable directly:
 | `consolidation_llm_model` | `HINDSIGHT_API_CONSOLIDATION_LLM_MODEL` |
 | `consolidation_llm_base_url` | `HINDSIGHT_API_CONSOLIDATION_LLM_BASE_URL` |
 | `consolidation_llm_api_key` | `HINDSIGHT_API_CONSOLIDATION_LLM_API_KEY` |
+| `consolidation_max_completion_tokens` | `HINDSIGHT_API_CONSOLIDATION_MAX_COMPLETION_TOKENS` |
 | `embeddings_provider` | `HINDSIGHT_API_EMBEDDINGS_PROVIDER` |
 | `embeddings_model` | `HINDSIGHT_API_EMBEDDINGS_<PROVIDER>_MODEL*` |
 | `embeddings_api_key` | `HINDSIGHT_API_EMBEDDINGS_OPENAI_API_KEY` (for `openai`) |
@@ -114,6 +116,15 @@ an upgrade writes no new variable and behaviour is unchanged. In `simple` mode a
 four are reset to empty before the env file is written, so a value left over from
 an expert setup cannot turn a local-only install into a remote caller. For a
 gateway use `openai` (not `custom`) plus `consolidation_llm_base_url`.
+
+When a consolidation LLM is configured (any of `consolidation_llm_provider` or
+`consolidation_llm_model` non-empty), `30-config.sh` also emits
+`HINDSIGHT_API_CONSOLIDATION_MAX_COMPLETION_TOKENS`. It defaults to `8192` (the
+same value the local llama.cpp mode uses) so a large consolidation prompt does
+not hit the model's output limit and fail with `OutputTooLongError`. Set
+`consolidation_max_completion_tokens` to override it; the schema is `int?`, so an
+empty value falls back to `8192`. When no consolidation LLM is configured the
+variable is not written and the upstream default applies.
 
 This is an operational **throughput** fix for the consolidation backlog. It does
 not change recall quality, fix a failing retain, or remove pending memories. The
@@ -308,9 +319,10 @@ For a local gateway that aggregates many model providers behind one endpoint:
   for local models or a provider key with a higher quota; the worker retries safely.
 - **Daily version-watch task keeps reopening** — `scripts/check_versions.py`
   compares `hindsight/versions.json` and the Dockerfile pin with npm/PyPI. When
-  upstream moves it opens one idempotent review task; it never changes the
-  running add-on. Run `python3 scripts/check_versions.py` for the current
-  comparison, then bump the API and UI pins together in a normal release.
+  upstream moves it opens one idempotent Zero Factory task on the
+  `deepdelver-hindsight-haos` board (dedup key `version-watch-<api>-<cp>`); it
+  never changes the running add-on. Run `python3 scripts/check_versions.py` for the
+  current comparison, then bump the API and UI pins together in a normal release.
 - **`git push` blocked by the pre-push gate** — the Kanban assessment task for the
   current change set (key printed by the hook) must be `done` and all five
   regression suites in `hindsight/tests/` must pass (`test_source_defaults.py`,
